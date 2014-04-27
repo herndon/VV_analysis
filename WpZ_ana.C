@@ -37,6 +37,8 @@ root -l WpZ_ana.C\(\".root\"\)
 #include "fstream"
 #include <string.h>
 
+void readWeights(Float_t* weights, Int_t numberWeights, char* weightsFileName);
+
 using namespace std;
 
 //------------------------------------------------------------------------------
@@ -385,16 +387,17 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 {
 
 
-  cout << "Processing file type " << inputFile << endl;
+  cout << "Processing file " << inputFile << endl;
   
   Bool_t eventdebug = false;
 
   Bool_t useWeightInfo = true;
   Bool_t firstEvent = true;
   const int numberWeights = 31;
+  Float_t weights[numberWeights];
 
-  fstream infile;
-  infile.open("unweighted_events.lhe", ios::in | ios::binary);
+  
+  char* weightsFileName = "unweighted_events.lhe";
 
   TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
   TClonesArray *branchEvent = treeReader->UseBranch("Event");
@@ -458,9 +461,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 
   
 
-  	Int_t nGenWZPS_leptons = 0;
-  	Int_t nGenWZPS_leptons3m = 0;
-  	Int_t nGenWZPS_leptons2m1e = 0;
+    Int_t nGenWZPS_leptons = 0;
+    Int_t nGenWZPS_leptons3m = 0;
+    Int_t nGenWZPS_leptons2m1e = 0;
   	Int_t nGenWZPS_leptons2e1m = 0;
   	Int_t nGenWZPS_leptons3e = 0;
   	Int_t nGenWZPS_jets = 0;
@@ -497,7 +500,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 
     if (useWeightInfo) 
     {
-		readWeights(weights, numberWeights);
+      readWeights(weights, numberWeights, weightsFileName);
     
     	for(i = 0; i < numberWeights; ++i)
 	        nwGenWZ_all[i] += weights[i]; 
@@ -649,8 +652,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
       lVectorRl = lVectorl1+lVectorl2+lVectorl3+lVectorMET;
       plots->gall_wztmass->Fill(lVectorRl.M());
 
-      lVectorWZ = lVectorW + lVectorZ;
-      plots->gall_wzmass->Fill(lVectorWZ.M());
+    lVectorWZ = lVectorW + lVectorZ;
+    plots->gall_wzmass->Fill(lVectorWZ.M());
 
  
       // WZ mass calculation
@@ -739,8 +742,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
       if (genltype ==4) nGenWZ_leptons3e++;
  
       }
-
- 
       if (genbr1Event) {
 
  
@@ -849,7 +850,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 	plots->gbr2_wztmass->Fill(lVectorRl.M());
 
 	if (useWeightInfo){
-	  for (Int_t i=0; i < numberWeights; i++) {
+  for (Int_t i=0; i < numberWeights; i++) {
 	    nwGenWZ_gbr2[i] += weights[i];
 	    plots->gbr2w_wztmass[i]->Fill(lVectorRl.M(),weights[i]);
 
@@ -857,97 +858,89 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 	  }
 	}
 
-	plots->gbr2_wzmass->Fill(lVectorWZ.M());
-
-
-	}
-
-
-
-      }
-
-  
-
- 
-
-
-  }
-
-  Float_t scale = 1.0;
-  Float_t luminosity = 19.6; //Integrated Luminosity in fb^-1
-
-  if (inputFile==1) scale = .61646E-05*1000.0*19.6;
-
-  cout << "Processing file type " << inputFile << " with scale factor " << scale << endl;
- 
-
-  if (useWeightInfo){
-  
-    cout << "Gen weighted event counts" << endl;
-    for(i = 0; i < numberWeights; ++i) {
-      cout << "Total cross section/Events*       " << i << " " << nwGenWZ_all[i]*1000*19.6 << endl;
-      cout << "Cross section with EWK selection  " << i << " " << nwGenWZ_gbr2[i]*1000*19.6 << endl;
-      cout << "Cross section with WZtn selection " << i << " " << nwGenWZ_wztmass[i]*1000*19.6 << endl;
+	       plots->gbr2_wzmass->Fill(lVectorWZ.M());
+            }
+        }
     }
-  }
 
-  cout << "Gen event counts" << endl;
-  cout << "Gen Baseline selection 1, leptons: " << nGenWZ_leptons << endl;
-  cout << "Gen Baseline selection 1, 3m     : " << nGenWZ_leptons3m << endl;
-  cout << "Gen Baseline selection 1, 2m1e   : " << nGenWZ_leptons2m1e << endl;
-  cout << "Gen Baseline selection 1, 2e1m   : " << nGenWZ_leptons2e1m << endl;
-  cout << "Gen Baseline selection 1, 3e     : " << nGenWZ_leptons3e << endl;
-  cout << "Gen Baseline selection 1, jets   : " << nGenWZ_jets << endl;
-  cout << "Gen Baseline selection 1, MET    : " << nGenWZ_met << endl;
-  cout << "Gen Baseline selection 1, Z      : " << nGenWZ_Z << endl;
-  cout << "Gen Baseline selection 1, m_jj   : " << nGenWZ_mjj << endl;
-  cout << "Gen Baseline selection 1, eta jj : " << nGenWZ_etajj << endl;
-  cout << " " << endl;
-  cout << " Gen event counts scale by lumi and cross section" << endl;
-  cout << "Gen Baseline selection 1, leptons: " << scale*nGenWZ_leptons << endl;
-  cout << "Gen Baseline selection 1, 3m     : " << scale*nGenWZ_leptons3m << endl;
-  cout << "Gen Baseline selection 1, 2m1e   : " << scale*nGenWZ_leptons2m1e << endl;
-  cout << "Gen Baseline selection 1, 2e1m   : " << scale*nGenWZ_leptons2e1m << endl;
-  cout << "Gen Baseline selection 1, 3e     : " << scale*nGenWZ_leptons3e << endl;
-  cout << "Gen Baseline selection 1, jets   : " << scale*nGenWZ_jets << endl;
-  cout << "Gen Baseline selection 1, MET    : " << scale*nGenWZ_met << endl;
-  cout << "Gen Baseline selection 1, Z      : " << scale*nGenWZ_Z << endl;
-  cout << "Gen Baseline selection 1, m_jj   : " << scale*nGenWZ_mjj << endl;
-  cout << "Gen Baseline selection 1, eta jj : " << scale*nGenWZ_etajj << endl;
+    Float_t scale = 1.0;
+    //Float_t luminosity = 19.6; //Integrated Luminosity in fb^-1
 
+    //if (inputFile==1) 
+    scale = .61646E-05*1000.0*19.6;
 
+    cout << "Processing file " << inputFile << " with scale factor " << scale << endl;
+ 
 
-  //cout << "Gen Baseline selection 1, opp eta: " << nGenWZ_oppetajj << endl;
+    if (useWeightInfo){
+        cout << "Gen weighted event counts" << endl;
+        for(i = 0; i < numberWeights; ++i) {
+            cout << "Total cross section/Events*       " << i << " " 
+	         << nwGenWZ_all[i]*1000*19.6 << endl;
+            cout << "Cross section with EWK selection  " << i << " "
+	         << nwGenWZ_gbr2[i]*1000*19.6 << endl;
+            cout << "Cross section with WZtn selection " << i << " "
+	         << nwGenWZ_wztmass[i]*1000*19.6 << endl;
+        }
+    }
 
-
-  cout << "Gen Baseline selection 1, wztmas : " << scale*nGenWZ_wztmass << endl;
-  cout << "Gen Baseline selection 1, 3m     : " << scale*nGenWZ_wztmass3m << endl;
-  cout << "Gen Baseline selection 1, 2m1e   : " << scale*nGenWZ_wztmass2m1e << endl;
-  cout << "Gen Baseline selection 1, 2e1m   : " << scale*nGenWZ_wztmass2e1m << endl;
-  cout << "Gen Baseline selection 1, 3e     : " << scale*nGenWZ_wztmass3e << endl;
-
-
-
-  cout << "Gen Baseline selection PS, leptons: " << nGenWZPS_leptons << endl;
-  cout << "Gen Baseline selection PS, 3m     : " << nGenWZPS_leptons3m << endl;
-  cout << "Gen Baseline selection PS, 2m1e   : " << nGenWZPS_leptons2m1e << endl;
-  cout << "Gen Baseline selection PS, 2e1m   : " << nGenWZPS_leptons2e1m << endl;
-  cout << "Gen Baseline selection PS, 3e     : " << nGenWZPS_leptons3e << endl;
-  cout << "Gen Baseline selection PS, jets   : " << nGenWZPS_jets << endl;
-  cout << "Gen Baseline selection PS, MET    : " << nGenWZPS_met << endl;
-  cout << "Gen Baseline selection PS, Z      : " << nGenWZPS_Z << endl;
-  cout << "Gen Baseline selection PS, m_jj   : " << nGenWZPS_mjj << endl;
-  cout << "Gen Baseline selection PS, eta jj : " << nGenWZPS_etajj << endl;
+    cout << "Gen event counts" << endl;
+    cout << "Gen Baseline selection 1, leptons: " << nGenWZ_leptons << endl;
+    cout << "Gen Baseline selection 1, 3m     : " << nGenWZ_leptons3m << endl;
+    cout << "Gen Baseline selection 1, 2m1e   : " << nGenWZ_leptons2m1e << endl;
+    cout << "Gen Baseline selection 1, 2e1m   : " << nGenWZ_leptons2e1m << endl;
+    cout << "Gen Baseline selection 1, 3e     : " << nGenWZ_leptons3e << endl;
+    cout << "Gen Baseline selection 1, jets   : " << nGenWZ_jets << endl;
+    cout << "Gen Baseline selection 1, MET    : " << nGenWZ_met << endl;
+    cout << "Gen Baseline selection 1, Z      : " << nGenWZ_Z << endl;
+    cout << "Gen Baseline selection 1, m_jj   : " << nGenWZ_mjj << endl;
+    cout << "Gen Baseline selection 1, eta jj : " << nGenWZ_etajj << endl;
+    cout << " " << endl;
+    cout << " Gen event counts scale by lumi and cross section" << endl;
+    cout << "Gen Baseline selection 1, leptons: " << scale*nGenWZ_leptons << endl;
+    cout << "Gen Baseline selection 1, 3m     : " << scale*nGenWZ_leptons3m << endl;
+    cout << "Gen Baseline selection 1, 2m1e   : " << scale*nGenWZ_leptons2m1e << endl;
+    cout << "Gen Baseline selection 1, 2e1m   : " << scale*nGenWZ_leptons2e1m << endl;
+    cout << "Gen Baseline selection 1, 3e     : " << scale*nGenWZ_leptons3e << endl;
+    cout << "Gen Baseline selection 1, jets   : " << scale*nGenWZ_jets << endl;
+    cout << "Gen Baseline selection 1, MET    : " << scale*nGenWZ_met << endl;
+    cout << "Gen Baseline selection 1, Z      : " << scale*nGenWZ_Z << endl;
+    cout << "Gen Baseline selection 1, m_jj   : " << scale*nGenWZ_mjj << endl;
+    cout << "Gen Baseline selection 1, eta jj : " << scale*nGenWZ_etajj << endl;
 
 
-  //cout << "Gen Baseline selection PS, opp eta: " << nGenWZPS_oppetajj << endl;
-  cout << "Gen Baseline selection PS, wztmas : " << nGenWZPS_wztmass << endl;
 
-  //cout << "Matching selection num " << nMatchedNum << endl;
-  //cout << "Matching selection denom " << nMatchedDenom << endl;
+    //cout << "Gen Baseline selection 1, opp eta: " << nGenWZ_oppetajj << endl;
 
-  cout << "Correct + " << pCorrect << " - " << mCorrect << endl;
-  cout << "Correct PS + " << pCorrectPS << " - " << mCorrectPS << endl;
+
+    cout << "Gen Baseline selection 1, wztmas : " << scale*nGenWZ_wztmass << endl;
+    cout << "Gen Baseline selection 1, 3m     : " << scale*nGenWZ_wztmass3m << endl;
+    cout << "Gen Baseline selection 1, 2m1e   : " << scale*nGenWZ_wztmass2m1e << endl;
+    cout << "Gen Baseline selection 1, 2e1m   : " << scale*nGenWZ_wztmass2e1m << endl;
+    cout << "Gen Baseline selection 1, 3e     : " << scale*nGenWZ_wztmass3e << endl;
+
+
+
+    cout << "Gen Baseline selection PS, leptons: " << nGenWZPS_leptons << endl;
+    cout << "Gen Baseline selection PS, 3m     : " << nGenWZPS_leptons3m << endl;
+    cout << "Gen Baseline selection PS, 2m1e   : " << nGenWZPS_leptons2m1e << endl;
+    cout << "Gen Baseline selection PS, 2e1m   : " << nGenWZPS_leptons2e1m << endl;
+    cout << "Gen Baseline selection PS, 3e     : " << nGenWZPS_leptons3e << endl;
+    cout << "Gen Baseline selection PS, jets   : " << nGenWZPS_jets << endl;
+    cout << "Gen Baseline selection PS, MET    : " << nGenWZPS_met << endl;
+    cout << "Gen Baseline selection PS, Z      : " << nGenWZPS_Z << endl;
+    cout << "Gen Baseline selection PS, m_jj   : " << nGenWZPS_mjj << endl;
+    cout << "Gen Baseline selection PS, eta jj : " << nGenWZPS_etajj << endl;
+
+
+    //cout << "Gen Baseline selection PS, opp eta: " << nGenWZPS_oppetajj << endl;
+    cout << "Gen Baseline selection PS, wztmas : " << nGenWZPS_wztmass << endl;
+
+    //cout << "Matching selection num " << nMatchedNum << endl;
+    //cout << "Matching selection denom " << nMatchedDenom << endl;
+
+    cout << "Correct + " << pCorrect << " - " << mCorrect << endl;
+    cout << "Correct PS + " << pCorrectPS << " - " << mCorrectPS << endl;
 
 }
 
@@ -1012,13 +1005,15 @@ void WpZ_ana(const char *inputFile)
 }
 
 
-Double_t* readWeights(weights, fstream infile)
+void readWeights(Float_t* weights, Int_t numberWeights,char*  weightsFileName)
 {
-	char infileLine[6];
+    char infileLine[6];
     char infileChar;
     char infileWeight[14];
+    fstream infile;
+    infile.open(weightsFileName, ios::in | ios::binary);
 	
-	Bool_t foundPos = false;
+    Bool_t foundPos = false;
     while (!foundPos){
         infile.read ((char*)&infileLine,sizeof(infileLine));
         if (strcmp(infileLine,"<rwgt>")==0) foundPos = true;
@@ -1027,25 +1022,27 @@ Double_t* readWeights(weights, fstream infile)
         //cout << infileLine << endl;
         //if (foundPos)cout << "Found <rwpt>: "<< infileLine << endl;
     }
-    for(i = 0; i < numberWeights; ++i) {
+    for(Int_t j = 0; j < numberWeights; ++j) {
         foundPos = false;
-	    while (!foundPos){
-	        infile.read ((char*)&infileChar,sizeof(infileChar));
-	        if (infileChar=='>')  foundPos = true;
-	        // cout << infileChar << endl;
-	        // if (foundPos) cout << "foundPos " << foundPos << endl;
-	        // if (foundPos) cout << infileChar << endl;
-	    }
+	while (!foundPos){
 	    infile.read ((char*)&infileChar,sizeof(infileChar));
+	    if (infileChar=='>')  foundPos = true;
+	    // cout << infileChar << endl;
+	    // if (foundPos) cout << "foundPos " << foundPos << endl;
+	    // if (foundPos) cout << infileChar << endl;
+	}
+	infile.read ((char*)&infileChar,sizeof(infileChar));
         //Float_t weight1;
-	    //infile.read  ((char*)&weight1,sizeof(weight1));
-	    //cout << weight1 << endl;
+	//infile.read  ((char*)&weight1,sizeof(weight1));
+	//cout << weight1 << endl;
         infile.read ((char*)&infileWeight,sizeof(infileWeight));
         //cout << infileWeight << endl;
-        weights[i] = atof(infileWeight);
-	    //cout << weights[i] << endl;
+        weights[j] = atof(infileWeight);
+	//cout << weights[i] << endl;
         infile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
     }
+
+    cout << "Made it through\n";
 }
 //------------------------------------------------------------------------------
 
