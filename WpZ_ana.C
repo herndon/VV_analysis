@@ -502,8 +502,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
     {
       readWeights(weights, numberWeights, weightsFileName);
     
-    	for(i = 0; i < numberWeights; ++i)
-	        nwGenWZ_all[i] += weights[i]; 
+      for(i = 0; i < numberWeights; ++i)
+          nwGenWZ_all[i] += weights[i]; 
     }  
     
     
@@ -1041,8 +1041,6 @@ void readWeights(Float_t* weights, Int_t numberWeights,char*  weightsFileName)
 	//cout << weights[i] << endl;
         infile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
     }
-
-    cout << "Made it through\n";
 }
 //------------------------------------------------------------------------------
 
