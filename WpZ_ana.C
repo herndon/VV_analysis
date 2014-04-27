@@ -47,9 +47,6 @@ struct MyPlots
 {
 
   // genrator all region declarations: all phyiscs objects with no selection
-
-
-
   TH1 *gall_electronpt;
   TH1 *gall_muonpt;
   TH1 *gall_electroneta;
@@ -461,22 +458,21 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
   	Int_t nGenWZPS_wztmass2m1e = 0;
   	Int_t nGenWZPS_wztmass2e1m = 0;
   	Int_t nGenWZPS_wztmass3e = 0;
+    Int_t pCorrect = 0;
+    Int_t mCorrect = 0;
+    Int_t pCorrectPS = 0;
+    Int_t mCorrectPS = 0;
 
-  	Int_t pCorrect = 0;
-  	Int_t mCorrect = 0;
-  	Int_t pCorrectPS = 0;
-  	Int_t mCorrectPS = 0;
 
+    // Lorentz vectors
 
-  	// Lorentz vectors
-
-  	TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorlW, lVectorMET, lVectorRl, lVectorj1, 
+    TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorlW, lVectorMET, lVectorRl, lVectorj1, 
                    lVectorj2, lVectorRj, lVectorZ, lVectorW, lVectorWZ;
 
-  	// Loop over all events
-  	for(entry = 0; entry < allEntries; ++entry) 
-  	{
-    	// Load selected branches with data from specified event
+    // Loop over all events
+    for(entry = 0; entry < allEntries; ++entry) 
+    {
+        // Load selected branches with data from specified event
     	treeReader->ReadEntry(entry);
 	    event = (TRootLHEFEvent*) branchEvent->At(0);
 	    
@@ -549,7 +545,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 		       	    WMass = particleM->M;
 		  		}
 			}
-		
 			if (particle->Status == 1 && (particle->Mother1 < i+2) && (abs(particle->PID) == 11
 			        || abs(particle->PID) == 13) && particle->PT >10.0 && fabs(particle->Eta) <2.4) 
 				nGenLepton10++;
@@ -559,18 +554,24 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 		  		nGenElectron20++;
 		      	nLepton++;
 		      	
-		      	if (nLepton==1) lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		  		if (nLepton==2) lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		  		if (nLepton==3) lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		      	if (nLepton==1) 
+                    lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		  		if (nLepton==2) 
+                    lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		  		if (nLepton==3) 
+                    lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
 			}
 			if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13
 			        && particle->PT >20.0 && fabs(particle->Eta) <2.4) 
 			{
 		  	    nGenMuon20++;
 		  	    nLepton++;
-		        if (nLepton==1) lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		        if (nLepton==2) lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		        if (nLepton==3) lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		        if (nLepton==1) 
+                    lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		        if (nLepton==2) 
+                    lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		        if (nLepton==3) 
+                    lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
 		    }
 		
 		    // for W+Z event initial particles end after 4. Status is not 2 which indicates intermediate history
