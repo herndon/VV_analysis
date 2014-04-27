@@ -392,15 +392,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
   Bool_t useWeightInfo = true;
   Bool_t firstEvent = true;
   const int numberWeights = 31;
-  Float_t weights[numberWeights];
 
   fstream infile;
   infile.open("unweighted_events.lhe", ios::in | ios::binary);
-  char infileLine[6];
-  char infileChar;
-  char infileWeight[14];
-  Bool_t foundPos;
-
 
   TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
   TClonesArray *branchEvent = treeReader->UseBranch("Event");
@@ -464,35 +458,35 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 
   
 
-  Int_t nGenWZPS_leptons = 0;
-  Int_t nGenWZPS_leptons3m = 0;
-  Int_t nGenWZPS_leptons2m1e = 0;
-  Int_t nGenWZPS_leptons2e1m = 0;
-  Int_t nGenWZPS_leptons3e = 0;
-  Int_t nGenWZPS_jets = 0;
-  Int_t nGenWZPS_met = 0;
-  Int_t nGenWZPS_Z = 0;
-  Int_t nGenWZPS_etajj = 0;
-  //Int_t nGenWZPS_oppetajj = 0;
-  Int_t nGenWZPS_mjj = 0;
-  Int_t nGenWZPS_wztmass = 0;
-  Int_t nGenWZPS_wztmass3m = 0;
-  Int_t nGenWZPS_wztmass2m1e = 0;
-  Int_t nGenWZPS_wztmass2e1m = 0;
-  Int_t nGenWZPS_wztmass3e = 0;
+  	Int_t nGenWZPS_leptons = 0;
+  	Int_t nGenWZPS_leptons3m = 0;
+  	Int_t nGenWZPS_leptons2m1e = 0;
+  	Int_t nGenWZPS_leptons2e1m = 0;
+  	Int_t nGenWZPS_leptons3e = 0;
+  	Int_t nGenWZPS_jets = 0;
+  	Int_t nGenWZPS_met = 0;
+	Int_t nGenWZPS_Z = 0;
+  	Int_t nGenWZPS_etajj = 0;
+  	//Int_t nGenWZPS_oppetajj = 0;
+  	Int_t nGenWZPS_mjj = 0;
+  	Int_t nGenWZPS_wztmass = 0;
+  	Int_t nGenWZPS_wztmass3m = 0;
+  	Int_t nGenWZPS_wztmass2m1e = 0;
+  	Int_t nGenWZPS_wztmass2e1m = 0;
+  	Int_t nGenWZPS_wztmass3e = 0;
 
-  Int_t pCorrect = 0;
-  Int_t mCorrect = 0;
-  Int_t pCorrectPS = 0;
-  Int_t mCorrectPS = 0;
+  	Int_t pCorrect = 0;
+  	Int_t mCorrect = 0;
+  	Int_t pCorrectPS = 0;
+  	Int_t mCorrectPS = 0;
 
 
-  // Lorentz vectors
+  	// Lorentz vectors
 
-  TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorlW, lVectorMET, lVectorRl, lVectorj1, lVectorj2, lVectorRj, lVectorZ, lVectorW, lVectorWZ;
+  	TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorlW, lVectorMET, lVectorRl, lVectorj1, lVectorj2, lVectorRj, lVectorZ, lVectorW, lVectorWZ;
 
-  // Loop over all events
-  for(entry = 0; entry < allEntries; ++entry) {
+  	// Loop over all events
+  	for(entry = 0; entry < allEntries; ++entry) {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
 
@@ -501,44 +495,15 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 
     
 
-    if (useWeightInfo) {
-      foundPos = false;
-      while (!foundPos){
-        infile.read ((char*)&infileLine,sizeof(infileLine));
-        if (strcmp(infileLine,"<rwgt>")==0) foundPos = true;
-        //if (foundPos) cout << "Found Event weights <rwgt>" << endl;
-        infile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
-        //cout << infileLine << endl;
-        //if (foundPos)cout << "Found <rwpt>: "<< infileLine << endl;
-      }
-      for(i = 0; i < numberWeights; ++i) {
-      foundPos = false;
-	while (!foundPos){
-	  infile.read ((char*)&infileChar,sizeof(infileChar));
-	  if (infileChar=='>')  foundPos = true;
-	  // cout << infileChar << endl;
-	  // if (foundPos) cout << "foundPos " << foundPos << endl;
-	  // if (foundPos) cout << infileChar << endl;
-	}
-	infile.read ((char*)&infileChar,sizeof(infileChar));
-        //Float_t weight1;
-	//infile.read  ((char*)&weight1,sizeof(weight1));
-	//cout << weight1 << endl;
-        infile.read ((char*)&infileWeight,sizeof(infileWeight));
-        //cout << infileWeight << endl;
-        weights[i] = atof(infileWeight);
-	//cout << weights[i] << endl;
-        infile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
-      }
-
-      for(i = 0; i < numberWeights; ++i) {
-	nwGenWZ_all[i] += weights[i]; 
-      }
-
-    }
+    if (useWeightInfo) 
+    {
+		readWeights(weights, numberWeights);
     
-
-
+    	for(i = 0; i < numberWeights; ++i)
+	        nwGenWZ_all[i] += weights[i]; 
+    }  
+    
+    
     firstEvent= false;
 
     // Generator Baseline region 1: 
@@ -568,49 +533,52 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 
     genPureSignalRegion = false;
 
-      for(i = 0; i < branchGenParticle->GetEntriesFast(); ++i) {
-	particle = (TRootLHEFParticle*) branchGenParticle->At(i);
-	//cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status << " m1 " << particle->Mother1 << " m2 " << particle->Mother2 << " " <<particle->PT <<  " " << particle->Eta << " mass " << particle->M << endl;
+    for(i = 0; i < branchGenParticle->GetEntriesFast(); ++i) {
+		particle = (TRootLHEFParticle*) branchGenParticle->At(i);
+		//cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status << " m1 " << particle->Mother1 << " m2 " << particle->Mother2 << " " <<particle->PT <<  " " << particle->Eta << " mass " << particle->M << endl;
 
 
-	//cout << "Gen Leptons " << endl;
-	if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 11) {
-	  nGenElectron++;
-	  plots->gall_electronpt->Fill(particle->PT);
-	  plots->gall_electroneta->Fill(particle->Eta);
-	  particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
-	  if (particleM->PID == 24) {         
-	    lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		//cout << "Gen Leptons " << endl;
+		if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 11) {
+	  		nGenElectron++;
+	  		plots->gall_electronpt->Fill(particle->PT);
+	  		plots->gall_electroneta->Fill(particle->Eta);
+	  		particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+	  		if (particleM->PID == 24) {         
+	    		lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
             //cout << "Set W lepton " << particle->PT << " " << particle->Pz << " Mother mass " << particleM->M << endl;
-            WMass = particleM->M;
-	  }
-	}
+            	WMass = particleM->M;
+	  		}
+		}
 
-	if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13) {
-	  nGenMuon++;
-	  plots->gall_muonpt->Fill(particle->PT);
-	  plots->gall_muoneta->Fill(particle->Eta);
-	  particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
-	  if (particleM->PID == 24) {         
-	    lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-            //cout << "Set W lepton " << particle->PT << " " << particle->Pz << endl;
-           WMass = particleM->M;
-	  }
-	}
+		if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13) {
+	  		nGenMuon++;
+	  		plots->gall_muonpt->Fill(particle->PT);
+	  		plots->gall_muoneta->Fill(particle->Eta);
+	  		particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+	  		if (particleM->PID == 24) {         
+	    		lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+            	//cout << "Set W lepton " << particle->PT << " " << particle->Pz << endl;
+           		WMass = particleM->M;
+	  		}
+		}
 
-	if (particle->Status == 1 && (particle->Mother1 < i+2) && (abs(particle->PID) == 11|| abs(particle->PID) == 13) && particle->PT >10.0 && fabs(particle->Eta) <2.4) nGenLepton10++;
-	if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 11 && particle->PT >20.0 && fabs(particle->Eta) <2.4) {
-	  nGenElectron20++;
-          nLepton++;
+		if (particle->Status == 1 && (particle->Mother1 < i+2) && (abs(particle->PID) == 11
+			|| abs(particle->PID) == 13) && particle->PT >10.0 && fabs(particle->Eta) <2.4) nGenLepton10++;
+		if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 11 
+			&& particle->PT >20.0 && fabs(particle->Eta) <2.4) {
+	  		nGenElectron20++;
+          	nLepton++;
 
-          //cout << nLepton << endl;
-          if (nLepton==1) lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-	  if (nLepton==2) lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-	  if (nLepton==3) lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-	}
-	if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13 && particle->PT >20.0 && fabs(particle->Eta) <2.4) {
-	  nGenMuon20++;
-	  nLepton++;
+          	//cout << nLepton << endl;
+          	if (nLepton==1) lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+	  		if (nLepton==2) lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+	  		if (nLepton==3) lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		}
+		if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13
+			&& particle->PT >20.0 && fabs(particle->Eta) <2.4) {
+	  		nGenMuon20++;
+	  		nLepton++;
           //cout << nLepton << endl;
          if (nLepton==1) lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
 	  if (nLepton==2) lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
@@ -863,7 +831,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 	  if (genltype ==2) nGenWZ_wztmass2m1e++;
 	  if (genltype ==3) nGenWZ_wztmass2e1m++;
 	  if (genltype ==4) nGenWZ_wztmass3e++;
-	}
+    }
 	if (genbr1Event&&genPureSignalRegion) {
 	  nGenWZPS_wztmass++;
 	  if (genltype ==1) nGenWZPS_wztmass3m++;
@@ -1043,5 +1011,41 @@ void WpZ_ana(const char *inputFile)
   delete chain;
 }
 
+
+Double_t* readWeights(weights, fstream infile)
+{
+	char infileLine[6];
+    char infileChar;
+    char infileWeight[14];
+	
+	Bool_t foundPos = false;
+    while (!foundPos){
+        infile.read ((char*)&infileLine,sizeof(infileLine));
+        if (strcmp(infileLine,"<rwgt>")==0) foundPos = true;
+        //if (foundPos) cout << "Found Event weights <rwgt>" << endl;
+        infile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+        //cout << infileLine << endl;
+        //if (foundPos)cout << "Found <rwpt>: "<< infileLine << endl;
+    }
+    for(i = 0; i < numberWeights; ++i) {
+        foundPos = false;
+	    while (!foundPos){
+	        infile.read ((char*)&infileChar,sizeof(infileChar));
+	        if (infileChar=='>')  foundPos = true;
+	        // cout << infileChar << endl;
+	        // if (foundPos) cout << "foundPos " << foundPos << endl;
+	        // if (foundPos) cout << infileChar << endl;
+	    }
+	    infile.read ((char*)&infileChar,sizeof(infileChar));
+        //Float_t weight1;
+	    //infile.read  ((char*)&weight1,sizeof(weight1));
+	    //cout << weight1 << endl;
+        infile.read ((char*)&infileWeight,sizeof(infileWeight));
+        //cout << infileWeight << endl;
+        weights[i] = atof(infileWeight);
+	    //cout << weights[i] << endl;
+        infile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+    }
+}
 //------------------------------------------------------------------------------
 
