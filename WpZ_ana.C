@@ -574,9 +574,11 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
                     lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
 		    }
 		
-		    // for W+Z event initial particles end after 4. Status is not 2 which indicates intermediate history
-		    // Pythia/delphies populates every event with extra substantially increasing the events that pass
-		    if (i>5 && (particle->Status == 1) && (abs(particle->PID) < 6||abs(particle->PID) == 21)) { 
+		    // for W+Z event initial particles end after 4. Status is not 2 which indicates
+            // intermediate history Pythia/delphies populates every event with extra substantially 
+            // increasing the events that pass
+		    if (i>5 && (particle->Status == 1) && (abs(particle->PID) < 6||abs(particle->PID) == 21)
+            { 
 		        nGenJet++;
 		        plots->gall_jetpt->Fill(particle->PT);
 		        //cout << "Gen Jet all fill " << endl;
@@ -586,12 +588,14 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 		
 		    //cout << "Select Gen Jets " << endl;
 		    //cout.flush()
-		    if (i>5 &&  (particle->Status ==1) && (abs(particle->PID)< 6 || abs(particle->PID) == 21) 
+		    if (i>5 &&  (particle->Status ==1) && (abs(particle->PID)< 6 || abs(particle->PID) == 21)
 		    		&& particle->PT >jetPTCut && fabs(particle->Eta) <4.7) 
 		    {
 		        nGenJet30++;
-		        if (!foundJet1) lVectorj1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		        if (foundJet1) lVectorj2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		        if (!foundJet1) 
+                    lVectorj1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		        if (foundJet1) 
+                    lVectorj2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
 		        foundJet1 = true;
 		    }
 		 
@@ -610,9 +614,12 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 		      //cout << "Set MET " << particle->PT << " " << lVectorMET.Pt() << " " << pz << endl;
 		    }
 		
-		    if (particle->PID==23) genZMass = particle->M;
-		    if (particle->PID==23)  lVectorZ.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		    if (particle->PID==24)  lVectorW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		    if (particle->PID==23)
+                genZMass = particle->M;
+		    if (particle->PID==23) 
+                lVectorZ.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		    if (particle->PID==24)  
+                lVectorW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
     	}
 
         plots->gall_zpt->Fill(lVectorZ.Pt());
@@ -635,19 +642,23 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 		Float_t pzp;
 		Float_t pzm;
 		
-		Float_t mu = (80.387*80.387)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
+		Float_t mu = (80.387*80.387)/2.0 + lVectorlW.Px()*lVectorMET.Px()
+                                         + lVectorlW.Py()*lVectorMET.Py();
 		mu = (WMass*WMass)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
 		Float_t t1 = mu*lVectorlW.Pz()/(lVectorlW.Pt()*lVectorlW.Pt());
 		Float_t t2 = t1*t1;
-		Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)/(lVectorlW.Pt()*lVectorlW.Pt());
+		Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)
+                     /(lVectorlW.Pt()*lVectorlW.Pt());
 		
-		if (t3<t2) {
+		if (t3<t2) 
+        {
 			pzp = t1 + sqrt(t2-t3);
 		  	pzm = t1 - sqrt(t2-t3);      
 		  	//cout << "Root was real" << endl;
 		}
 		
-		if (t3>t2) {
+		if (t3>t2) 
+        {
 		  	pzp = t1;
 		  	pzm = t1;      
 		  	//cout << "Root was imaginary" << endl;
@@ -662,7 +673,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 		Float_t ptlnu =  lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
 		Float_t a = 4.0*lVectorlW.E()*lVectorlW.E() -4.0*lVectorlW.Pz()*lVectorlW.Pz();
 		Float_t b = -8.0*ptlnu*lVectorlW.Pz() -4.0*lVectorlW.Pz()*WMass*WMass;
-		Float_t c = 4.0*lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt() - 4.0*ptlnu*ptlnu - WMass*WMass*WMass*WMass - 4.0*ptlnu*WMass*WMass;
+		Float_t c = 4.0*lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()
+                     - 4.0*ptlnu*ptlnu - WMass*WMass*WMass*WMass - 4.0*ptlnu*WMass*WMass;
 		
 		t2 = b*b;
 		t3 = 4.0*a*c;
@@ -742,7 +754,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 		//cout << "Warning, did not find neutrino" << endl;
 		//for(i = 0; i < branchGenParticle->GetEntriesFast(); ++i) {
 		//particle = (TRootLHEFParticle*) branchGenParticle->At(i);
-		//cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status << " m1 " << particle->Mother1 << " m2 " << particle->Mother2 << " " <<particle->PT <<  " " << particle->Eta << endl;
+		//cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status
+        //     << " m1 " << particle->Mother1 << " m2 " << particle->Mother2 << " "
+        //     <<particle->PT <<  " " << particle->Eta << endl;
 		//}
 	    } 
 	    if (genMet < metCut) genbr1Event = false;
@@ -758,7 +772,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 	 		for(i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
 	 		{
 		  		particle = (TRootLHEFParticle*) branchGenParticle->At(i);
-		  		cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status << " m1 " << particle->Mother1 << " m2 " << particle->Mother2 <<  " " <<particle->PT <<  " " << particle->Eta << endl;
+		  		cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status
+                     << " m1 " << particle->Mother1 << " m2 " << particle->Mother2 <<  " "
+                     << particle->PT <<  " " << particle->Eta << endl;
 			}
 	    }
 
@@ -775,7 +791,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 			if (lVectorRj.M()>600.0 && genPureSignalRegion) nGenWZPS_mjj++;
 			if (lVectorRj.M()>600.0 && fabs(lVectorj1.Eta()-lVectorj2.Eta()) > 4.0) 
 				nGenWZ_etajj++;
-			if (lVectorRj.M()>600.0 && fabs(lVectorj1.Eta()-lVectorj2.Eta()) > 4.0 && genPureSignalRegion)
+			if (lVectorRj.M()>600.0 && fabs(lVectorj1.Eta()-lVectorj2.Eta()) > 4.0
+                    && genPureSignalRegion)
 				nGenWZPS_etajj++;
 			if (lVectorRj.M()>600.0 && fabs(lVectorj1.Eta()-lVectorj2.Eta()) > 4.0) 
 			{
