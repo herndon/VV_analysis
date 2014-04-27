@@ -37,7 +37,7 @@ root -l WpZ_ana.C\(\".root\"\)
 #include "fstream"
 #include <string.h>
 
-using namespace std;
+
 
 //------------------------------------------------------------------------------
 
@@ -66,8 +66,9 @@ struct MyPlots
 
  
 
-  
+
   // genrator baseline regions 1 declarations
+
 
   TH1 *gbr1_electronpt;
   TH1 *gbr1_muonpt;
@@ -885,6 +886,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 	    nwGenWZ_gbr2[i] += weights[i];
 	    plots->gbr2w_wztmass[i]->Fill(lVectorRl.M(),weights[i]);
 
+	    cout << "Filling for i = " << i;
+	    cout << "\nValue of lVectorRl.M() is " << lVectorRl.M() << endl;
 	    if (lVectorRl.M() > 1000.0 ) nwGenWZ_wztmass[i] += weights[i];
 	  }
 	}
@@ -906,9 +909,32 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
   }
 
   Float_t scale = 1.0;
-  Float_t luminosity = 19.6; //Integrated Luminosity in fb^-1
 
   if (inputFile==1) scale = .61646E-05*1000.0*19.6;
+  // all if (inputFile==1) scale = .63908E-05*1000.0*19.6;
+  // ewk if (inputFile==1) scale = .90813E-06*1000.0*19.6;
+  //  if (inputFile==1) scale = 6.2504*20.0/100000.0;
+  if (inputFile==2) scale = 637.67*20.0/100000.0;
+  if (inputFile==3) scale = 635.59*20.0/100000.0;
+  if (inputFile==4) scale = 2.2273*20.0/77183.0;
+  if (inputFile==5) scale = 2.2175*20.0/77177.0;
+  if (inputFile==6) scale = 2.6813*20.0/100000.0;
+  if (inputFile==7) scale = 2.6233*20.0/100000.0;
+
+  if (inputFile==8) scale = 202.03*20.0/100000.0;
+  if (inputFile==9) scale = 201.89*20.0/100000.0;
+
+
+
+  if (inputFile==10) scale =  6.2504*20.0/100000.0;
+  if (inputFile==11) scale =  2.6969*20.0/100000.0;
+  if (inputFile==12) scale =  2.3825*20.0/100000.0;
+  if (inputFile==13) scale =  1.97614*20.0/100000.0;
+
+  if (inputFile==14) scale = 209.27*20.0/100000.0;
+  //  if (inputFile==15) scale = 9.2963*20.0/4574.0;
+  if (inputFile==15) scale = 9.3298*20.0/117535.0;
+
 
   cout << "Processing file type " << inputFile << " with scale factor " << scale << endl;
  
@@ -1001,24 +1027,82 @@ void WpZ_ana(const char *inputFile)
 
   Bool_t useInputFile = false;
   Int_t inputFile_int = 0;
-  const char * outputFile = "results_wpz_ewk.root";
 
   cout << "Processing file " << inputFile << endl;
   
-  if (useInputFile) {
-    chain->Add(inputFile);
-  }
-  else{
-    inputFile_int = atoi(inputFile);
-    cout << "Processing file type int: " << inputFile_int << endl;
-  }
-  if (atoi(inputFile)==1){
-    chain->Add("unweighted_events.root");
-  }
-  else {
-     cout << "\nPlease enter a valid input file\n";
-     exit(0);
-  }
+
+
+    if (useInputFile) {
+      chain->Add(inputFile);
+    } else
+      {
+	inputFile_int = atoi(inputFile);
+          cout << "Processing file type int: " << inputFile_int << endl;
+  
+
+	if (atoi(inputFile)==1){
+	  chain->Add("unweighted_events.root");
+	  // chain->Add("unweighted_events_wpz_zg_qcd_8TeV_aqgc_ft1_0.lhe.root");
+	}
+	if (atoi(inputFile)==2){
+	  chain->Add("unweighted_events_wpz_qcd.lhe.root");
+	}
+	if (atoi(inputFile)==3){
+	  chain->Add("unweighted_events_wpz_all.lhe.root");
+	}
+	if (atoi(inputFile)==4){
+	  chain->Add("unweighted_events_wpz_ewk_aqgc_ft1_1.lhe.root");
+	}
+	if (atoi(inputFile)==5){
+	  chain->Add("unweighted_events_wpz_ewk_aqgc_ft1_sm.lhe.root");
+	}
+	if (atoi(inputFile)==6){
+	  chain->Add("unweighted_events_wpz_ewk_aqgc_ft1_1_ll.lhe.root");
+	}
+	if (atoi(inputFile)==7){
+	  chain->Add("unweighted_events_wpz_ewk_aqgc_ft1_sm_ll.lhe.root");
+	}
+
+	if (atoi(inputFile)==8){
+	  chain->Add("unweighted_events_wpz_all_aqgc_ft1_1.lhe.root");
+	}
+	if (atoi(inputFile)==9){
+	  chain->Add("unweighted_events_wpz_all_aqgc_ft1_sm.lhe.root");
+	}
+
+
+
+
+
+	if (atoi(inputFile)==10){
+	  chain->Add("unweighted_events_wpz_ewk_1_ll.lhe.root");
+	}
+	if (atoi(inputFile)==11){
+	  chain->Add("unweighted_events_wpz_ewk_2_ll.lhe.root");
+	}
+	if (atoi(inputFile)==12){
+	  chain->Add("unweighted_events_wpz_ewk_2_llZ.lhe.root");
+	}
+	if (atoi(inputFile)==13){
+	  chain->Add("unweighted_events_wpz_ewk_3_Z.lhe.root");
+	}
+
+
+	if (atoi(inputFile)==14){
+	  chain->Add("unweighted_events_wpz_all_aqgc_ft1_10.lhe.root");
+	}
+
+	if (atoi(inputFile)==15){
+	  chain->Add("unweighted_events_wpz_ewk_aqgc_ft1_10_2.lhe.root");
+	}
+
+
+
+      }
+
+
+
+
   ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
   ExRootResult *result = new ExRootResult();
 
@@ -1033,7 +1117,62 @@ void WpZ_ana(const char *inputFile)
   // 1 default
   // 2 no opp eta and no met cut for 3at-1
 
-  result->Write(outputFile);
+
+ if (atoi(inputFile)==1){
+   result->Write("results_wpz_ewk.root");
+ }
+ if (atoi(inputFile)==2){
+   result->Write("results_wpz_qcd.root");
+ }
+ if (atoi(inputFile)==3){
+   result->Write("results_wpz_all.root");
+ }
+ if (atoi(inputFile)==4){
+   result->Write("results_wpz_ewk_aqgc_ft1_1.root");
+ }
+ if (atoi(inputFile)==5){
+   result->Write("results_wpz_ewk_aqgc_ft1_sm.root");
+ }
+ if (atoi(inputFile)==6){
+   result->Write("results_wpz_ewk_aqgc_ft1_1_ll.root");
+ }
+ if (atoi(inputFile)==7){
+   result->Write("results_wpz_ewk_aqgc_ft1_sm_ll.root");
+ }
+
+
+ if (atoi(inputFile)==8){
+   result->Write("results_wpz_all_aqgc_ft1_1.root");
+ }
+ if (atoi(inputFile)==9){
+   result->Write("results_wpz_all_aqgc_ft1_sm.root");
+ }
+
+
+
+ if (atoi(inputFile)==10){
+   result->Write("results_wpz_ewk_1_ll3.root");
+ }
+ if (atoi(inputFile)==11){
+   result->Write("results_wpz_ewk_2_ll.root");
+ }
+ if (atoi(inputFile)==12){
+   result->Write("results_wpz_ewk_2_llZ.root");
+ }
+ if (atoi(inputFile)==13){
+   result->Write("results_wpz_ewk_3_Z.root");
+ }
+
+ 
+ if (atoi(inputFile)==14){
+   result->Write("results_wpz_all_aqgc_ft1_10.root");
+ }
+ if (atoi(inputFile)==15){
+   result->Write("results_wpz_ewk_aqgc_ft1_10.root");
+ }
+
+
+ //result->Write("results.root");
 
   cout << "** Exiting..." << endl;
 
@@ -1044,4 +1183,3 @@ void WpZ_ana(const char *inputFile)
 }
 
 //------------------------------------------------------------------------------
-
