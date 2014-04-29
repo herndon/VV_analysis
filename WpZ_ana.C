@@ -37,7 +37,7 @@ root -l WpZ_ana.C\(\".root\"\)
 #include "fstream"
 #include <string.h>
 
-void readWeights(Float_t* weights, Int_t numberWeights, char* weightsFileName);
+Float_t* readWeights(Int_t numberWeights, fstream& lheFile);
 
 using namespace std;
 
@@ -387,8 +387,10 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
     Bool_t eventdebug = false;
     Bool_t useWeightInfo = true;
     const int numberWeights = 31;
-    Float_t weights[numberWeights];
-    char* weightsFileName = "unweighted_events.lhe";
+    Float_t* weights;
+    
+    fstream lheFile;
+    lheFile.open("unweighted_events.lhe", ios::in | ios::binary);
 
     TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
     TClonesArray *branchEvent = treeReader->UseBranch("Event");
@@ -480,7 +482,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 
         if (useWeightInfo) 
         {
-            readWeights(weights, numberWeights, weightsFileName);
+            weights = readWeights(numberWeights, lheFile);
     
             for(i = 0; i < numberWeights; ++i)
                 nwGenWZ_all[i] += weights[i]; 
@@ -577,7 +579,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 		    // for W+Z event initial particles end after 4. Status is not 2 which indicates
             // intermediate history Pythia/delphies populates every event with extra substantially 
             // increasing the events that pass
-		    if (i>5 && (particle->Status == 1) && (abs(particle->PID) < 6||abs(particle->PID) == 21)
+		    if (i>5 && (particle->Status == 1) && (abs(particle->PID) < 6||abs(particle->PID) == 21))
             { 
 		        nGenJet++;
 		        plots->gall_jetpt->Fill(particle->PT);
@@ -833,7 +835,10 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
     }
 
     Float_t scale = 1.0;
-    //Float_t luminosity = 19.6; //Integrated Luminosity in fb^-1
+    Float_t luminosity = 19.6; //Integrated Luminosity in fb^-1
+    Float_t crossSection = 0.61647E-05*1000;
+
+
     //if (inputFile==1) 
     scale = .61646E-05*1000.0*19.6;
 
@@ -962,42 +967,44 @@ void WpZ_ana(const char *inputFile)
 }
 
 
-void readWeights(Float_t* weights, Int_t numberWeights,char*  weightsFileName)
+Float_t* readWeights(Int_t numberWeights,fstream& lheFile)
 {
-    char infileLine[6];
-    char infileChar;
-    char infileWeight[14];
-    fstream infile;
-    infile.open(weightsFileName, ios::in | ios::binary);
-	
+    char lheFileLine[6];
+    char lheFileChar;
+    char lheFileWeight[14];
+    Float_t weights[numberWeights];
     Bool_t foundPos = false;
-    while (!foundPos){
-        infile.read ((char*)&infileLine,sizeof(infileLine));
-        if (strcmp(infileLine,"<rwgt>")==0) foundPos = true;
+
+    while (!foundPos)
+    {
+        lheFile.read ((char*)&lheFileLine,sizeof(lheFileLine));
+        if (strcmp(lheFileLine,"<rwgt>")==0) foundPos = true;
         //if (foundPos) cout << "Found Event weights <rwgt>" << endl;
-        infile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
-        //cout << infileLine << endl;
-        //if (foundPos)cout << "Found <rwpt>: "<< infileLine << endl;
+        lheFile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+        //cout << lheFileLine << endl;
+        //if (foundPos)cout << "Found <rwpt>: "<< lheFileLine << endl;
     }
     for(Int_t j = 0; j < numberWeights; ++j) {
         foundPos = false;
-	while (!foundPos){
-	    infile.read ((char*)&infileChar,sizeof(infileChar));
-	    if (infileChar=='>')  foundPos = true;
-	    // cout << infileChar << endl;
-	    // if (foundPos) cout << "foundPos " << foundPos << endl;
-	    // if (foundPos) cout << infileChar << endl;
-	}
-	infile.read ((char*)&infileChar,sizeof(infileChar));
+	    while (!foundPos)
+        {
+	        lheFile.read ((char*)&lheFileChar,sizeof(lheFileChar));
+            if (lheFileChar=='>')  foundPos = true;
+            // cout << lheFileChar << endl;
+	        // if (foundPos) cout << "foundPos " << foundPos << endl;
+	        // if (foundPos) cout << lheFileChar << endl;
+        }
+	    lheFile.read ((char*)&lheFileChar,sizeof(lheFileChar));
         //Float_t weight1;
-	//infile.read  ((char*)&weight1,sizeof(weight1));
-	//cout << weight1 << endl;
-        infile.read ((char*)&infileWeight,sizeof(infileWeight));
-        //cout << infileWeight << endl;
-        weights[j] = atof(infileWeight);
-	//cout << weights[i] << endl;
-        infile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+	    //lheFile.read  ((char*)&weight1,sizeof(weight1));
+	    //cout << weight1 << endl;
+        lheFile.read ((char*)&lheFileWeight,sizeof(lheFileWeight));
+        //cout << lheFileWeight << endl;
+        weights[j] = atof(lheFileWeight);
+        //cout << "weight " << j << " = =" <<  weights[j] << endl;
+        lheFile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
     }
+    return weights;
 }
 //------------------------------------------------------------------------------
 
