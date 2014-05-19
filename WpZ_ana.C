@@ -37,7 +37,7 @@ root -l WpZ_ana.C\(\".root\"\)
 #include "fstream"
 #include <string.h>
 
-Float_t* readWeights(Int_t numberWeights, fstream& lheFile);
+Float_t* readWeights(Int_t NUM_WEIGHTS, fstream& lheFile);
 
 using namespace std;
 
@@ -45,7 +45,6 @@ using namespace std;
 
 struct MyPlots
 {
-
   // genrator all region declarations: all phyiscs objects with no selection
   TH1 *gall_electronpt;
   TH1 *gall_muonpt;
@@ -54,7 +53,6 @@ struct MyPlots
  
   TH1 *gall_jetpt;
   TH1 *gall_jeteta;
-
   TH1 *gall_met;
 
   TH1*gall_deltaetajj;
@@ -62,17 +60,13 @@ struct MyPlots
   TH1 *gall_zpt;
   TH1 *gall_wztmass;
   TH1 *gall_wzmass;
-
- 
-
   
-  // genrator baseline regions 1 declarations
+  // genrator baseline regions 1 declarations. First level "weak" cuts
 
   TH1 *gbr1_electronpt;
   TH1 *gbr1_muonpt;
   TH1 *gbr1_electroneta;
   TH1 *gbr1_muoneta;
-
 
   TH1 *gbr1_jet1pt;
   TH1 *gbr1_jet2pt;
@@ -87,33 +81,25 @@ struct MyPlots
   TH1 *gbr1_wztmass;
   TH1 *gbr1_wzmass;
 
-
-  // genrator baseline regions 1 declarations
-
+  // genrator baseline regions 2 declarations. Greater sensitivity cuts
 
   TH1 *gbr2_electronpt;
   TH1 *gbr2_muonpt;
   TH1 *gbr2_electroneta;
   TH1 *gbr2_muoneta;
 
-
   TH1 *gbr2_jet1pt;
   TH1 *gbr2_jet2pt;
   TH1 *gbr2_jet1eta;
   TH1 *gbr2_jet2eta;
-
   TH1 *gbr2_met;
 
   TH1 *gbr2_deltaetajj;
   TH1 *gbr2_mjj;
   TH1 *gbr2_zpt;
   TH1 *gbr2_wztmass;
-  TH1 *gbr2w_wztmass[31];
+  vector<TH1*> gbr2w_wztmass;
   TH1 *gbr2_wzmass;
-
-
- 
-
 };
 
 //------------------------------------------------------------------------------
@@ -123,27 +109,18 @@ class ExRootTreeReader;
 
 //------------------------------------------------------------------------------
 
-void BookHistograms(ExRootResult *result, MyPlots *plots)
+void BookHistograms(ExRootResult *result, MyPlots *plots, Int_t NUM_WEIGHTS)
 {
-  //THStack *stack;
-  //TLegend *legend;
-  //TPaveText *comment;
-
-
- // generator all region 1 booking: all physics objects with no selection
-
-
+  // generator all region 1 booking: all physics objects with no selection
   plots->gall_electronpt = result->AddHist1D(
     "gall_electronpt", "electron P_{T}",
     "electron P_{T}, GeV/c", "number of electrons",
     20, 0.0, 100.0);
 
-
   plots->gall_muonpt = result->AddHist1D(
     "gall_muonpt", "muon P_{T}",
     "muon P_{T}, GeV/c", "number of muons",
     20, 0.0, 100.0);
-
 
   plots->gall_electroneta = result->AddHist1D(
     "gall_electroneta", "electron eta",
@@ -155,10 +132,6 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
     "muon Eta", "number of muons",
     20, -4.0, 4.0);
 
-
-
-
-
   plots->gall_jetpt = result->AddHist1D(
     "gall_jetpt", "jet P_{T}",
     "jet P_{T}, GeV/c", "number of jets",
@@ -168,8 +141,6 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
     "gall_jeteta", "jet Eta}",
     "jet Eta", "number of jets",
     20, -5.0, 5.0);
-
-
 
  plots->gall_deltaetajj = result->AddHist1D(
     "gall_deltaetajj", "Delta Eta JJ",
@@ -186,8 +157,6 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
     "Z p_{T}, GeV/c", "number of events",
     20, 0.0, 1000.0);
 
-
-
   plots->gall_met = result->AddHist1D(
     "gall_met", "Missing E_{T}",
     "Missing E_{T}, GeV", "number of events",
@@ -203,21 +172,15 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
     "WZ Mass, GeV", "number of events",
     1000, 0.0, 10000.0);
 
-
-
-
-
   plots->gbr1_electronpt = result->AddHist1D(
     "gbr1_electron_pt", "electron P_{T}",
     "electron P_{T}, GeV/c", "number of electrons",
     20, 0.0, 100.0);
 
-
   plots->gbr1_muonpt = result->AddHist1D(
     "gbr1_muonpt", "muon P_{T}",
     "muon P_{T}, GeV/c", "number of muons",
     20, 0.0, 100.0);
-
 
   plots->gbr1_electroneta = result->AddHist1D(
     "gbr1_electroneta", "electron eta",
@@ -228,8 +191,6 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
     "gbr1_muoneta", "muon Eta}",
     "muon Eta", "number of muons",
     20, -4.0, 4.0);
-
-
  
   plots->gbr1_jet1pt = result->AddHist1D(
     "gbr1_jet1pt", "jet 1 P_{T}",
@@ -251,13 +212,10 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
     "jet 2 Eta", "number of jets",
     20, -5.0, 5.0);
 
-
-
   plots->gbr1_met = result->AddHist1D(
     "gbr1_met", "Missing E_{T}",
     "Missing E_{T}, GeV", "number of events",
     20, 0.0, 200.0);
-
  
   plots->gbr1_deltaetajj = result->AddHist1D(
     "gbr1_deltaetajj", "Delta Eta JJ",
@@ -284,20 +242,15 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
     "WZ  Mass, GeV", "number of events",
     1000, 0.0, 10000.0);
 
-
-
-
   plots->gbr2_electronpt = result->AddHist1D(
     "gbr2_electron_pt", "electron P_{T}",
     "electron P_{T}, GeV/c", "number of electrons",
     20, 0.0, 100.0);
 
-
   plots->gbr2_muonpt = result->AddHist1D(
     "gbr2_muonpt", "muon P_{T}",
     "muon P_{T}, GeV/c", "number of muons",
     20, 0.0, 100.0);
-
 
   plots->gbr2_electroneta = result->AddHist1D(
     "gbr2_electroneta", "electron eta",
@@ -308,8 +261,6 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
     "gbr2_muoneta", "muon Eta}",
     "muon Eta", "number of muons",
     20, -4.0, 4.0);
-
-
  
   plots->gbr2_jet1pt = result->AddHist1D(
     "gbr2_jet1pt", "jet 1 P_{T}",
@@ -331,13 +282,10 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
     "jet 2 Eta", "number of jets",
     20, -5.0, 5.0);
 
-
-
   plots->gbr2_met = result->AddHist1D(
     "gbr2_met", "Missing E_{T}",
     "Missing E_{T}, GeV", "number of events",
     20, 0.0, 200.0);
-
  
   plots->gbr2_deltaetajj = result->AddHist1D(
     "gbr2_deltaetajj", "Delta Eta JJ",
@@ -359,8 +307,11 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
     "WZ Transverse Mass, GeV", "number of events",
     20, 0.0, 2000.0);
 
-  for (Int_t i = 0; i < 31; i++) {
-  plots->gbr2w_wztmass[i] = result->AddHist1D(
+  plots->gbr2w_wztmass.resize(NUM_WEIGHTS);
+
+  for (int i = 0; i < NUM_WEIGHTS; i++) 
+  {
+    plots->gbr2w_wztmass[i] = result->AddHist1D(
     "gbr2w_wztmass", "WZ Transverse Mass",
     "WZ Transverse Mass, GeV", "number of events",
     20, 0.0, 2000.0);
@@ -380,13 +331,12 @@ void BookHistograms(ExRootResult *result, MyPlots *plots)
 
 //------------------------------------------------------------------------------
 
-void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile)
+void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile, int NUM_WEIGHTS)
 {
     cout << "Processing file " << inputFile << endl;
   
     Bool_t eventdebug = false;
     Bool_t useWeightInfo = true;
-    const int numberWeights = 31;
     Float_t* weights;
     
     fstream lheFile;
@@ -409,7 +359,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
     //TObject *object;
 
     Long64_t entry;
-    Int_t i;
 
     // Cuts
     Float_t leptonEtaCut = 2.4;
@@ -420,9 +369,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
     cout << "Using Jet pt     cut " << jetPTCut << endl;
     cout << "Using jetCut " << jetPTCut << endl;
 
-    Float_t nwGenWZ_all[numberWeights] = { 0.0 };
-    Float_t nwGenWZ_gbr2[numberWeights] = { 0.0 };
-    Float_t nwGenWZ_wztmass[numberWeights] = { 0.0 };
+    vector<Float_t> nwGenWZ_all(NUM_WEIGHTS, 0.);
+    vector<Float_t> nwGenWZ_gbr2(NUM_WEIGHTS, 0.);
+    vector<Float_t> nwGenWZ_wztmass(NUM_WEIGHTS, 0.);
 
     Int_t nGenWZ_leptons = 0;
     Int_t nGenWZ_leptons3m = 0;
@@ -442,24 +391,22 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
     Int_t nGenWZ_wztmass3e = 0;
     Bool_t genPureSignalRegion;
 
-  
-
     Int_t nGenWZPS_leptons = 0;
     Int_t nGenWZPS_leptons3m = 0;
     Int_t nGenWZPS_leptons2m1e = 0;
-  	Int_t nGenWZPS_leptons2e1m = 0;
-  	Int_t nGenWZPS_leptons3e = 0;
-  	Int_t nGenWZPS_jets = 0;
-  	Int_t nGenWZPS_met = 0;
-	Int_t nGenWZPS_Z = 0;
-  	Int_t nGenWZPS_etajj = 0;
-  	//Int_t nGenWZPS_oppetajj = 0;
-  	Int_t nGenWZPS_mjj = 0;
-  	Int_t nGenWZPS_wztmass = 0;
-  	Int_t nGenWZPS_wztmass3m = 0;
-  	Int_t nGenWZPS_wztmass2m1e = 0;
-  	Int_t nGenWZPS_wztmass2e1m = 0;
-  	Int_t nGenWZPS_wztmass3e = 0;
+    Int_t nGenWZPS_leptons2e1m = 0;
+    Int_t nGenWZPS_leptons3e = 0;
+    Int_t nGenWZPS_jets = 0;
+    Int_t nGenWZPS_met = 0;
+    Int_t nGenWZPS_Z = 0;
+    Int_t nGenWZPS_etajj = 0;
+    //Int_t nGenWZPS_oppetajj = 0;
+    Int_t nGenWZPS_mjj = 0;
+    Int_t nGenWZPS_wztmass = 0;
+    Int_t nGenWZPS_wztmass3m = 0;
+    Int_t nGenWZPS_wztmass2m1e = 0;
+    Int_t nGenWZPS_wztmass2e1m = 0;
+    Int_t nGenWZPS_wztmass3e = 0;
     Int_t pCorrect = 0;
     Int_t mCorrect = 0;
     Int_t pCorrectPS = 0;
@@ -482,9 +429,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 
         if (useWeightInfo) 
         {
-            weights = readWeights(numberWeights, lheFile);
+            weights = readWeights(NUM_WEIGHTS, lheFile);
     
-            for(i = 0; i < numberWeights; ++i)
+            for(Int_t i = 0; i < NUM_WEIGHTS; ++i)
                 nwGenWZ_all[i] += weights[i]; 
         }  
 
@@ -514,7 +461,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 
         genPureSignalRegion = false;
 
-        for(i = 0; i < branchGenParticle->GetEntriesFast(); ++i) {
+        for(Int_t i = 0; i < branchGenParticle->GetEntriesFast(); ++i) {
 		    particle = (TRootLHEFParticle*) branchGenParticle->At(i);
 		    //cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status << " m1 "
 		    //<< particle->Mother1 << " m2 " << particle->Mother2 << " " <<particle->PT <<  " " << particle->Eta 
@@ -771,7 +718,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 	    if (nGenJet>2) 
 	    {
 			cout << "Too many jets " << endl;
-	 		for(i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
+	 		for(Int_t i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
 	 		{
 		  		particle = (TRootLHEFParticle*) branchGenParticle->At(i);
 		  		cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status
@@ -822,7 +769,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 	
 				if (useWeightInfo)
 				{
-		  			for (Int_t i=0; i < numberWeights; i++) 
+		  			for (Int_t i=0; i < NUM_WEIGHTS; i++) 
 		  			{
 			    		nwGenWZ_gbr2[i] += weights[i];
 			    		plots->gbr2w_wztmass[i]->Fill(lVectorRl.M(),weights[i]);
@@ -833,28 +780,25 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 	        }
         }
     }
-
-    Float_t scale = 1.0;
-    Float_t luminosity = 19.6; //Integrated Luminosity in fb^-1
-    Float_t crossSection = 0.61647E-05*1000;
-
-
-    //if (inputFile==1) 
-    scale = .61646E-05*1000.0*19.6;
+    //Standard Model cross section in picobarns
+    //FT1 = 0 corresponds to SM, which is the 16th parameter used in Cards/reweight_card.dat
+    const Float_t sm_crossx = nwGenWZ_all[15];
+    const Float_t luminosity = 19.6; //Integrated Luminosity in fb^-1 
+	const Float_t scale = sm_crossx*1000*luminosity; //Number of events at given luminosity
 
     cout << "Processing file " << inputFile << " with scale factor " << scale << endl;
  
     if (useWeightInfo)
     {
         cout << "Gen weighted event counts" << endl;
-        for(i = 0; i < numberWeights; ++i) 
+        for(Int_t i = 0; i < NUM_WEIGHTS; ++i) 
         {
             cout << "Total cross section/Events*       " << i << " " 
-	         << nwGenWZ_all[i]*1000*19.6 << endl;
+	         << nwGenWZ_all[i]*1000*luminosity << endl;
             cout << "Cross section with EWK selection  " << i << " "
-	         << nwGenWZ_gbr2[i]*1000*19.6 << endl;
+	         << nwGenWZ_gbr2[i]*1000*luminosity << endl;
             cout << "Cross section with WZtn selection " << i << " "
-	         << nwGenWZ_wztmass[i]*1000*19.6 << endl;
+	         << nwGenWZ_wztmass[i]*1000*luminosity << endl;
         }
     }
     cout << "Gen event counts" << endl;
@@ -915,7 +859,7 @@ void PrintHistograms(ExRootResult *result, MyPlots *plots)
 
 //------------------------------------------------------------------------------
 
-void WpZ_ana(const char *inputFile)
+void WpZ_ana(const char *inputFile, int NUM_WEIGHTS)
 {
 
   gSystem->Load("libExRootAnalysis.so");
@@ -947,9 +891,9 @@ void WpZ_ana(const char *inputFile)
 
   MyPlots *plots = new MyPlots;
 
-  BookHistograms(result, plots);
+  BookHistograms(result, plots, NUM_WEIGHTS);
 
-  AnalyseEvents(treeReader, plots, inputFile_int);
+  AnalyseEvents(treeReader, plots, inputFile_int, NUM_WEIGHTS);
 
   //PrintHistograms(result, plots);
 
@@ -967,12 +911,12 @@ void WpZ_ana(const char *inputFile)
 }
 
 
-Float_t* readWeights(Int_t numberWeights,fstream& lheFile)
+Float_t* readWeights(const Int_t NUM_WEIGHTS,fstream& lheFile)
 {
     char lheFileLine[6];
     char lheFileChar;
     char lheFileWeight[14];
-    Float_t weights[numberWeights];
+    Float_t weights[NUM_WEIGHTS];
     Bool_t foundPos = false;
 
     while (!foundPos)
@@ -984,7 +928,7 @@ Float_t* readWeights(Int_t numberWeights,fstream& lheFile)
         //cout << lheFileLine << endl;
         //if (foundPos)cout << "Found <rwpt>: "<< lheFileLine << endl;
     }
-    for(Int_t j = 0; j < numberWeights; ++j) {
+    for(Int_t j = 0; j < NUM_WEIGHTS; ++j) {
         foundPos = false;
 	    while (!foundPos)
         {
