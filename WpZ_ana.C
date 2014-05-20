@@ -32,16 +32,28 @@ root -l WpZ_ana.C\(\".root\"\)
 
 //#include "/usr/include/c++/4.1.1/backward/iostream.h"
 #include "iostream"
+#include <vector>
 #include <stdlib.h> 
 //#include "/usr/include/c++/4.1.1/backward/fstream.h"
 #include "fstream"
 #include <string.h>
 
-Float_t* readWeights(Int_t NUM_WEIGHTS, fstream& lheFile);
+struct MyPlots;
+void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots,
+                                   Int_t inputFile, int NUM_WEIGHTS);
+void readWeights(const int NUM_WEIGHTS, Float_t* weights, fstream& lheFile);
+void WpZ_ana(const char *inputFile, int NUM_WEIGHTS);
+void PrintHistograms(ExRootResult *result, MyPlots *plots);
 
 using namespace std;
 
 //------------------------------------------------------------------------------
+
+int main()
+{
+    WpZ_ana("1", 31);
+    return 0;
+}
 
 struct MyPlots
 {
@@ -93,7 +105,6 @@ struct MyPlots
   TH1 *gbr2_jet1eta;
   TH1 *gbr2_jet2eta;
   TH1 *gbr2_met;
-
   TH1 *gbr2_deltaetajj;
   TH1 *gbr2_mjj;
   TH1 *gbr2_zpt;
@@ -327,12 +338,6 @@ void BookHistograms(ExRootResult *result, MyPlots *plots, Int_t NUM_WEIGHTS)
 
 }
 
-int main()
-{
-    cout << "Hi";
-    return 0;
-}
-
 //------------------------------------------------------------------------------
 
 void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile, int NUM_WEIGHTS)
@@ -341,7 +346,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
   
     Bool_t eventdebug = false;
     Bool_t useWeightInfo = true;
-    Float_t* weights;
+    Float_t weights[NUM_WEIGHTS];
     
     fstream lheFile;
     lheFile.open("unweighted_events.lhe", ios::in | ios::binary);
@@ -433,9 +438,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
 
         if (useWeightInfo) 
         {
-            weights = readWeights(NUM_WEIGHTS, lheFile);
+            readWeights(NUM_WEIGHTS, weights, lheFile);
     
-            for(Int_t i = 0; i < NUM_WEIGHTS; ++i)
+            for(int i = 0; i < NUM_WEIGHTS; ++i)
                 nwGenWZ_all[i] += weights[i]; 
         }  
 
@@ -865,10 +870,7 @@ void PrintHistograms(ExRootResult *result, MyPlots *plots)
 
 void WpZ_ana(const char *inputFile, int NUM_WEIGHTS)
 {
-
-  gSystem->Load("libExRootAnalysis.so");
   TChain *chain = new TChain("LHEF");
-
 
   Bool_t useInputFile = false;
   Int_t inputFile_int = 0;
@@ -914,13 +916,11 @@ void WpZ_ana(const char *inputFile, int NUM_WEIGHTS)
   delete chain;
 }
 
-
-Float_t* readWeights(const Int_t NUM_WEIGHTS,fstream& lheFile)
+void readWeights(const int NUM_WEIGHTS, Float_t* weights, fstream& lheFile)
 {
     char lheFileLine[6];
     char lheFileChar;
     char lheFileWeight[14];
-    Float_t weights[NUM_WEIGHTS];
     Bool_t foundPos = false;
 
     while (!foundPos)
@@ -952,7 +952,6 @@ Float_t* readWeights(const Int_t NUM_WEIGHTS,fstream& lheFile)
         //cout << "weight " << j << " = =" <<  weights[j] << endl;
         lheFile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
     }
-    return weights;
 }
 //------------------------------------------------------------------------------
 
