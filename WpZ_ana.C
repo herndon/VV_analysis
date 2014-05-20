@@ -104,8 +104,6 @@ struct MyPlots
 
 //------------------------------------------------------------------------------
 
-class ExRootResult;
-class ExRootTreeReader;
 
 //------------------------------------------------------------------------------
 
@@ -327,6 +325,12 @@ void BookHistograms(ExRootResult *result, MyPlots *plots, Int_t NUM_WEIGHTS)
 
 
 
+}
+
+int main()
+{
+    cout << "Hi";
+    return 0;
 }
 
 //------------------------------------------------------------------------------
