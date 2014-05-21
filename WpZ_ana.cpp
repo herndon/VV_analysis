@@ -339,32 +339,23 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 {
     cout << "Processing file " << inputFile << endl;
   
-    Bool_t eventdebug = false;
-    Bool_t useWeightInfo = true;
+    bool useWeightInfo = true;
     float weights[NUM_WEIGHTS];
     
     fstream lheFile;
     lheFile.open("unweighted_events.lhe", ios::in | ios::binary);
 
+    // Get pointers to branches used in analysis
     TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
     TClonesArray *branchEvent = treeReader->UseBranch("Event");
 
     TRootLHEFParticle *particle;
     TRootLHEFParticle *particleM;
     TRootLHEFEvent *event;
-    //GenParticle *particle;
-    //LHEFEvent *event; 
-
-    Long64_t allEntries = treeReader->GetEntries();
-
+    
     cout << "** Chain contains " << allEntries << " events" << endl;
     cout.flush();
 
-    //TObject *object;
-
-    Long64_t entry;
-
-    // Cuts
     Float_t leptonEtaCut = 2.4;
     Float_t metCut = 30.0;
     Float_t jetPTCut = 30.0;    
@@ -386,7 +377,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     Int_t nGenWZ_met = 0;
     Int_t nGenWZ_Z = 0;
     Int_t nGenWZ_etajj = 0;
-    //Int_t nGenWZ_oppetajj = 0;
     Int_t nGenWZ_mjj = 0;
     Int_t nGenWZ_wztmass = 0;
     Int_t nGenWZ_wztmass3m = 0;
@@ -404,7 +394,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     Int_t nGenWZPS_met = 0;
     Int_t nGenWZPS_Z = 0;
     Int_t nGenWZPS_etajj = 0;
-    //Int_t nGenWZPS_oppetajj = 0;
     Int_t nGenWZPS_mjj = 0;
     Int_t nGenWZPS_wztmass = 0;
     Int_t nGenWZPS_wztmass3m = 0;
@@ -422,12 +411,15 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorlW, lVectorMET, lVectorRl, lVectorj1, 
                    lVectorj2, lVectorRj, lVectorZ, lVectorW, lVectorWZ;
 
+    Long64_t allEntries = treeReader->GetEntries();
+
     // Loop over all events
-    for(entry = 0; entry < allEntries; ++entry) 
+    for(unsigned int entry = 0; entry < allEntries; ++entry) 
     {
         // Load selected branches with data from specified event
-    	treeReader->ReadEntry(entry);
-	    event = (TRootLHEFEvent*) branchEvent->At(0);
+    	
+        //Updates entry pointed to by branchGenParticle and branchEvent 
+        treeReader->ReadEntry(entry);
 	    
         if ((entry%1000) == 0)  cout << entry << endl;
 
@@ -465,323 +457,337 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 
         genPureSignalRegion = false;
 
-        for(Int_t i = 0; i < branchGenParticle->GetEntriesFast(); ++i) {
-		    particle = (TRootLHEFParticle*) branchGenParticle->At(i);
-		    //cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status << " m1 "
-		    //<< particle->Mother1 << " m2 " << particle->Mother2 << " " <<particle->PT <<  " " << particle->Eta 
-		    //<< " mass " << particle->M << endl;
-		    //cout << "Gen Leptons " << endl;
-		    if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 11) 
-		    {
-	  		    nGenElectron++;
-	  		    plots->gall_electronpt->Fill(particle->PT);
-	  		    plots->gall_electroneta->Fill(particle->Eta);
-	  		    particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+        for(int i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
+        {
+            particle = (TRootLHEFParticle*) branchGenParticle->At(i);
+            if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 11) 
+            {
+	        nGenElectron++;
+	        plots->gall_electronpt->Fill(particle->PT);
+	  	plots->gall_electroneta->Fill(particle->Eta);
+	  	particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
 	  		    
-	  		    if (particleM->PID == 24) 
-	  		    {         
-	    		    lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+	        if (particleM->PID == 24) 
+                {         
+	            lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
                     //cout << "Set W lepton " << particle->PT << " " << particle->Pz << " Mother mass " 
                     //<< particleM->M << endl;
             	    WMass = particleM->M;
-	  		    }
-		    }
-			if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13) 
-			{
-		  	    nGenMuon++;
-		  	    plots->gall_muonpt->Fill(particle->PT);
-		  	    plots->gall_muoneta->Fill(particle->Eta);
-		        particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
-		  		if (particleM->PID == 24) {         
-		    	    lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		            //cout << "Set W lepton " << particle->PT << " " << particle->Pz << endl;
-		       	    WMass = particleM->M;
-		  		}
-			}
-			if (particle->Status == 1 && (particle->Mother1 < i+2) && (abs(particle->PID) == 11
+	        }
+            }
+	    if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13) 
+	    {
+                nGenMuon++;
+		plots->gall_muonpt->Fill(particle->PT);
+		plots->gall_muoneta->Fill(particle->Eta);
+		particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+		if (particleM->PID == 24)
+                {         
+		    lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+		     WMass = particleM->M;
+		}
+	    }   
+            if (particle->Status == 1 && (particle->Mother1 < i+2) && (abs(particle->PID) == 11
 			        || abs(particle->PID) == 13) && particle->PT >10.0 && fabs(particle->Eta) <2.4) 
-				nGenLepton10++;
-			if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 11 
+	        nGenLepton10++;
+            if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 11 
 			        && particle->PT >20.0 && fabs(particle->Eta) <2.4) 
-			{
-		  		nGenElectron20++;
-		      	nLepton++;
+            {
+                nGenElectron20++;
+                nLepton++;
 		      	
-		      	if (nLepton==1) 
+                if (nLepton==1) 
                     lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		  		if (nLepton==2) 
+                if (nLepton==2) 
                     lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		  		if (nLepton==3) 
+                if (nLepton==3) 
                     lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-			}
-			if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13
+            }
+            if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13
 			        && particle->PT >20.0 && fabs(particle->Eta) <2.4) 
-			{
-		  	    nGenMuon20++;
-		  	    nLepton++;
-		        if (nLepton==1) 
+            {
+                nGenMuon20++;
+                nLepton++;
+                if (nLepton==1) 
                     lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		        if (nLepton==2) 
+                if (nLepton==2) 
                     lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		        if (nLepton==3) 
+                if (nLepton==3) 
                     lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		    }
+            }
 		
-		    // for W+Z event initial particles end after 4. Status is not 2 which indicates
+            // for W+Z event initial particles end after 4. Status is not 2 which indicates
             // intermediate history Pythia/delphies populates every event with extra substantially 
             // increasing the events that pass
-		    if (i>5 && (particle->Status == 1) && (abs(particle->PID) < 6||abs(particle->PID) == 21))
+            if (i>5 && (particle->Status == 1) && (abs(particle->PID) < 6||abs(particle->PID) == 21))
             { 
-		        nGenJet++;
-		        plots->gall_jetpt->Fill(particle->PT);
-		        //cout << "Gen Jet all fill " << endl;
-		        //cout.flush();
-		        plots->gall_jeteta->Fill(particle->Eta);
-		    }
+                nGenJet++;
+                plots->gall_jetpt->Fill(particle->PT);
+                plots->gall_jeteta->Fill(particle->Eta);
+            }
 		
-		    //cout << "Select Gen Jets " << endl;
-		    //cout.flush()
-		    if (i>5 &&  (particle->Status ==1) && (abs(particle->PID)< 6 || abs(particle->PID) == 21)
+            if (i>5 &&  (particle->Status ==1) && (abs(particle->PID)< 6 || abs(particle->PID) == 21)
 		    		&& particle->PT >jetPTCut && fabs(particle->Eta) <4.7) 
-		    {
-		        nGenJet30++;
-		        if (!foundJet1) 
+            {
+                nGenJet30++;
+                if (!foundJet1) 
                     lVectorj1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		        if (foundJet1) 
+                if (foundJet1) 
                     lVectorj2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		        foundJet1 = true;
-		    }
+                    foundJet1 = true;
+            }
 		 
-		    //cout << "Gen Jets Selected" << endl;
-		    // For ZZ set the genMet to something
-		    //genMet = 50;
-		    //cout << "Gen Met " << endl;
-		    if (particle->Status == 1 && (abs(particle->PID) == 12 || abs(particle->PID) == 14) 
+            if (particle->Status == 1 && (abs(particle->PID) == 12 || abs(particle->PID) == 14) 
 		    		&& particle->PT > genMet) 
-		    {
-		        //cout << "Filled Gen met" << endl;
-		        genMet = particle->PT;
-		        plots->gall_met->Fill(particle->PT);
-		        lVectorMET.SetPtEtaPhiM(particle->PT,0.0,particle->Phi,particle->M);
-		        pz = particle->Pz;
-		      //cout << "Set MET " << particle->PT << " " << lVectorMET.Pt() << " " << pz << endl;
-		    }
-		
-		    if (particle->PID==23)
+            {
+                //cout << "Filled Gen met" << endl;
+                genMet = particle->PT;
+                plots->gall_met->Fill(particle->PT);
+                lVectorMET.SetPtEtaPhiM(particle->PT,0.0,particle->Phi,particle->M);
+                pz = particle->Pz;
+		//cout << "Set MET " << particle->PT << " " << lVectorMET.Pt() << " " << pz << endl;
+            }
+            if (particle->PID==23)
                 genZMass = particle->M;
-		    if (particle->PID==23) 
+            if (particle->PID==23) 
                 lVectorZ.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		    if (particle->PID==24)  
+            if (particle->PID==24)  
                 lVectorW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
     	}
 
         plots->gall_zpt->Fill(lVectorZ.Pt());
 
-		lVectorRj = lVectorj1+lVectorj2;
-		plots->gall_mjj->Fill(lVectorRj.M());
-		plots->gall_deltaetajj->Fill(fabs(lVectorj1.Eta()-lVectorj2.Eta()));
+        lVectorRj = lVectorj1+lVectorj2;
+        plots->gall_mjj->Fill(lVectorRj.M());
+        plots->gall_deltaetajj->Fill(fabs(lVectorj1.Eta()-lVectorj2.Eta()));
+		
+        lVectorRl = lVectorl1+lVectorl2+lVectorl3+lVectorMET;
+        plots->gall_wztmass->Fill(lVectorRl.M());
+		
+        lVectorWZ = lVectorW + lVectorZ;
+        plots->gall_wzmass->Fill(lVectorWZ.M());
 		
 		
-		lVectorRl = lVectorl1+lVectorl2+lVectorl3+lVectorMET;
-		plots->gall_wztmass->Fill(lVectorRl.M());
+        // WZ mass calculation
+        // Need to define Wlepton lVectorlW
 		
-		lVectorWZ = lVectorW + lVectorZ;
-		plots->gall_wzmass->Fill(lVectorWZ.M());
+        Float_t pzp;
+        Float_t pzm;
 		
-		
-		// WZ mass calculation
-		// Need to define Wlepton lVectorlW
-		
-		Float_t pzp;
-		Float_t pzm;
-		
-		Float_t mu = (80.387*80.387)/2.0 + lVectorlW.Px()*lVectorMET.Px()
+        Float_t mu = (80.387*80.387)/2.0 + lVectorlW.Px()*lVectorMET.Px()
                                          + lVectorlW.Py()*lVectorMET.Py();
-		mu = (WMass*WMass)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
-		Float_t t1 = mu*lVectorlW.Pz()/(lVectorlW.Pt()*lVectorlW.Pt());
-		Float_t t2 = t1*t1;
-		Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)
+        mu = (WMass*WMass)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
+        Float_t t1 = mu*lVectorlW.Pz()/(lVectorlW.Pt()*lVectorlW.Pt());
+        Float_t t2 = t1*t1;
+        Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)
                      /(lVectorlW.Pt()*lVectorlW.Pt());
 		
-		if (t3<t2) 
+        if (t3<t2) 
         {
-			pzp = t1 + sqrt(t2-t3);
-		  	pzm = t1 - sqrt(t2-t3);      
-		  	//cout << "Root was real" << endl;
-		}
-		
-		if (t3>t2) 
+            pzp = t1 + sqrt(t2-t3);
+            pzm = t1 - sqrt(t2-t3);      
+        }
+	if (t3>t2) 
         {
-		  	pzp = t1;
-		  	pzm = t1;      
-		  	//cout << "Root was imaginary" << endl;
-		}
+            pzp = t1;
+            pzm = t1;      
+              //cout << "Root was imaginary" << endl;
+        }
 		
-		//cout << "pzp " << pzp << " pzm " << pzm << endl;
-		//cout << "pz " << pz << endl;
+        //cout << "pzp " << pzp << " pzm " << pzm << endl;
+        //cout << "pz " << pz << endl;
+        WMass = 80.387;
 		
-		WMass = 80.387;
+        // Try again with my own solution
+        Float_t ptlnu =  lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
+        Float_t a = 4.0*lVectorlW.E()*lVectorlW.E() -4.0*lVectorlW.Pz()*lVectorlW.Pz();
+        Float_t b = -8.0*ptlnu*lVectorlW.Pz() -4.0*lVectorlW.Pz()*WMass*WMass;
+        Float_t c = 4.0*lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()
+                       - 4.0*ptlnu*ptlnu - WMass*WMass*WMass*WMass - 4.0*ptlnu*WMass*WMass;
 		
-		// Try again with my own solution
-		Float_t ptlnu =  lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
-		Float_t a = 4.0*lVectorlW.E()*lVectorlW.E() -4.0*lVectorlW.Pz()*lVectorlW.Pz();
-		Float_t b = -8.0*ptlnu*lVectorlW.Pz() -4.0*lVectorlW.Pz()*WMass*WMass;
-		Float_t c = 4.0*lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()
-                     - 4.0*ptlnu*ptlnu - WMass*WMass*WMass*WMass - 4.0*ptlnu*WMass*WMass;
+        t2 = b*b;
+        t3 = 4.0*a*c;
 		
-		t2 = b*b;
-		t3 = 4.0*a*c;
-		
-		if (t3<t2) {
-			pzp = (-b + sqrt(t2-t3))/(2.0*a);
-			pzm = (-b - sqrt(t2-t3))/(2.0*a);      
-			//cout << "New Root was real" << endl;
-		}
-		
-		if (t3>t2) {
-			pzp = -b/(2.0*a);
-			pzm = -b/(2.0*a);      
-			//cout << "New Root was imaginary" << endl;
-		}
-		Float_t pzsmall;
-		Float_t pzlarge;
+        if (t3<t2)
+        {
+            pzp = (-b + sqrt(t2-t3))/(2.0*a);
+            pzm = (-b - sqrt(t2-t3))/(2.0*a);      
+            //cout << "New Root was real" << endl;
+        }
+        if (t3>t2)
+        {
+            pzp = -b/(2.0*a);
+            pzm = -b/(2.0*a);      
+            //cout << "New Root was imaginary" << endl;
+        }
+        Float_t pzsmall;
+        Float_t pzlarge;
 	
-		if (fabs(pzp) < fabs(pzm)) {pzsmall = pzp; pzlarge = pzm;}
-		if (fabs(pzp) > fabs(pzm)) {pzsmall = pzm; pzlarge = pzp;}
+        if (fabs(pzp) < fabs(pzm))
+        {
+            pzsmall = pzp;
+            pzlarge = pzm;
+        }
+        if (fabs(pzp) > fabs(pzm))
+        {
+            pzsmall = pzm; 
+            pzlarge = pzp;
+        }
 		
-		//cout << "New pzp " << pzp << " pzm " << pzm << endl;
-		//cout << "New pz " << pz << endl;
+        //cout << "New pzp " << pzp << " pzm " << pzm << endl;
+        //cout << "New pz " << pz << endl;
 		
-		if (fabs(pzsmall-pz) < fabs(pzlarge-pz)) pCorrect++;
-		if (fabs(pzsmall-pz) > fabs(pzlarge-pz)) mCorrect++;
-		if (lVectorWZ.M() > 1200.0){
-			if (fabs(pzsmall-pz) < fabs(pzlarge-pz)) pCorrectPS++;
-			if (fabs(pzsmall-pz) > fabs(pzlarge-pz)) mCorrectPS++;
-		}
+        if (fabs(pzsmall-pz) < fabs(pzlarge-pz)) 
+            pCorrect++;
+        if (fabs(pzsmall-pz) > fabs(pzlarge-pz))
+            mCorrect++;
+        if (lVectorWZ.M() > 1200.0)
+        {
+            if (fabs(pzsmall-pz) < fabs(pzlarge-pz)) pCorrectPS++;
+            if (fabs(pzsmall-pz) > fabs(pzlarge-pz)) mCorrectPS++;
+        }
+        nGenLepton20 = nGenElectron20 + nGenMuon20;
+        Int_t genltype = 0;
+		
+        if (nGenLepton20 != 3)
+            genbr1Event = false;
+        if (genbr1Event)
+            nGenWZ_leptons++;
+        if (nGenElectron20 == 3)
+            genltype = 4;
+        if (nGenElectron20 == 2) 
+            genltype = 3;
+        if (nGenMuon20 == 2)
+            genltype = 2;
+        if (nGenMuon20 == 3) 
+            genltype = 1;
+		
+        if (genbr1Event)
+        {
+            if (genltype ==1)
+                nGenWZ_leptons3m++;
+            if (genltype ==2)
+                nGenWZ_leptons2m1e++;
+            if (genltype ==3)
+                nGenWZ_leptons2e1m++;
+            if (genltype ==4)
+                nGenWZ_leptons3e++;
+        }
+        if (genbr1Event) 
+        {
+            if (lVectorRl.M() > 1200.0)
+            {
+                genPureSignalRegion = true;
+                //plots->gwztm_leptonpt->Fill(lVectorl1.Pt());
+                //plots->gwztm_leptoneta->Fill(lVectorl1.Eta());
+                //plots->gwztm_leptonpt->Fill(lVectorl2.Pt());
+                //plots->gwztm_leptoneta->Fill(lVectorl2.Eta());
+                //plots->gwztm_leptonpt->Fill(lVectorl3.Pt());
+                //plots->gwztm_leptoneta->Fill(lVectorl3.Eta());
+            }
+        }
+        if (genbr1Event&&genPureSignalRegion) 
+        {
+            nGenWZPS_leptons++;
+            if (genltype ==1)
+                nGenWZPS_leptons3m++;
+            if (genltype ==2) 
+                nGenWZPS_leptons2m1e++;
+            if (genltype ==3) 
+                nGenWZPS_leptons2e1m++;
+	    if (genltype ==4) 
+                nGenWZPS_leptons3e++;
+        }
 	
-	
-		nGenLepton20 = nGenElectron20 + nGenMuon20;
-		Int_t genltype = 0;
-		
-		
-		
-		if (nGenLepton20 != 3) genbr1Event = false;
-		if (genbr1Event) nGenWZ_leptons++;
-		if (nGenElectron20 == 3) genltype = 4;
-		if (nGenElectron20 == 2) genltype = 3;
-		if (nGenMuon20 == 2) genltype = 2;
-		if (nGenMuon20 == 3) genltype = 1;
-		
-		if (genbr1Event) {
-			if (genltype ==1) nGenWZ_leptons3m++;
-			if (genltype ==2) nGenWZ_leptons2m1e++;
-			if (genltype ==3) nGenWZ_leptons2e1m++;
-			if (genltype ==4) nGenWZ_leptons3e++;
-	    }
-	    if (genbr1Event) 
-	    {
-			if (lVectorRl.M() > 1200.0) {
-			  genPureSignalRegion = true;
-		          //plots->gwztm_leptonpt->Fill(lVectorl1.Pt());
-		          //plots->gwztm_leptoneta->Fill(lVectorl1.Eta());
-		          //plots->gwztm_leptonpt->Fill(lVectorl2.Pt());
-		          //plots->gwztm_leptoneta->Fill(lVectorl2.Eta());
-		          //plots->gwztm_leptonpt->Fill(lVectorl3.Pt());
-		          //plots->gwztm_leptoneta->Fill(lVectorl3.Eta());
-			}
-		}
-	    if (genbr1Event&&genPureSignalRegion) 
-	    {
-			nGenWZPS_leptons++;
-			if (genltype ==1) nGenWZPS_leptons3m++;
-			if (genltype ==2) nGenWZPS_leptons2m1e++;
-			if (genltype ==3) nGenWZPS_leptons2e1m++;
-			if (genltype ==4) nGenWZPS_leptons3e++;
-	    }
-	
-	    if (nGenJet30<2) genbr1Event = false;
-	    if (genbr1Event) nGenWZ_jets++;
-	    if (genbr1Event&&genPureSignalRegion) nGenWZPS_jets++;
-
-	    if (genMet  < 0.0001 ) {
-		//cout << "Warning, did not find neutrino" << endl;
-		//for(i = 0; i < branchGenParticle->GetEntriesFast(); ++i) {
-		//particle = (TRootLHEFParticle*) branchGenParticle->At(i);
-		//cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status
-        //     << " m1 " << particle->Mother1 << " m2 " << particle->Mother2 << " "
-        //     <<particle->PT <<  " " << particle->Eta << endl;
-		//}
-	    } 
-	    if (genMet < metCut) genbr1Event = false;
-	    if (genbr1Event) nGenWZ_met++;
-	    if (genbr1Event&&genPureSignalRegion) nGenWZPS_met++;
-	    if (fabs(genZMass-91.1876)>20.0) genbr1Event = false;
-	    if (genbr1Event) nGenWZ_Z++;
-	    if (genbr1Event&&genPureSignalRegion) nGenWZPS_Z++;
-	
-	    if (nGenJet>2) 
-	    {
-			cout << "Too many jets " << endl;
-	 		for(Int_t i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
-	 		{
-		  		particle = (TRootLHEFParticle*) branchGenParticle->At(i);
-		  		cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status
+        if (nGenJet30<2)
+            genbr1Event = false;
+        if (genbr1Event) 
+            nGenWZ_jets++;
+        if (genbr1Event&&genPureSignalRegion) 
+            nGenWZPS_jets++;
+	if (genMet < metCut) 
+            genbr1Event = false;
+	if (genbr1Event) 
+            nGenWZ_met++;
+	if (genbr1Event&&genPureSignalRegion)
+            nGenWZPS_met++;
+	if (fabs(genZMass-91.1876)>20.0) 
+            genbr1Event = false;
+        if (genbr1Event) 
+            nGenWZ_Z++;
+        if (genbr1Event&&genPureSignalRegion) 
+            nGenWZPS_Z++;
+	if (nGenJet>2) 
+        {
+            cout << "Too many jets " << endl;
+            for(int i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
+            {
+                particle = (TRootLHEFParticle*) branchGenParticle->At(i);
+                cout << "Gen particle " << i << " " << particle->PID << " s "<< particle->Status
                      << " m1 " << particle->Mother1 << " m2 " << particle->Mother2 <<  " "
                      << particle->PT <<  " " << particle->Eta << endl;
-			}
-	    }
-
-	    if (genbr1Event) 
-	    {
-			plots->gbr1_zpt->Fill(lVectorZ.Pt());
-			plots->gbr1_mjj->Fill(lVectorRj.M());
-			plots->gbr1_deltaetajj->Fill(fabs(lVectorj1.Eta()-lVectorj2.Eta()));
-			plots->gbr1_wztmass->Fill(lVectorRl.M());
-			plots->gbr1_wzmass->Fill(lVectorWZ.M());
+            }
+        }
+        if (genbr1Event) 
+        {
+            plots->gbr1_zpt->Fill(lVectorZ.Pt());
+            plots->gbr1_mjj->Fill(lVectorRj.M());
+            plots->gbr1_deltaetajj->Fill(fabs(lVectorj1.Eta()-lVectorj2.Eta()));
+            plots->gbr1_wztmass->Fill(lVectorRl.M());
+            plots->gbr1_wzmass->Fill(lVectorWZ.M());
 	
-			if (lVectorRj.M()>600.0) 
-				nGenWZ_mjj++; 
-			if (lVectorRj.M()>600.0 && genPureSignalRegion) nGenWZPS_mjj++;
-			if (lVectorRj.M()>600.0 && fabs(lVectorj1.Eta()-lVectorj2.Eta()) > 4.0) 
-				nGenWZ_etajj++;
-			if (lVectorRj.M()>600.0 && fabs(lVectorj1.Eta()-lVectorj2.Eta()) > 4.0
+            if (lVectorRj.M()>600.0) 
+                nGenWZ_mjj++; 
+            if (lVectorRj.M()>600.0 && genPureSignalRegion) 
+                nGenWZPS_mjj++;
+            if (lVectorRj.M()>600.0 && fabs(lVectorj1.Eta()-lVectorj2.Eta()) > 4.0) 
+                nGenWZ_etajj++;
+            if (lVectorRj.M()>600.0 && fabs(lVectorj1.Eta()-lVectorj2.Eta()) > 4.0
                     && genPureSignalRegion)
-				nGenWZPS_etajj++;
-			if (lVectorRj.M()>600.0 && fabs(lVectorj1.Eta()-lVectorj2.Eta()) > 4.0) 
-			{
-	        	if (lVectorRl.M()<1200.0)  genbr1Event = false;
-				if (genbr1Event) 
-				{
-		  			nGenWZ_wztmass++;
-		  			if (genltype ==1) nGenWZ_wztmass3m++;
-		  			if (genltype ==2) nGenWZ_wztmass2m1e++;
-		  			if (genltype ==3) nGenWZ_wztmass2e1m++;
-		  			if (genltype ==4) nGenWZ_wztmass3e++;
-	    		}
-				if (genbr1Event&&genPureSignalRegion) 
-				{
-		  			nGenWZPS_wztmass++;
-					if (genltype ==1) nGenWZPS_wztmass3m++;
-		  			if (genltype ==2) nGenWZPS_wztmass2m1e++;
-		  			if (genltype ==3) nGenWZPS_wztmass2e1m++;
-		  			if (genltype ==4) nGenWZPS_wztmass3e++;
-				}
-				plots->gbr2_zpt->Fill(lVectorZ.Pt());
-				plots->gbr2_mjj->Fill(lVectorRj.M());
-				plots->gbr2_deltaetajj->Fill(fabs(lVectorj1.Eta()-lVectorj2.Eta()));
-				plots->gbr2_wztmass->Fill(lVectorRl.M());
+                nGenWZPS_etajj++;
+            if (lVectorRj.M()>600.0 && fabs(lVectorj1.Eta()-lVectorj2.Eta()) > 4.0) 
+            {
+                if (lVectorRl.M()<1200.0)  genbr1Event = false;
+                if (genbr1Event) 
+                {
+                    nGenWZ_wztmass++;
+                    if (genltype ==1) 
+                        nGenWZ_wztmass3m++;
+                    if (genltype ==2) 
+                        nGenWZ_wztmass2m1e++;
+                    if (genltype ==3) 
+                        nGenWZ_wztmass2e1m++;
+                    if (genltype ==4) nGenWZ_wztmass3e++;
+                }
+                if (genbr1Event&&genPureSignalRegion) 
+                {
+                    nGenWZPS_wztmass++;
+                    if (genltype ==1) 
+                        nGenWZPS_wztmass3m++;
+                    if (genltype ==2) 
+                        nGenWZPS_wztmass2m1e++;
+                    if (genltype ==3) 
+                        nGenWZPS_wztmass2e1m++;
+                    if (genltype ==4) 
+                        nGenWZPS_wztmass3e++;
+                }
+                plots->gbr2_zpt->Fill(lVectorZ.Pt());
+                plots->gbr2_mjj->Fill(lVectorRj.M());
+                plots->gbr2_deltaetajj->Fill(fabs(lVectorj1.Eta()-lVectorj2.Eta()));
+                plots->gbr2_wztmass->Fill(lVectorRl.M());
 	
-				if (useWeightInfo)
-				{
-		  			for (Int_t i=0; i < NUM_WEIGHTS; i++) 
-		  			{
-			    		nwGenWZ_gbr2[i] += weights[i];
-			    		plots->gbr2w_wztmass[i]->Fill(lVectorRl.M(),weights[i]);
-						if (lVectorRl.M() > 1000.0 ) nwGenWZ_wztmass[i] += weights[i];
-			  		}
-				}
-				plots->gbr2_wzmass->Fill(lVectorWZ.M());
-	        }
+                if (useWeightInfo)
+                {
+                      for (Int_t i=0; i < NUM_WEIGHTS; i++) 
+                      {
+                          nwGenWZ_gbr2[i] += weights[i];
+                          plots->gbr2w_wztmass[i]->Fill(lVectorRl.M(),weights[i]);
+                          if (lVectorRl.M() > 1000.0 )
+                              nwGenWZ_wztmass[i] += weights[i];
+                      }
+                }
+		plots->gbr2_wzmass->Fill(lVectorWZ.M());
+            }
         }
     }
     //Standard Model cross section in picobarns
