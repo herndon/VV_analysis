@@ -3,7 +3,7 @@ CXXFLAGS      = $(OPT2) $(ROOTCFLAGS) -Wall -O2 -std=c++11
 LD            = g++
 LDFLAGS       = $(OPT2)
 
-SRCS = WpZ_ana.C
+SRCS = WpZ_ana.cpp readWeights.cpp
 
 ROOTINCLUDES = -I$(ROOTSYS)/include
 ROOTLDLIBS = `$(ROOTSYS)/bin/root-config --cflags --glibs` -lEG
