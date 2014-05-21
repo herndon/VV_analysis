@@ -40,7 +40,7 @@ root -l WpZ_ana.C\(\".root\"\)
 
 struct MyPlots;
 void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots,
-                                   Int_t inputFile, int NUM_WEIGHTS);
+                                   const char* inputFile, int NUM_WEIGHTS);
 void readWeights(const int NUM_WEIGHTS, Float_t* weights, fstream& lheFile);
 void WpZ_ana(const char *inputFile, int NUM_WEIGHTS);
 void PrintHistograms(ExRootResult *result, MyPlots *plots);
@@ -340,7 +340,7 @@ void BookHistograms(ExRootResult *result, MyPlots *plots, Int_t NUM_WEIGHTS)
 
 //------------------------------------------------------------------------------
 
-void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile, int NUM_WEIGHTS)
+void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inputFile, int NUM_WEIGHTS)
 {
     cout << "Processing file " << inputFile << endl;
   
@@ -793,7 +793,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, Int_t inputFile
     //FT1 = 0 corresponds to SM, which is the 16th parameter used in Cards/reweight_card.dat
     const Float_t sm_crossx = nwGenWZ_all[15];
     const Float_t luminosity = 19.6; //Integrated Luminosity in fb^-1 
-	const Float_t scale = sm_crossx*1000*luminosity; //Number of events at given luminosity
+    const Float_t scale = sm_crossx*1000*luminosity; //Number of events at given luminosity
 
     cout << "Processing file " << inputFile << " with scale factor " << scale << endl;
  
@@ -868,52 +868,35 @@ void PrintHistograms(ExRootResult *result, MyPlots *plots)
 
 //------------------------------------------------------------------------------
 
-void WpZ_ana(const char *inputFile, int NUM_WEIGHTS)
+void WpZ_ana(const char* inputFile, int NUM_WEIGHTS)
 {
-  TChain *chain = new TChain("LHEF");
+    TChain *chain = new TChain("LHEF");
+    const char * outputFile = "results_wpz_ewk.root";
 
-  Bool_t useInputFile = false;
-  Int_t inputFile_int = 0;
-  const char * outputFile = "results_wpz_ewk.root";
-
-  cout << "Processing file " << inputFile << endl;
-  
-  if (useInputFile) {
+    cout << "Processing file " << inputFile << endl;
     chain->Add(inputFile);
-  }
-  else{
-    inputFile_int = atoi(inputFile);
-    cout << "Processing file type int: " << inputFile_int << endl;
-  }
-  if (atoi(inputFile)==1){
-    chain->Add("unweighted_events.root");
-  }
-  else {
-     cout << "\nPlease enter a valid input file\n";
-     exit(0);
-  }
-  ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
-  ExRootResult *result = new ExRootResult();
 
-  MyPlots *plots = new MyPlots;
+    ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
+    ExRootResult *result = new ExRootResult();
 
-  BookHistograms(result, plots, NUM_WEIGHTS);
+    MyPlots *plots = new MyPlots;
 
-  AnalyseEvents(treeReader, plots, inputFile_int, NUM_WEIGHTS);
+    BookHistograms(result, plots, NUM_WEIGHTS);
+    AnalyseEvents(treeReader, plots, inputFile, NUM_WEIGHTS);
 
-  //PrintHistograms(result, plots);
+    //PrintHistograms(result, plots);
 
-  // 1 default
-  // 2 no opp eta and no met cut for 3at-1
+    // 1 default
+    // 2 no opp eta and no met cut for 3at-1
 
-  result->Write(outputFile);
+    result->Write(outputFile);
 
-  cout << "** Exiting..." << endl;
-
-  delete plots;
-  delete result;
-  delete treeReader;
-  delete chain;
+    cout << "** Exiting..." << endl;
+    
+    delete plots;
+    delete result;
+    delete treeReader;
+    delete chain;
 }
 
 void readWeights(const int NUM_WEIGHTS, Float_t* weights, fstream& lheFile)
@@ -926,30 +909,21 @@ void readWeights(const int NUM_WEIGHTS, Float_t* weights, fstream& lheFile)
     while (!foundPos)
     {
         lheFile.read ((char*)&lheFileLine,sizeof(lheFileLine));
-        if (strcmp(lheFileLine,"<rwgt>")==0) foundPos = true;
-        //if (foundPos) cout << "Found Event weights <rwgt>" << endl;
+        if (strcmp(lheFileLine,"<rwgt>")==0)
+            foundPos = true;
         lheFile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
-        //cout << lheFileLine << endl;
-        //if (foundPos)cout << "Found <rwpt>: "<< lheFileLine << endl;
     }
-    for(Int_t j = 0; j < NUM_WEIGHTS; ++j) {
+    for(Int_t j = 0; j < NUM_WEIGHTS; ++j)
+    {
         foundPos = false;
-	    while (!foundPos)
+	while (!foundPos)
         {
-	        lheFile.read ((char*)&lheFileChar,sizeof(lheFileChar));
-            if (lheFileChar=='>')  foundPos = true;
-            // cout << lheFileChar << endl;
-	        // if (foundPos) cout << "foundPos " << foundPos << endl;
-	        // if (foundPos) cout << lheFileChar << endl;
-        }
 	    lheFile.read ((char*)&lheFileChar,sizeof(lheFileChar));
-        //Float_t weight1;
-	    //lheFile.read  ((char*)&weight1,sizeof(weight1));
-	    //cout << weight1 << endl;
+            if (lheFileChar=='>')  foundPos = true;
+        }
+	lheFile.read ((char*)&lheFileChar,sizeof(lheFileChar));
         lheFile.read ((char*)&lheFileWeight,sizeof(lheFileWeight));
-        //cout << lheFileWeight << endl;
         weights[j] = atof(lheFileWeight);
-        //cout << "weight " << j << " = =" <<  weights[j] << endl;
         lheFile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
     }
 }
