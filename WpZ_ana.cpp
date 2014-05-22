@@ -33,6 +33,7 @@ root -l WpZ_ana.C\(\".root\"\)
 #include "iostream"
 #include <vector>
 #include "fstream"
+#include "readWeights.h" 
 
 struct MyPlots;
 void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots,
@@ -46,7 +47,7 @@ using namespace std;
 
 int main()
 {
-    WpZ_ana("1", 31);
+    WpZ_ana("unweighted_events.root", 31);
     return 0;
 }
 
@@ -353,6 +354,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     TRootLHEFParticle *particleM;
     TRootLHEFEvent *event;
     
+    Long64_t allEntries = treeReader->GetEntries();
+
     cout << "** Chain contains " << allEntries << " events" << endl;
     cout.flush();
 
@@ -411,8 +414,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorlW, lVectorMET, lVectorRl, lVectorj1, 
                    lVectorj2, lVectorRj, lVectorZ, lVectorW, lVectorWZ;
 
-    Long64_t allEntries = treeReader->GetEntries();
-
+    
     // Loop over all events
     for(unsigned int entry = 0; entry < allEntries; ++entry) 
     {
@@ -460,92 +462,93 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         for(int i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
         {
             particle = (TRootLHEFParticle*) branchGenParticle->At(i);
-            if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 11) 
+            if(particle->Status == 1)
             {
-	        nGenElectron++;
-	        plots->gall_electronpt->Fill(particle->PT);
-	  	plots->gall_electroneta->Fill(particle->Eta);
-	  	particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
-	  		    
-	        if (particleM->PID == 24) 
-                {         
-	            lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                    //cout << "Set W lepton " << particle->PT << " " << particle->Pz << " Mother mass " 
-                    //<< particleM->M << endl;
-            	    WMass = particleM->M;
-	        }
-            }
-	    if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13) 
-	    {
-                nGenMuon++;
-		plots->gall_muonpt->Fill(particle->PT);
-		plots->gall_muoneta->Fill(particle->Eta);
-		particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
-		if (particleM->PID == 24)
-                {         
-		    lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-		     WMass = particleM->M;
-		}
-	    }   
-            if (particle->Status == 1 && (particle->Mother1 < i+2) && (abs(particle->PID) == 11
-			        || abs(particle->PID) == 13) && particle->PT >10.0 && fabs(particle->Eta) <2.4) 
-	        nGenLepton10++;
-            if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 11 
-			        && particle->PT >20.0 && fabs(particle->Eta) <2.4) 
-            {
-                nGenElectron20++;
-                nLepton++;
-		      	
-                if (nLepton==1) 
-                    lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                if (nLepton==2) 
-                    lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                if (nLepton==3) 
-                    lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-            }
-            if (particle->Status == 1 && (particle->Mother1 < i+2) && abs(particle->PID) == 13
-			        && particle->PT >20.0 && fabs(particle->Eta) <2.4) 
-            {
-                nGenMuon20++;
-                nLepton++;
-                if (nLepton==1) 
-                    lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                if (nLepton==2) 
-                    lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                if (nLepton==3) 
-                    lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-            }
-		
-            // for W+Z event initial particles end after 4. Status is not 2 which indicates
-            // intermediate history Pythia/delphies populates every event with extra substantially 
-            // increasing the events that pass
-            if (i>5 && (particle->Status == 1) && (abs(particle->PID) < 6||abs(particle->PID) == 21))
-            { 
-                nGenJet++;
-                plots->gall_jetpt->Fill(particle->PT);
-                plots->gall_jeteta->Fill(particle->Eta);
-            }
-		
-            if (i>5 &&  (particle->Status ==1) && (abs(particle->PID)< 6 || abs(particle->PID) == 21)
-		    		&& particle->PT >jetPTCut && fabs(particle->Eta) <4.7) 
-            {
-                nGenJet30++;
-                if (!foundJet1) 
-                    lVectorj1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                if (foundJet1) 
-                    lVectorj2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                    foundJet1 = true;
-            }
-		 
-            if (particle->Status == 1 && (abs(particle->PID) == 12 || abs(particle->PID) == 14) 
-		    		&& particle->PT > genMet) 
-            {
-                //cout << "Filled Gen met" << endl;
-                genMet = particle->PT;
-                plots->gall_met->Fill(particle->PT);
-                lVectorMET.SetPtEtaPhiM(particle->PT,0.0,particle->Phi,particle->M);
-                pz = particle->Pz;
-		//cout << "Set MET " << particle->PT << " " << lVectorMET.Pt() << " " << pz << endl;
+                if((particle->Mother1 < i+2) && (abs(particle->PID) == 11 || abs(particle->PID) == 13))
+                { 
+                    if (abs(particle->PID) == 11) 
+                    {
+        	        nGenElectron++;
+        	        plots->gall_electronpt->Fill(particle->PT);
+                        plots->gall_electroneta->Fill(particle->Eta);
+        	  	particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+                        if (particleM->PID == 24) 
+                        {         
+        	            lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                            //cout << "Set W lepton " << particle->PT << " " << particle->Pz << " Mother mass " 
+                            //<< particleM->M << endl;
+                	    WMass = particleM->M;
+        	        }
+                    }
+        	    if (abs(particle->PID) == 13) 
+        	    {
+                        nGenMuon++;
+        	        plots->gall_muonpt->Fill(particle->PT);
+        	        plots->gall_muoneta->Fill(particle->Eta);
+        	        particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+        	        if (particleM->PID == 24)
+                        {         
+        		    lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+        		    WMass = particleM->M;
+        		}
+        	    }  
+                    if (particle->PT >10.0 && fabs(particle->Eta) <2.4) 
+        	            nGenLepton10++;
+                    if (particle->PT >20.0 && fabs(particle->Eta) <2.4) 
+                    {
+                        nGenElectron20++;
+                        nLepton++;
+        		      	
+                        if (nLepton==1) 
+                            lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                        if (nLepton==2) 
+                            lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                        if (nLepton==3) 
+                            lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                    }
+                    if (abs(particle->PID) == 13 && particle->PT >20.0 && fabs(particle->Eta) <2.4) 
+                    {
+                        nGenMuon20++;
+                        nLepton++;
+                        if (nLepton==1) 
+                            lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                        if (nLepton==2) 
+                            lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                        if (nLepton==3) 
+                            lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                    }
+    		}
+                // for W+Z event initial particles end after 4. Status is not 2 which indicates
+                // intermediate history Pythia/delphies populates every event with extra substantially 
+                // increasing the events that pass
+                if (i>5 && (abs(particle->PID) < 6||abs(particle->PID) == 21))
+                { 
+                    nGenJet++;
+                    plots->gall_jetpt->Fill(particle->PT);
+                    plots->gall_jeteta->Fill(particle->Eta);
+                }
+    		
+                if (i>5 && (abs(particle->PID)< 6 || abs(particle->PID) == 21)
+    		    		&& particle->PT >jetPTCut && fabs(particle->Eta) <4.7) 
+                {
+                    nGenJet30++;
+                    if (!foundJet1) 
+                        lVectorj1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                    if (foundJet1) 
+                        lVectorj2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                        foundJet1 = true;
+                }
+    		 
+                if ((abs(particle->PID) == 12 || abs(particle->PID) == 14) 
+    		    		&& particle->PT > genMet) 
+                {
+                    //cout << "Filled Gen met" << endl;
+                    genMet = particle->PT;
+                    plots->gall_met->Fill(particle->PT);
+                    lVectorMET.SetPtEtaPhiM(particle->PT,0.0,particle->Phi,particle->M);
+                    pz = particle->Pz;
+    		    //cout << "Set MET " << particle->PT << " " << lVectorMET.Pt() << " " << pz << endl;
+                }
             }
             if (particle->PID==23)
                 genZMass = particle->M;

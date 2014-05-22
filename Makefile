@@ -20,11 +20,11 @@ all : WpZ_ana
 clean :
 	rm -rf *.o
 
-WpZ_ana: $(SRCS:.cc=.o)
+WpZ_ana: $(SRCS:.cpp=.o)
 	$(LD) $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $^ $(LDLIBS) $(EXROOTLIB) -o $@
 	@echo Built $@
 
-%.o: %.cc
+%.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -fPIC $^
 	@echo Compiled $@
 
