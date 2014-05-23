@@ -40,6 +40,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots,
                                    const char* inputFile, int NUM_WEIGHTS);
 void WpZ_ana(const char *inputFile, int NUM_WEIGHTS);
 void PrintHistograms(ExRootResult *result, MyPlots *plots);
+bool WZMassCalculation(TLorentzVector lVectorlW,  TLorentzVector lVectorMET, float neutrino_pz,
+                                     float WMass);
 
 using namespace std;
 
@@ -414,7 +416,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorlW, lVectorMET, lVectorRl, lVectorj1, 
                    lVectorj2, lVectorRj, lVectorZ, lVectorW, lVectorWZ;
 
-    
+    //cout << "\n";    
     // Loop over all events
     for(unsigned int entry = 0; entry < allEntries; ++entry) 
     {
@@ -422,9 +424,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     	
         //Updates entry pointed to by branchGenParticle and branchEvent 
         treeReader->ReadEntry(entry);
-	    
-        if ((entry%1000) == 0)  cout << entry << endl;
-
+        cout << "\n";    
+        //if ((entry%10) == 0)  
+           // cout << "\n" << entry << endl;
         if (useWeightInfo) 
         {
             readWeights(NUM_WEIGHTS, weights, lheFile);
@@ -452,8 +454,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         Bool_t foundJet1 = false;
 
  
-        Float_t pz = 0;
-        Float_t WMass = 0;
+        float neutrino_pz = 0.;
+        float WMass = 0.;
 
         Int_t nLepton = 0;
 
@@ -530,7 +532,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                 // for W+Z event initial particles end after 4. Status is not 2 which indicates
                 // intermediate history Pythia/delphies populates every event with extra substantially 
                 // increasing the events that pass
-                if (i>5 && (abs(particle->PID) < 6||abs(particle->PID) == 21))
+                else if (i>5 && (abs(particle->PID) < 6||abs(particle->PID) == 21))
                 { 
                     nGenJet++;
                     plots->gall_jetpt->Fill(particle->PT);
@@ -547,22 +549,23 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                         foundJet1 = true;
                     }
                 }
-                if ((abs(particle->PID) == 12 || abs(particle->PID) == 14) 
+                else if ((abs(particle->PID) == 12 || abs(particle->PID) == 14) 
     		    		&& particle->PT > genMet) 
                 {
                     //cout << "Filled Gen met" << endl;
                     genMet = particle->PT;
                     plots->gall_met->Fill(particle->PT);
                     lVectorMET.SetPtEtaPhiM(particle->PT,0.0,particle->Phi,particle->M);
-                    pz = particle->Pz;
+                    neutrino_pz = particle->Pz;
     		    //cout << "Set MET " << particle->PT << " " << lVectorMET.Pt() << " " << pz << endl;
                 }
             }
             if (particle->PID==23)
+            {
                 genZMass = particle->M;
-            if (particle->PID==23) 
                 lVectorZ.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-            if (particle->PID==24)  
+            }
+            else if (particle->PID==24)  
                 lVectorW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
     	}
 
@@ -581,100 +584,42 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 		
         // WZ mass calculation
         // Need to define Wlepton lVectorlW
-		
-        Float_t pzp;
-        Float_t pzm;
-		
-        Float_t mu = (80.387*80.387)/2.0 + lVectorlW.Px()*lVectorMET.Px()
-                                         + lVectorlW.Py()*lVectorMET.Py();
-        mu = (WMass*WMass)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
-        Float_t t1 = mu*lVectorlW.Pz()/(lVectorlW.Pt()*lVectorlW.Pt());
-        Float_t t2 = t1*t1;
-        Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)
-                     /(lVectorlW.Pt()*lVectorlW.Pt());
-		
-        if (t3<t2) 
-        {
-            pzp = t1 + sqrt(t2-t3);
-            pzm = t1 - sqrt(t2-t3);      
-        }
-	if (t3>t2) 
-        {
-            pzp = t1;
-            pzm = t1;      
-              //cout << "Root was imaginary" << endl;
-        }
-		
-        //cout << "pzp " << pzp << " pzm " << pzm << endl;
-        //cout << "pz " << pz << endl;
-        WMass = 80.387;
-		
-        // Try again with my own solution
-        Float_t ptlnu =  lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
-        Float_t a = 4.0*lVectorlW.E()*lVectorlW.E() -4.0*lVectorlW.Pz()*lVectorlW.Pz();
-        Float_t b = -8.0*ptlnu*lVectorlW.Pz() -4.0*lVectorlW.Pz()*WMass*WMass;
-        Float_t c = 4.0*lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()
-                       - 4.0*ptlnu*ptlnu - WMass*WMass*WMass*WMass - 4.0*ptlnu*WMass*WMass;
-		
-        t2 = b*b;
-        t3 = 4.0*a*c;
-		
-        if (t3<t2)
-        {
-            pzp = (-b + sqrt(t2-t3))/(2.0*a);
-            pzm = (-b - sqrt(t2-t3))/(2.0*a);      
-            //cout << "New Root was real" << endl;
-        }
-        if (t3>t2)
-        {
-            pzp = -b/(2.0*a);
-            pzm = -b/(2.0*a);      
-            //cout << "New Root was imaginary" << endl;
-        }
-        Float_t pzsmall;
-        Float_t pzlarge;
-	
-        if (fabs(pzp) < fabs(pzm))
-        {
-            pzsmall = pzp;
-            pzlarge = pzm;
-        }
-        if (fabs(pzp) > fabs(pzm))
-        {
-            pzsmall = pzm; 
-            pzlarge = pzp;
-        }
-		
+			
         //cout << "New pzp " << pzp << " pzm " << pzm << endl;
         //cout << "New pz " << pz << endl;
-		
-        if (fabs(pzsmall-pz) < fabs(pzlarge-pz)) 
-            pCorrect++;
-        if (fabs(pzsmall-pz) > fabs(pzlarge-pz))
-            mCorrect++;
-        if (lVectorWZ.M() > 1200.0)
+
+        bool correct_p = WZMassCalculation(lVectorW, lVectorMET, neutrino_pz,  WMass);	
+        if(correct_p)
         {
-            if (fabs(pzsmall-pz) < fabs(pzlarge-pz)) pCorrectPS++;
-            if (fabs(pzsmall-pz) > fabs(pzlarge-pz)) mCorrectPS++;
+            //cout << "\nentry" << entry  << "Is negative";
+            pCorrect++;
+            if(lVectorWZ.M() > 1200.)
+                pCorrectPS++;
+        }
+        else
+        {
+            //cout << "\nentry: " << entry <<  "is positive";
+            mCorrect++;
+            if (lVectorWZ.M() > 1200.0)
+                mCorrect++;
         }
         nGenLepton20 = nGenElectron20 + nGenMuon20;
         Int_t genltype = 0;
 		
         if (nGenLepton20 != 3)
             genbr1Event = false;
-        if (genbr1Event)
-            nGenWZ_leptons++;
         if (nGenElectron20 == 3)
             genltype = 4;
-        if (nGenElectron20 == 2) 
+        else if (nGenElectron20 == 2) 
             genltype = 3;
         if (nGenMuon20 == 2)
             genltype = 2;
-        if (nGenMuon20 == 3) 
+        else if (nGenMuon20 == 3) 
             genltype = 1;
 		
         if (genbr1Event)
         {
+            nGenWZ_leptons++;
             if (genltype ==1)
                 nGenWZ_leptons3m++;
             if (genltype ==2)
@@ -872,7 +817,79 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     cout << "Correct PS + " << pCorrectPS << " - " << mCorrectPS << endl;
 }
 //------------------------------------------------------------------------------
+	
+bool WZMassCalculation(TLorentzVector lVectorlW, TLorentzVector lVectorMET,
+                                                         float neutrino_pz, float WMass)
+{
 
+    const float WMASS_ON_SHELL = 80.387;
+        
+    Float_t pzp;
+    Float_t pzm;
+		
+    Float_t mu = (WMASS_ON_SHELL*WMASS_ON_SHELL)/2.0 + lVectorlW.Px()*lVectorMET.Px()
+                                         + lVectorlW.Py()*lVectorMET.Py();
+    mu = (WMass*WMass)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
+    Float_t t1 = mu*lVectorlW.Pz()/(lVectorlW.Pt()*lVectorlW.Pt());
+    Float_t t2 = t1*t1;
+    Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)
+                     /(lVectorlW.Pt()*lVectorlW.Pt());
+		
+    if (t3<t2) 
+    {
+        pzp = t1 + sqrt(t2-t3);
+        pzm = t1 - sqrt(t2-t3);      
+    }
+    else if (t3>t2) 
+    {
+        pzp = t1;
+        pzm = t1;      
+              //cout << "Root was imaginary" << endl;
+    }
+		
+    //cout << "pzp " << pzp << " pzm " << pzm << endl;
+    //cout << "pz" << pz << endl;
+    WMass = WMASS_ON_SHELL;
+		
+    // Try again with my own solution
+    Float_t ptlnu =  lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
+    Float_t a = 4.0*lVectorlW.E()*lVectorlW.E() -4.0*lVectorlW.Pz()*lVectorlW.Pz();
+    Float_t b = -8.0*ptlnu*lVectorlW.Pz() -4.0*lVectorlW.Pz()*WMass*WMass;
+    Float_t c = 4.0*lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()
+                       - 4.0*ptlnu*ptlnu - WMass*WMass*WMass*WMass - 4.0*ptlnu*WMass*WMass;
+		
+    t2 = b*b;
+    t3 = 4.0*a*c;
+	
+    if (t3<t2)
+    {
+        pzp = (-b + sqrt(t2-t3))/(2.0*a);
+        pzm = (-b - sqrt(t2-t3))/(2.0*a);      
+            //cout << "New Root was real" << endl;
+    }
+    else
+    {
+        pzp = -b/(2.0*a);
+        pzm = -b/(2.0*a);      
+            //cout << "New Root was imaginary" << endl;
+    }
+    Float_t pzsmall;
+    Float_t pzlarge;
+	
+    if (fabs(pzp) < fabs(pzm))
+    {
+        pzsmall = pzp;
+        pzlarge = pzm;
+    }
+    else
+    {
+        pzsmall = pzm; 
+        pzlarge = pzp;
+    }
+    //cout << "Value " <<  (fabs(pzsmall-neutrino_pz) - fabs(pzlarge-neutrino_pz));
+ 
+    return (fabs(pzsmall-neutrino_pz) < fabs(pzlarge-neutrino_pz)); 
+}
 void PrintHistograms(ExRootResult *result, MyPlots *plots)
 {
   result->Print("png");
