@@ -482,12 +482,12 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                         if(fabs(particle->Eta) <2.4)
                         {
                            if(particle->PT >10.0)
-                               nGenLepton10++;
-                           else if(particle->PT >20.0)
+                                nGenLepton10++;	
+                           if(particle->PT >20.0)
                            {
                                 nGenElectron20++;
                                 nLepton++;
-        		      	
+        		        
                                 if (nLepton==1) 
                                     lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
                                 else if (nLepton==2) 
@@ -499,27 +499,31 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                     }
         	    else if(abs(particle->PID) == 13) 
         	    {
-                        if(particle->PT > 10.0)
-                            nGenLepton10++;
-                        else if(particle->PT > 20.0)
-                        {
-                            nGenMuon++;
-        	            plots->gall_muonpt->Fill(particle->PT);
-        	            plots->gall_muoneta->Fill(particle->Eta);
-        	            particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
-        	            if (particleM->PID == 24)
-                            {         
-        		        lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-        		        WMass = particleM->M;
-        	            }
-        	            nGenMuon20++;
-                            nLepton++;
-                            if (nLepton==1) 
-                                lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                            else if (nLepton==2) 
-                                lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                            else if (nLepton==3) 
-                                lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                        nGenMuon++;
+        	        plots->gall_muonpt->Fill(particle->PT);
+        	        plots->gall_muoneta->Fill(particle->Eta);
+        	        particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+        	        if (particleM->PID == 24)
+                        {         
+                           lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                            WMass = particleM->M;
+        	        }
+                        if(fabs(particle->Eta) < 2.4)
+                        { 
+                            if(particle->PT >10.0)
+                                nGenLepton10++;
+                            if(particle->PT > 20.0)
+                            {
+        	                nGenMuon20++;
+                                nLepton++;
+                               
+                                if (nLepton==1) 
+                                    lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                                else if (nLepton==2) 
+                                    lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                                else if (nLepton==3) 
+                                    lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                            }
                         }
                     }  
     		}
@@ -536,11 +540,11 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                    {
                        nGenJet30++;
                             
-                    if (foundJet1) 
-                        lVectorj2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                    else
-                        lVectorj1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                    foundJet1 = true;
+                       if (foundJet1) 
+                           lVectorj2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                        else
+                            lVectorj1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                        foundJet1 = true;
                     }
                 }
                 if ((abs(particle->PID) == 12 || abs(particle->PID) == 14) 
