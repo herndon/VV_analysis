@@ -479,44 +479,49 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                             //<< particleM->M << endl;
                 	    WMass = particleM->M;
         	        }
-                    }
-        	    if (abs(particle->PID) == 13) 
-        	    {
-                        nGenMuon++;
-        	        plots->gall_muonpt->Fill(particle->PT);
-        	        plots->gall_muoneta->Fill(particle->Eta);
-        	        particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
-        	        if (particleM->PID == 24)
-                        {         
-        		    lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-        		    WMass = particleM->M;
-        		}
-        	    }  
-                    if (particle->PT >10.0 && fabs(particle->Eta) <2.4) 
-        	            nGenLepton10++;
-                    if (particle->PT >20.0 && fabs(particle->Eta) <2.4) 
-                    {
-                        nGenElectron20++;
-                        nLepton++;
+                        if(fabs(particle->Eta) <2.4)
+                        {
+                           if(particle->PT >10.0)
+                               nGenLepton10++;
+                           else if(particle->PT >20.0)
+                           {
+                                nGenElectron20++;
+                                nLepton++;
         		      	
-                        if (nLepton==1) 
-                            lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                        if (nLepton==2) 
-                            lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                        if (nLepton==3) 
-                            lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                                if (nLepton==1) 
+                                    lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                                else if (nLepton==2) 
+                                    lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                                else if (nLepton==3) 
+                                    lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                            }
+                        }
                     }
-                    if (abs(particle->PID) == 13 && particle->PT >20.0 && fabs(particle->Eta) <2.4) 
-                    {
-                        nGenMuon20++;
-                        nLepton++;
-                        if (nLepton==1) 
-                            lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                        if (nLepton==2) 
-                            lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                        if (nLepton==3) 
-                            lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                    }
+        	    else if(abs(particle->PID) == 13) 
+        	    {
+                        if(particle->PT > 10.0)
+                            nGenLepton10++;
+                        else if(particle->PT > 20.0)
+                        {
+                            nGenMuon++;
+        	            plots->gall_muonpt->Fill(particle->PT);
+        	            plots->gall_muoneta->Fill(particle->Eta);
+        	            particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+        	            if (particleM->PID == 24)
+                            {         
+        		        lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+        		        WMass = particleM->M;
+        	            }
+        	            nGenMuon20++;
+                            nLepton++;
+                            if (nLepton==1) 
+                                lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                            else if (nLepton==2) 
+                                lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                            else if (nLepton==3) 
+                                lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                        }
+                    }  
     		}
                 // for W+Z event initial particles end after 4. Status is not 2 which indicates
                 // intermediate history Pythia/delphies populates every event with extra substantially 
@@ -526,19 +531,18 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                     nGenJet++;
                     plots->gall_jetpt->Fill(particle->PT);
                     plots->gall_jeteta->Fill(particle->Eta);
-                }
     		
-                if (i>5 && (abs(particle->PID)< 6 || abs(particle->PID) == 21)
-    		    		&& particle->PT >jetPTCut && fabs(particle->Eta) <4.7) 
-                {
-                    nGenJet30++;
-                    if (!foundJet1) 
-                        lVectorj1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                   if (particle->PT >jetPTCut && fabs(particle->Eta) <4.7) 
+                   {
+                       nGenJet30++;
+                            
                     if (foundJet1) 
                         lVectorj2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                        foundJet1 = true;
+                    else
+                        lVectorj1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                    foundJet1 = true;
+                    }
                 }
-    		 
                 if ((abs(particle->PID) == 12 || abs(particle->PID) == 14) 
     		    		&& particle->PT > genMet) 
                 {
