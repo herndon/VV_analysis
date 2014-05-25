@@ -40,7 +40,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots,
                                    const char* inputFile, int NUM_WEIGHTS);
 void WpZ_ana(const char *inputFile, int NUM_WEIGHTS);
 void PrintHistograms(ExRootResult *result, MyPlots *plots);
-void WZMassCalculation(Float_t* pzdiff,TLorentzVector& lVectorlW,TLorentzVector &lVectorMET,Float_t WMass); 
+void WZMassCalculation(Float_t* pzdiff,TLorentzVector& lVectorlW,TLorentzVector &lVectorMET,Float_t &WMass); 
 
 using namespace std;
 
@@ -415,7 +415,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorRl, lVectorj1, 
                    lVectorj2, lVectorRj, lVectorZ, lVectorW, lVectorWZ;
 
-    
+    //TLorentzVector lVectorlW;
+    //TLorentzVector lVectorMET; 
     // Loop over all events
     for(unsigned int entry = 0; entry < allEntries; ++entry) 
     {
@@ -580,7 +581,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         lVectorWZ = lVectorW + lVectorZ;
         plots->gall_wzmass->Fill(lVectorWZ.M());
 		
-		
+	//cout << "\n" << lVectorlW.Pz(); 	
         // WZ mass calculation
         // Need to define Wlepton lVectorlW
 	
@@ -590,7 +591,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         		
         Float_t pzsmall = pzdiff[0];
         Float_t pzlarge = pzdiff[1];
-        
+       
         //cout << "New pzp " << pzp << " pzm " << pzm << endl;
         //cout << "New pz " << pz << endl;
 		
@@ -818,10 +819,11 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     cout << "Correct PS + " << pCorrectPS << " - " << mCorrectPS << endl;
 }
 //------------------------------------------------------------------------------
-void WZMassCalculation(Float_t* pzdiff,TLorentzVector& lVectorlW,TLorentzVector &lVectorMET,Float_t WMass){
+void WZMassCalculation(Float_t* pzdiff,TLorentzVector& lVectorlW,TLorentzVector &lVectorMET,Float_t &WMass){
         Float_t pzp;
         Float_t pzm;
-		
+	//cout << "Test\n" << lVectorMET.Px();
+	
         Float_t mu = (80.387*80.387)/2.0 + lVectorlW.Px()*lVectorMET.Px()
                                          + lVectorlW.Py()*lVectorMET.Py();
         mu = (WMass*WMass)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
@@ -829,7 +831,7 @@ void WZMassCalculation(Float_t* pzdiff,TLorentzVector& lVectorlW,TLorentzVector 
         Float_t t2 = t1*t1;
         Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)
                      /(lVectorlW.Pt()*lVectorlW.Pt());
-		
+        		
         if (t3<t2) 
         {
             pzp = t1 + sqrt(t2-t3);
@@ -855,7 +857,7 @@ void WZMassCalculation(Float_t* pzdiff,TLorentzVector& lVectorlW,TLorentzVector 
 		
         t2 = b*b;
         t3 = 4.0*a*c;
-		
+	//cout << "\nHere";	
         if (t3<t2)
         {
             pzp = (-b + sqrt(t2-t3))/(2.0*a);
@@ -870,7 +872,7 @@ void WZMassCalculation(Float_t* pzdiff,TLorentzVector& lVectorlW,TLorentzVector 
         }
         Float_t pzsmall;
         Float_t pzlarge;
-	
+        //cout << "And here\n";	
         if (fabs(pzp) < fabs(pzm))
         {
             pzsmall = pzp;
