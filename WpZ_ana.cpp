@@ -40,6 +40,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots,
                                    const char* inputFile, int NUM_WEIGHTS);
 void WpZ_ana(const char *inputFile, int NUM_WEIGHTS);
 void PrintHistograms(ExRootResult *result, MyPlots *plots);
+void WZMassCalculation(Float_t* pzdiff, TLorentzVector& lVectorlW, TLorentzVector& lVectorMET, Float_t& WMass);
 
 using namespace std;
 
@@ -411,15 +412,17 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 
     // Lorentz vectors
 
-    TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorlW, lVectorMET, lVectorRl, lVectorj1, 
+    TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorRl, lVectorj1, 
                    lVectorj2, lVectorRj, lVectorZ, lVectorW, lVectorWZ;
 
-    
+    //TLorentzVector* lVectorlW = new TLorentzVector;
+    //TLorentzVector* lVectorMET = new TLorentzVector;
     // Loop over all events
     for(unsigned int entry = 0; entry < allEntries; ++entry) 
     {
         // Load selected branches with data from specified event
-    	
+    	TLorentzVector lVectorlW;
+        TLorentzVector lVectorMET;
         //Updates entry pointed to by branchGenParticle and branchEvent 
         treeReader->ReadEntry(entry);
 	    
@@ -582,69 +585,12 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         // WZ mass calculation
         // Need to define Wlepton lVectorlW
 		
-        Float_t pzp;
-        Float_t pzm;
+        Float_t pzdiff[2];
+        WZMassCalculation(pzdiff, lVectorlW, lVectorMET,  WMass); 
 		
-        Float_t mu = (80.387*80.387)/2.0 + lVectorlW.Px()*lVectorMET.Px()
-                                         + lVectorlW.Py()*lVectorMET.Py();
-        mu = (WMass*WMass)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
-        Float_t t1 = mu*lVectorlW.Pz()/(lVectorlW.Pt()*lVectorlW.Pt());
-        Float_t t2 = t1*t1;
-        Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)
-                     /(lVectorlW.Pt()*lVectorlW.Pt());
-		
-        if (t3<t2) 
-        {
-            pzp = t1 + sqrt(t2-t3);
-            pzm = t1 - sqrt(t2-t3);      
-        }
-	if (t3>t2) 
-        {
-            pzp = t1;
-            pzm = t1;      
-              //cout << "Root was imaginary" << endl;
-        }
-		
-        //cout << "pzp " << pzp << " pzm " << pzm << endl;
-        //cout << "pz " << pz << endl;
-        WMass = 80.387;
-		
-        // Try again with my own solution
-        Float_t ptlnu =  lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
-        Float_t a = 4.0*lVectorlW.E()*lVectorlW.E() -4.0*lVectorlW.Pz()*lVectorlW.Pz();
-        Float_t b = -8.0*ptlnu*lVectorlW.Pz() -4.0*lVectorlW.Pz()*WMass*WMass;
-        Float_t c = 4.0*lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()
-                       - 4.0*ptlnu*ptlnu - WMass*WMass*WMass*WMass - 4.0*ptlnu*WMass*WMass;
-		
-        t2 = b*b;
-        t3 = 4.0*a*c;
-		
-        if (t3<t2)
-        {
-            pzp = (-b + sqrt(t2-t3))/(2.0*a);
-            pzm = (-b - sqrt(t2-t3))/(2.0*a);      
-            //cout << "New Root was real" << endl;
-        }
-        if (t3>t2)
-        {
-            pzp = -b/(2.0*a);
-            pzm = -b/(2.0*a);      
-            //cout << "New Root was imaginary" << endl;
-        }
-        Float_t pzsmall;
-        Float_t pzlarge;
-	
-        if (fabs(pzp) < fabs(pzm))
-        {
-            pzsmall = pzp;
-            pzlarge = pzm;
-        }
-        if (fabs(pzp) > fabs(pzm))
-        {
-            pzsmall = pzm; 
-            pzlarge = pzp;
-        }
-		
+        Float_t pzsmall = pzdiff[0];
+        Float_t pzlarge = pzdiff[1];
+
         //cout << "New pzp " << pzp << " pzm " << pzm << endl;
         //cout << "New pz " << pz << endl;
 		
@@ -872,7 +818,73 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     cout << "Correct PS + " << pCorrectPS << " - " << mCorrectPS << endl;
 }
 //------------------------------------------------------------------------------
-
+void WZMassCalculation(Float_t* pzdiff, TLorentzVector& lVectorlW, TLorentzVector& lVectorMET, Float_t& WMass)
+{
+    Float_t pzp;
+        Float_t pzm;
+		
+        Float_t mu = (80.387*80.387)/2.0 + lVectorlW.Px()*lVectorMET.Px()
+                                         + lVectorlW.Py()*lVectorMET.Py();
+        mu = (WMass*WMass)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
+        Float_t t1 = mu*lVectorlW.Pz()/(lVectorlW.Pt()*lVectorlW.Pt());
+        Float_t t2 = t1*t1;
+        Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)
+                     /(lVectorlW.Pt()*lVectorlW.Pt());
+		
+        if (t3<t2) 
+        {
+            pzp = t1 + sqrt(t2-t3);
+            pzm = t1 - sqrt(t2-t3);      
+        }
+	if (t3>t2) 
+        {
+            pzp = t1;
+            pzm = t1;      
+              //cout << "Root was imaginary" << endl;
+        }
+		
+        //cout << "pzp " << pzp << " pzm " << pzm << endl;
+        //cout << "pz " << pz << endl;
+        WMass = 80.387;
+		
+        // Try again with my own solution
+        Float_t ptlnu =  lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
+        Float_t a = 4.0*lVectorlW.E()*lVectorlW.E() -4.0*lVectorlW.Pz()*lVectorlW.Pz();
+        Float_t b = -8.0*ptlnu*lVectorlW.Pz() -4.0*lVectorlW.Pz()*WMass*WMass;
+        Float_t c = 4.0*lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()
+                       - 4.0*ptlnu*ptlnu - WMass*WMass*WMass*WMass - 4.0*ptlnu*WMass*WMass;
+		
+        t2 = b*b;
+        t3 = 4.0*a*c;
+		
+        if (t3<t2)
+        {
+            pzp = (-b + sqrt(t2-t3))/(2.0*a);
+            pzm = (-b - sqrt(t2-t3))/(2.0*a);      
+            //cout << "New Root was real" << endl;
+        }
+        if (t3>t2)
+        {
+            pzp = -b/(2.0*a);
+            pzm = -b/(2.0*a);      
+            //cout << "New Root was imaginary" << endl;
+        }
+        Float_t pzsmall;
+        Float_t pzlarge;
+	
+        if (fabs(pzp) < fabs(pzm))
+        {
+            pzsmall = pzp;
+            pzlarge = pzm;
+        }
+        if (fabs(pzp) > fabs(pzm))
+        {
+            pzsmall = pzm; 
+            pzlarge = pzp;
+        }
+    pzdiff[0] = pzsmall;
+    pzdiff[1] = pzlarge;
+}
 void PrintHistograms(ExRootResult *result, MyPlots *plots)
 {
   result->Print("png");
