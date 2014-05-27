@@ -55,60 +55,60 @@ int main()
 
 struct MyPlots
 {
-  // genrator all region declarations: all phyiscs objects with no selection
-  TH1 *gall_electronpt;
-  TH1 *gall_muonpt;
-  TH1 *gall_electroneta;
-  TH1 *gall_muoneta;
- 
-  TH1 *gall_jetpt;
-  TH1 *gall_jeteta;
-  TH1 *gall_met;
+    // genrator all region declarations: all phyiscs objects with no selection
+    TH1 *gall_electronpt;
+    TH1 *gall_muonpt;
+    TH1 *gall_electroneta;
+    TH1 *gall_muoneta;
 
-  TH1*gall_deltaetajj;
-  TH1 *gall_mjj;
-  TH1 *gall_zpt;
-  TH1 *gall_wztmass;
-  TH1 *gall_wzmass;
-  
-  // genrator baseline regions 1 declarations. First level "weak" cuts
+    TH1 *gall_jetpt;
+    TH1 *gall_jeteta;
+    TH1 *gall_met;
 
-  TH1 *gbr1_electronpt;
-  TH1 *gbr1_muonpt;
-  TH1 *gbr1_electroneta;
-  TH1 *gbr1_muoneta;
+    TH1*gall_deltaetajj;
+    TH1 *gall_mjj;
+    TH1 *gall_zpt;
+    TH1 *gall_wztmass;
+    TH1 *gall_wzmass;
 
-  TH1 *gbr1_jet1pt;
-  TH1 *gbr1_jet2pt;
-  TH1 *gbr1_jet1eta;
-  TH1 *gbr1_jet2eta;
+    // genrator baseline regions 1 declarations. First level "weak" cuts
 
-  TH1 *gbr1_met;
+    TH1 *gbr1_electronpt;
+    TH1 *gbr1_muonpt;
+    TH1 *gbr1_electroneta;
+    TH1 *gbr1_muoneta;
 
-  TH1 *gbr1_deltaetajj;
-  TH1 *gbr1_mjj;
-  TH1 *gbr1_zpt;
-  TH1 *gbr1_wztmass;
-  TH1 *gbr1_wzmass;
+    TH1 *gbr1_jet1pt;
+    TH1 *gbr1_jet2pt;
+    TH1 *gbr1_jet1eta;
+    TH1 *gbr1_jet2eta;
 
-  // genrator baseline regions 2 declarations. Greater sensitivity cuts
+    TH1 *gbr1_met;
 
-  TH1 *gbr2_electronpt;
-  TH1 *gbr2_muonpt;
-  TH1 *gbr2_electroneta;
-  TH1 *gbr2_muoneta;
+    TH1 *gbr1_deltaetajj;
+    TH1 *gbr1_mjj;
+    TH1 *gbr1_zpt;
+    TH1 *gbr1_wztmass;
+    TH1 *gbr1_wzmass;
 
-  TH1 *gbr2_jet1pt;
-  TH1 *gbr2_jet2pt;
-  TH1 *gbr2_jet1eta;
-  TH1 *gbr2_jet2eta;
-  TH1 *gbr2_met;
-  TH1 *gbr2_deltaetajj;
-  TH1 *gbr2_mjj;
-  TH1 *gbr2_zpt;
-  TH1 *gbr2_wztmass;
-  vector<TH1*> gbr2w_wztmass;
-  TH1 *gbr2_wzmass;
+    // genrator baseline regions 2 declarations. Greater sensitivity cuts
+
+    TH1 *gbr2_electronpt;
+    TH1 *gbr2_muonpt;
+    TH1 *gbr2_electroneta;
+    TH1 *gbr2_muoneta;
+
+    TH1 *gbr2_jet1pt;
+    TH1 *gbr2_jet2pt;
+    TH1 *gbr2_jet1eta;
+    TH1 *gbr2_jet2eta;
+    TH1 *gbr2_met;
+    TH1 *gbr2_deltaetajj;
+    TH1 *gbr2_mjj;
+    TH1 *gbr2_zpt;
+    TH1 *gbr2_wztmass;
+    vector<TH1*> gbr2w_wztmass;
+    TH1 *gbr2_wzmass;
 };
 
 //------------------------------------------------------------------------------
@@ -456,7 +456,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         Bool_t foundJet1 = false;
 
  
-        Float_t pz = 0;
+        Float_t neutrino_pz = 0;
         Float_t WMass = 0;
 
         Int_t nLepton = 0;
@@ -472,17 +472,15 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                 { 
                     if (abs(particle->PID) == 11) 
                     {
-        	        nGenElectron++;
-        	        plots->gall_electronpt->Fill(particle->PT);
+        	            nGenElectron++;
+        	            plots->gall_electronpt->Fill(particle->PT);
                         plots->gall_electroneta->Fill(particle->Eta);
-        	  	particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+        	  	        particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
                         if (particleM->PID == 24) 
                         {         
-        	            lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                            //cout << "Set W lepton " << particle->PT << " " << particle->Pz << " Mother mass " 
-                            //<< particleM->M << endl;
-                	    WMass = particleM->M;
-        	        }
+        	                lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+                	        WMass = particleM->M;
+        	            }
                         if(fabs(particle->Eta) <2.4)
                         {
                            if(particle->PT >10.0)
@@ -501,24 +499,24 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                             }
                         }
                     }
-        	    else if(abs(particle->PID) == 13) 
-        	    {
-                    nGenMuon++;
-        	        plots->gall_muonpt->Fill(particle->PT);
-        	        plots->gall_muoneta->Fill(particle->Eta);
-        	        particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
-        	        if (particleM->PID == 24)
-                    {         
+        	        else if(abs(particle->PID) == 13) 
+        	        {
+                        nGenMuon++;
+        	            plots->gall_muonpt->Fill(particle->PT);
+        	            plots->gall_muoneta->Fill(particle->Eta);
+        	            particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+        	            if (particleM->PID == 24)
+                        {         
                            lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
                             WMass = particleM->M;
-        	        }
+        	            }
                         if(fabs(particle->Eta) < 2.4)
                         { 
                             if(particle->PT >10.0)
                                 nGenLepton10++;
                             if(particle->PT > 20.0)
                             {
-        	                nGenMuon20++;
+        	                    nGenMuon20++;
                                 nLepton++;
                                
                                 if (nLepton==1) 
@@ -530,7 +528,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                             }
                         }
                     }  
-    		}
+    	    	}
                 // for W+Z event initial particles end after 4. Status is not 2 which indicates
                 // intermediate history Pythia/delphies populates every event with extra substantially 
                 // increasing the events that pass
@@ -558,7 +556,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                     genMet = particle->PT;
                     plots->gall_met->Fill(particle->PT);
                     lVectorMET.SetPtEtaPhiM(particle->PT,0.0,particle->Phi,particle->M);
-                    pz = particle->Pz;
+                    neutrino_pz = particle->Pz;
     		    //cout << "Set MET " << particle->PT << " " << lVectorMET.Pt() << " " << pz << endl;
                 }
             }
@@ -620,7 +618,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                 if(lVectorRl.M() > 1200.)
                 {
                     nGenWZPS_leptons++;    
-                    nGenWZPS_leptons3e++;
+                    nGenWZPS_leptons3m++;
                 }
             }
             else if (nGenElectron20 == 2)
