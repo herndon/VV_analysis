@@ -40,7 +40,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots,
                                    const char* inputFile, int NUM_WEIGHTS);
 void WpZ_ana(const char *inputFile, int NUM_WEIGHTS);
 void PrintHistograms(ExRootResult *result, MyPlots *plots);
-void WZMassCalculation(Float_t* pzdiff, TLorentzVector& lVectorlW, TLorentzVector& lVectorMET, Float_t& WMass);
+bool WZMassCalculation(const TLorentzVector& lVectorlW, const TLorentzVector& lVectorMET,
+                           Float_t WMass, Float_t pz);
 
 using namespace std;
 
@@ -502,12 +503,12 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                     }
         	    else if(abs(particle->PID) == 13) 
         	    {
-                        nGenMuon++;
+                    nGenMuon++;
         	        plots->gall_muonpt->Fill(particle->PT);
         	        plots->gall_muoneta->Fill(particle->Eta);
         	        particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
         	        if (particleM->PID == 24)
-                        {         
+                    {         
                            lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
                             WMass = particleM->M;
         	        }
@@ -584,97 +585,94 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 		
         // WZ mass calculation
         // Need to define Wlepton lVectorlW
+        bool correctp = WZMassCalculation(lVectorlW, lVectorMET,  WMass, pz); 
 		
-        Float_t pzdiff[2];
-        WZMassCalculation(pzdiff, lVectorlW, lVectorMET,  WMass); 
-		
-        Float_t pzsmall = pzdiff[0];
-        Float_t pzlarge = pzdiff[1];
 
         //cout << "New pzp " << pzp << " pzm " << pzm << endl;
         //cout << "New pz " << pz << endl;
 		
-        if (fabs(pzsmall-pz) < fabs(pzlarge-pz)) 
+        if (correctp)
+        {    
             pCorrect++;
-        if (fabs(pzsmall-pz) > fabs(pzlarge-pz))
-            mCorrect++;
-        if (lVectorWZ.M() > 1200.0)
+            if(lVectorWZ.M() > 1200.)
+                pCorrectPS++;
+        }
+        else
         {
-            if (fabs(pzsmall-pz) < fabs(pzlarge-pz)) pCorrectPS++;
-            if (fabs(pzsmall-pz) > fabs(pzlarge-pz)) mCorrectPS++;
+            mCorrect++;
+            if(lVectorWZ.M() > 1200.)
+                mCorrectPS++;
         }
         nGenLepton20 = nGenElectron20 + nGenMuon20;
         Int_t genltype = 0;
 		
+        //if (nGenLepton20 != 3)
+        //    genbr1Event = false;
         if (nGenLepton20 != 3)
             genbr1Event = false;
-        if (genbr1Event)
+        if(genbr1Event)    
+        {    
             nGenWZ_leptons++;
-        if (nGenElectron20 == 3)
-            genltype = 4;
-        if (nGenElectron20 == 2) 
-            genltype = 3;
-        if (nGenMuon20 == 2)
-            genltype = 2;
-        if (nGenMuon20 == 3) 
-            genltype = 1;
-		
-        if (genbr1Event)
-        {
-            if (genltype ==1)
-                nGenWZ_leptons3m++;
-            if (genltype ==2)
-                nGenWZ_leptons2m1e++;
-            if (genltype ==3)
-                nGenWZ_leptons2e1m++;
-            if (genltype ==4)
-                nGenWZ_leptons3e++;
-        }
-        if (genbr1Event) 
-        {
-            if (lVectorRl.M() > 1200.0)
+
+            if (nGenElectron20 == 3)
             {
-                genPureSignalRegion = true;
-                //plots->gwztm_leptonpt->Fill(lVectorl1.Pt());
-                //plots->gwztm_leptoneta->Fill(lVectorl1.Eta());
-                //plots->gwztm_leptonpt->Fill(lVectorl2.Pt());
-                //plots->gwztm_leptoneta->Fill(lVectorl2.Eta());
-                //plots->gwztm_leptonpt->Fill(lVectorl3.Pt());
-                //plots->gwztm_leptoneta->Fill(lVectorl3.Eta());
+                nGenWZ_leptons3e++;
+                if(lVectorRl.M() > 1200.)
+                {
+                    nGenWZPS_leptons++;    
+                    nGenWZPS_leptons3m++;
+                }
+            }
+            else if (nGenElectron20 == 2)
+            {
+                nGenWZ_leptons2e1m++;
+                if(lVectorRl.M() > 1200.)
+                {
+                    nGenWZPS_leptons++;
+                    nGenWZPS_leptons2e1m++;
+                }
+            }
+            else if (nGenMuon20 == 2)
+            {
+                nGenWZ_leptons2m1e++;
+                if(lVectorRl.M() > 1200.)
+                {
+                    nGenWZPS_leptons++;
+		            nGenWZPS_leptons2m1e++;
+                }
+            }
+            else if (nGenMuon20 == 3)
+            {
+                nGenWZ_leptons3m++;
+                if(lVectorRl.M() > 1200.)
+                {    
+                    nGenWZPS_leptons3m++;
+                     nGenWZPS_leptons++;
+                 }
             }
         }
-        if (genbr1Event&&genPureSignalRegion) 
-        {
-            nGenWZPS_leptons++;
-            if (genltype ==1)
-                nGenWZPS_leptons3m++;
-            if (genltype ==2) 
-                nGenWZPS_leptons2m1e++;
-            if (genltype ==3) 
-                nGenWZPS_leptons2e1m++;
-	    if (genltype ==4) 
-                nGenWZPS_leptons3e++;
-        }
-	
+
+        if(lVectorRl.M() > 1200.)
+            genPureSignalRegion= true;
         if (nGenJet30<2)
             genbr1Event = false;
         if (genbr1Event) 
             nGenWZ_jets++;
         if (genbr1Event&&genPureSignalRegion) 
             nGenWZPS_jets++;
-	if (genMet < metCut) 
+	    if (genMet < metCut) 
             genbr1Event = false;
-	if (genbr1Event) 
+	    if (genbr1Event) 
             nGenWZ_met++;
-	if (genbr1Event&&genPureSignalRegion)
+	    if (genbr1Event&&genPureSignalRegion)
             nGenWZPS_met++;
-	if (fabs(genZMass-91.1876)>20.0) 
+	    if (fabs(genZMass-91.1876)>20.0) 
             genbr1Event = false;
         if (genbr1Event) 
             nGenWZ_Z++;
         if (genbr1Event&&genPureSignalRegion) 
             nGenWZPS_Z++;
-	if (nGenJet>2) 
+	    if (nGenJet>2) 
         {
             cout << "Too many jets " << endl;
             for(int i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
@@ -818,72 +816,73 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     cout << "Correct PS + " << pCorrectPS << " - " << mCorrectPS << endl;
 }
 //------------------------------------------------------------------------------
-void WZMassCalculation(Float_t* pzdiff, TLorentzVector& lVectorlW, TLorentzVector& lVectorMET, Float_t& WMass)
+bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVectorMET,
+                            Float_t WMass, Float_t pz)
 {
     Float_t pzp;
-        Float_t pzm;
-		
-        Float_t mu = (80.387*80.387)/2.0 + lVectorlW.Px()*lVectorMET.Px()
-                                         + lVectorlW.Py()*lVectorMET.Py();
-        mu = (WMass*WMass)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
-        Float_t t1 = mu*lVectorlW.Pz()/(lVectorlW.Pt()*lVectorlW.Pt());
-        Float_t t2 = t1*t1;
-        Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)
-                     /(lVectorlW.Pt()*lVectorlW.Pt());
-		
-        if (t3<t2) 
-        {
-            pzp = t1 + sqrt(t2-t3);
-            pzm = t1 - sqrt(t2-t3);      
-        }
-	if (t3>t2) 
-        {
-            pzp = t1;
-            pzm = t1;      
-              //cout << "Root was imaginary" << endl;
-        }
-		
-        //cout << "pzp " << pzp << " pzm " << pzm << endl;
-        //cout << "pz " << pz << endl;
-        WMass = 80.387;
-		
-        // Try again with my own solution
-        Float_t ptlnu =  lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
-        Float_t a = 4.0*lVectorlW.E()*lVectorlW.E() -4.0*lVectorlW.Pz()*lVectorlW.Pz();
-        Float_t b = -8.0*ptlnu*lVectorlW.Pz() -4.0*lVectorlW.Pz()*WMass*WMass;
-        Float_t c = 4.0*lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()
-                       - 4.0*ptlnu*ptlnu - WMass*WMass*WMass*WMass - 4.0*ptlnu*WMass*WMass;
-		
-        t2 = b*b;
-        t3 = 4.0*a*c;
-		
-        if (t3<t2)
-        {
-            pzp = (-b + sqrt(t2-t3))/(2.0*a);
-            pzm = (-b - sqrt(t2-t3))/(2.0*a);      
-            //cout << "New Root was real" << endl;
-        }
-        if (t3>t2)
-        {
-            pzp = -b/(2.0*a);
-            pzm = -b/(2.0*a);      
-            //cout << "New Root was imaginary" << endl;
-        }
-        Float_t pzsmall;
-        Float_t pzlarge;
-	
-        if (fabs(pzp) < fabs(pzm))
-        {
-            pzsmall = pzp;
-            pzlarge = pzm;
-        }
-        if (fabs(pzp) > fabs(pzm))
-        {
-            pzsmall = pzm; 
-            pzlarge = pzp;
-        }
-    pzdiff[0] = pzsmall;
-    pzdiff[1] = pzlarge;
+    Float_t pzm;
+
+    Float_t mu = (80.387*80.387)/2.0 + lVectorlW.Px()*lVectorMET.Px()
+        + lVectorlW.Py()*lVectorMET.Py();
+    mu = (WMass*WMass)/2.0 + lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
+    Float_t t1 = mu*lVectorlW.Pz()/(lVectorlW.Pt()*lVectorlW.Pt());
+    Float_t t2 = t1*t1;
+    Float_t t3 = (lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()-t1*t1)
+        /(lVectorlW.Pt()*lVectorlW.Pt());
+
+    if (t3<t2) 
+    {
+        pzp = t1 + sqrt(t2-t3);
+        pzm = t1 - sqrt(t2-t3);      
+    }
+    if (t3>t2) 
+    {
+        pzp = t1;
+        pzm = t1;      
+        //cout << "Root was imaginary" << endl;
+    }
+
+    //cout << "pzp " << pzp << " pzm " << pzm << endl;
+    //cout << "pz " << pz << endl;
+    WMass = 80.387;
+
+    // Try again with my own solution
+    Float_t ptlnu =  lVectorlW.Px()*lVectorMET.Px() + lVectorlW.Py()*lVectorMET.Py();
+    Float_t a = 4.0*lVectorlW.E()*lVectorlW.E() -4.0*lVectorlW.Pz()*lVectorlW.Pz();
+    Float_t b = -8.0*ptlnu*lVectorlW.Pz() -4.0*lVectorlW.Pz()*WMass*WMass;
+    Float_t c = 4.0*lVectorlW.E()*lVectorlW.E()*lVectorMET.Pt()*lVectorMET.Pt()
+        - 4.0*ptlnu*ptlnu - WMass*WMass*WMass*WMass - 4.0*ptlnu*WMass*WMass;
+
+    t2 = b*b;
+    t3 = 4.0*a*c;
+
+    if (t3<t2)
+    {
+        pzp = (-b + sqrt(t2-t3))/(2.0*a);
+        pzm = (-b - sqrt(t2-t3))/(2.0*a);      
+        //cout << "New Root was real" << endl;
+    }
+    if (t3>t2)
+    {
+        pzp = -b/(2.0*a);
+        pzm = -b/(2.0*a);      
+        //cout << "New Root was imaginary" << endl;
+    }
+    Float_t pzsmall;
+    Float_t pzlarge;
+
+    if (fabs(pzp) < fabs(pzm))
+    {
+        pzsmall = pzp;
+        pzlarge = pzm;
+    }
+    if (fabs(pzp) > fabs(pzm))
+    {
+        pzsmall = pzm; 
+        pzlarge = pzp;
+    }
+    
+    return (fabs(pzsmall-pz) < fabs(pzlarge-pz));
 }
 void PrintHistograms(ExRootResult *result, MyPlots *plots)
 {
