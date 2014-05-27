@@ -620,7 +620,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                 if(lVectorRl.M() > 1200.)
                 {
                     nGenWZPS_leptons++;    
-                    nGenWZPS_leptons3m++;
+                    nGenWZPS_leptons3e++;
                 }
             }
             else if (nGenElectron20 == 2)
@@ -647,10 +647,19 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                 if(lVectorRl.M() > 1200.)
                 {    
                     nGenWZPS_leptons3m++;
-                     nGenWZPS_leptons++;
+                    nGenWZPS_leptons++;
                  }
             }
         }
+
+        if (nGenElectron20 == 3)
+            genltype = 4;
+        if (nGenElectron20 == 2) 
+            genltype = 3;
+        if (nGenMuon20 == 2)
+            genltype = 2;
+        if (nGenMuon20 == 3) 
+            genltype = 1;
 
         if(lVectorRl.M() > 1200.)
             genPureSignalRegion= true;
@@ -741,7 +750,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                               nwGenWZ_wztmass[i] += weights[i];
                       }
                 }
-		plots->gbr2_wzmass->Fill(lVectorWZ.M());
+		        plots->gbr2_wzmass->Fill(lVectorWZ.M());
             }
         }
     }
