@@ -18,7 +18,7 @@ root -l WpZ_ana.C\(\".root\"\)
 #include "TLegend.h"
 #include "TPaveText.h"
 #include "TClonesArray.h"
-#include "TLorentzVector.h"
+//#include "TLorentzVector.h"
 
 
 
@@ -27,13 +27,14 @@ root -l WpZ_ana.C\(\".root\"\)
 #include "external/ExRootAnalysis/ExRootTreeBranch.h"
 #include "external/ExRootAnalysis/ExRootResult.h"
 #include "external/ExRootAnalysis/ExRootUtilities.h"
-#include "external/ExRootAnalysis/ExRootClasses.h"
+//#include "external/ExRootAnalysis/ExRootClasses.h"
 
 
-#include "iostream"
-#include <vector>
+//#include "iostream"
+//#include <vector>
 #include "fstream"
 #include "readWeights.h" 
+#include "WZEvent.h"
 
 struct MyPlots;
 void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots,
@@ -410,7 +411,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     Int_t pCorrectPS = 0;
     Int_t mCorrectPS = 0;
 
-
+    
+    WZEvent wzEvent;
     // Lorentz vectors
 
     TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorRl, lVectorj1, 
@@ -463,71 +465,21 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 
         genPureSignalRegion = false;
 
+
         for(int i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
         {
             particle = (TRootLHEFParticle*) branchGenParticle->At(i);
-            if(particle->Status == 1)
+
+            wzEvent.setParticle(particle);
+            if(wzEvent.particleIsStable())
             {
-                if((particle->Mother1 < i+2) && (abs(particle->PID) == 11 || abs(particle->PID) == 13))
-                { 
-                    if (abs(particle->PID) == 11) 
-                    {
-        	            nGenElectron++;
-        	            plots->gall_electronpt->Fill(particle->PT);
-                        plots->gall_electroneta->Fill(particle->Eta);
-        	  	        particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
-                        if (particleM->PID == 24) 
-                        {         
-        	                lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                	        WMass = particleM->M;
-        	            }
-                        if(fabs(particle->Eta) <2.4)
-                        {
-                           if(particle->PT >10.0)
-                                nGenLepton10++;	
-                           if(particle->PT >20.0)
-                           {
-                                nGenElectron20++;
-                                nLepton++;
-        		        
-                                if (nLepton==1) 
-                                    lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                                else if (nLepton==2) 
-                                    lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                                else if (nLepton==3) 
-                                    lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                            }
-                        }
-                    }
-        	        else if(abs(particle->PID) == 13) 
-        	        {
-                        nGenMuon++;
-        	            plots->gall_muonpt->Fill(particle->PT);
-        	            plots->gall_muoneta->Fill(particle->Eta);
-        	            particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
-        	            if (particleM->PID == 24)
-                        {         
-                           lVectorlW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                            WMass = particleM->M;
-        	            }
-                        if(fabs(particle->Eta) < 2.4)
-                        { 
-                            if(particle->PT >10.0)
-                                nGenLepton10++;
-                            if(particle->PT > 20.0)
-                            {
-        	                    nGenMuon20++;
-                                nLepton++;
-                               
-                                if (nLepton==1) 
-                                    lVectorl1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                                else if (nLepton==2) 
-                                    lVectorl2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                                else if (nLepton==3) 
-                                    lVectorl3.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                            }
-                        }
-                    }  
+                if(wzEvent.isGeneratedParticle(i) && wzEvent.particleIsLepton())
+                {
+                    particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+                    wzEvent.setParticleMother(particleM);
+                    wzEvent.foundLepton(); 
+        	        //plots->gall_electronpt->Fill(particle->PT);
+                    //plots->gall_electroneta->Fill(particle->Eta);
     	    	}
                 // for W+Z event initial particles end after 4. Status is not 2 which indicates
                 // intermediate history Pythia/delphies populates every event with extra substantially 
@@ -568,13 +520,20 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                 lVectorW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
     	}
 
+        nGenElectron = wzEvent.getGenElectronNumber();
+        nGenMuon = wzEvent.getGenMuonNumber();
+        nGenElectron20 = wzEvent.getGenMuonPtCutNumber();
+        nGenMuon20 = wzEvent.getGenElectronPtCutNumber();
+        WMass = wzEvent.getWMass();
+
         plots->gall_zpt->Fill(lVectorZ.Pt());
 
         lVectorRj = lVectorj1+lVectorj2;
         plots->gall_mjj->Fill(lVectorRj.M());
         plots->gall_deltaetajj->Fill(fabs(lVectorj1.Eta()-lVectorj2.Eta()));
 		
-        lVectorRl = lVectorl1+lVectorl2+lVectorl3+lVectorMET;
+        //lVectorRl = lVectorl1+lVectorl2+lVectorl3+lVectorMET;
+        lVectorRl = wzEvent.getWZleptonSum();
         plots->gall_wztmass->Fill(lVectorRl.M());
 		
         lVectorWZ = lVectorW + lVectorZ;
@@ -583,7 +542,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 		
         // WZ mass calculation
         // Need to define Wlepton lVectorlW
-        bool correctp = WZMassCalculation(lVectorlW, lVectorMET,  WMass, pz); 
+        bool correctp = WZMassCalculation(lVectorlW, lVectorMET,  WMass, neutrino_pz); 
 		
 
         //cout << "New pzp " << pzp << " pzm " << pzm << endl;

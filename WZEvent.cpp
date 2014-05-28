@@ -1,87 +1,125 @@
 #include "WZEvent.h"
+#include <cmath>
+#include <iostream>
 
-WZEvent()
-{
-    WZEvent(NULL, NULL);
-}
-WZEvent(TRootLHEFParticle* currentParticle, TRootLHEFParticle* mother);
+WZEvent::WZEvent(TRootLHEFParticle* currentParticle, TRootLHEFParticle* mother)
 {
     resetEvent();
     particle = currentParticle;
     particleMother = mother;
 }
-bool particleIsStable()
+WZEvent::WZEvent()
 {
-    return (particle.Status() == 1);
+    WZEvent(NULL, NULL);
 }
-bool particleIsLepton()
+void WZEvent::setParticle(TRootLHEFParticle* currentParticle)
 {
-    return (abs(particle.PID) == 11 || abs(particle.PID == 13); 
+    particle = currentParticle;
 }
-bool isGeneratedParticle(int particleCount)
+void WZEvent::setParticleMother(TRootLHEFParticle* mother)
 {
-    return (particle->Mother1 < particleCount + 2) 
+    particleMother = mother;
 }
-void foundLepton()
+bool WZEvent::particleIsStable()
+{
+    return (particle->Status == 1);
+}
+bool WZEvent::particleIsLepton()
+{
+    return (abs(particle->PID) == 11 || abs(particle->PID == 13)); 
+}
+bool WZEvent::isGeneratedParticle(int particleCount)
+{
+    return (particle->Mother1 < particleCount + 2); 
+}
+TLorentzVector WZEvent::getWZSum()
+{
+    return wzlVectors.WZSum;
+}
+TLorentzVector WZEvent::getWZleptonSum()
+{
+    return wzlVectors.leptonSum;
+}
+int WZEvent::getGenElectronNumber()
+{
+    return counter.electrons;
+}
+int WZEvent::getGenMuonNumber()
+{
+    return counter.muons;
+}
+int WZEvent::getGenMuonPtCutNumber()
+{
+    return counter.muons_ptCut;
+}
+int WZEvent::getGenElectronPtCutNumber()
+{
+    return counter.electrons_ptCut;
+}
+float WZEvent::getWMass()
+{
+    return WMass;
+}      
+void WZEvent::foundLepton()
 {
     counter.leptons++;
     GeneratorParticle lepton;
     lepton.pt = particle->PT;
-    lepton.eta = particle->eta
+    lepton.eta = particle->Eta;
 
     switch(abs(particle->PID))
     {
         case 11:
-            processWZLeptons(&this.counter.electrons, &this.counter.electrons_ptCut, 11);
-            allMuons.push_back(lepton);
+            processWZLeptons(&counter.electrons, &counter.electrons_ptCut);
+            allElectrons.push_back(lepton);
             break;
         case 13:
-            processWZLeptons(&this.counter.muons, &this.counter.muons_ptCut, 13);  
+            processWZLeptons(&counter.muons, &counter.muons_ptCut);  
             allMuons.push_back(lepton);
             break;
         default:
-            cout << "A problem occured processing leptons in WZEvent class."
+            std::cout << "A problem occured processing leptons in WZEvent class.";
             exit(0);
     }
 }
 
-void processWZLeptons(int* typeCounter, int* typePtCut_counter)
+void WZEvent::processWZLeptons(int* typeCounter, int* typePtCut_counter)
 {
-    &typeCounter++;
-
+    *typeCounter++;
+    
     if(particle->PID == 24)
     {    
-        WZlVectors.leptonFromW.SetPtEtaPhiM(particle->PT,
+        wzlVectors.leptonFromW.SetPtEtaPhiM(particle->PT,
                         particle->Eta,particle->Phi,particle->M);
-        WMass = particleM->M;
+        WMass = particleMother->M;
     }
     if(fabs(particle->Eta) < cuts.leptonEta && particle->PT < cuts.leptonPt) 
     {
-        &typePtCut_counter++;
+        *typePtCut_counter++;
         switch(counter.leptons)
         {
             case 1:
-                WZlVectors.lepton1.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle-M);
+                wzlVectors.lepton1.SetPtEtaPhiM(particle->PT,
+                        particle->Eta,particle->Phi,particle->M);
                 //lepton1Type = type;
                 break;
             case 2: 
-                WZlVectors.lepton2.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle-M);
+                wzlVectors.lepton2.SetPtEtaPhiM(particle->PT,
+                        particle->Eta,particle->Phi,particle->M);
                 //lepton2Type = type;
                 break;
             case 3:
-                WZlVectors.lepton2.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle-M);
+                wzlVectors.lepton2.SetPtEtaPhiM(particle->PT,
+                        particle->Eta,particle->Phi,particle->M);
                 //lepton3Type = type;
                 break;
             default:
-                cout << "A critical error occured in processLepton() function."
+                std::cout << "A critical error occured in processLepton() function.";
                 exit(0);
          }
     }
 }
-void resetEvent()
+void WZEvent::resetEvent()
 {
     particle = NULL;
     particle = NULL;
@@ -97,5 +135,6 @@ void resetEvent()
     cuts.leptonPt = 0.;
     cuts.jetPt = 0.;
     cuts.leptonEta = 0.;
+    cuts.jetEta = 0.;
 }
 

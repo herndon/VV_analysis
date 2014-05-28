@@ -1,33 +1,17 @@
-#if ndef __WZEvent_h__
+#ifndef __WZEvent_h__
 #define __WZEvent_h__
 
-class WZEvent
-{
-private: 
-    TRootLHEFParticle* particle;
-    TRootLHEFParticle* particleMother;
-    EventCounter counter;
-    Cuts cuts;
-    LorentzVectors lorentzVectors;
-    float WMass;
-    float ZMass;
+#include "TLorentzVector.h"
+#include "external/ExRootAnalysis/ExRootClasses.h"
+#include <vector>
 
-public:
-    WZEvent();
-    setParticle(TRootLHEFParticle*);
-    bool particleIsStable();
-    bool particleIs 
-    foundFinalStateLepton()
-    foundJet()
-};
-struct KinematicVariables
+struct GeneratorParticle
 {
-    WMass;
-    ZMass;
-    
+    float pt;
+    float eta; 
 };
 
-struct LorentzVectors
+struct WZlVectors
 {
     TLorentzVector lepton1;
     TLorentzVector lepton2;
@@ -61,6 +45,42 @@ struct Cuts
     float jetPt;
     float leptonEta;
     float jetEta;
+};
+
+
+class WZEvent
+{
+private: 
+    TRootLHEFParticle* particle;
+    TRootLHEFParticle* particleMother;
+    float WMass;
+    EventCounter counter;
+    Cuts cuts;
+    WZlVectors wzlVectors;
+    std::vector<GeneratorParticle> allElectrons;
+    std::vector<GeneratorParticle> allMuons;
+    
+    void processWZLeptons(int* typeCounter, int* typePtCut_counter);
+
+public:
+    WZEvent();
+    WZEvent(TRootLHEFParticle*, TRootLHEFParticle*);
+    void setParticle(TRootLHEFParticle*);
+    void setParticleMother(TRootLHEFParticle*);
+    bool isGeneratedParticle(int);
+    bool particleIsStable();
+    bool particleIsLepton();
+    bool isGeneratedParticle(); 
+    void foundLepton();
+    TLorentzVector getWZSum();
+    TLorentzVector getWZleptonSum();
+    //foundJet();
+    void resetEvent();
+    float getWMass();
+    int getGenElectronNumber();
+    int getGenMuonNumber();
+    int getGenMuonPtCutNumber();
+    int getGenElectronPtCutNumber();
 };
 
 #endif
