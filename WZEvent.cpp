@@ -38,7 +38,23 @@ TLorentzVector WZEvent::getWZSum()
 }
 TLorentzVector WZEvent::getWZleptonSum()
 {
+    wzlVectors.leptonSum = wzlVectors.lepton1 + wzlVectors.lepton2
+                                + wzlVectors.lepton3;
     return wzlVectors.leptonSum;
+}
+TLorentzVector WZEvent::getleptonFromW()
+{
+    return wzlVectors.leptonFromW;
+}
+void WZEvent::setLeptonCuts(float leptonPt, float leptonEta)
+{
+    cuts.leptonPt = leptonPt;
+    cuts.leptonEta = leptonEta;
+}
+void WZEvent::setJetCuts(float jetPt, float jetEta)
+{
+    cuts.jetPt = jetPt;
+    cuts.jetEta = jetEta;
 }
 int WZEvent::getGenElectronNumber()
 {
@@ -56,6 +72,10 @@ int WZEvent::getGenElectronPtCutNumber()
 {
     return counter.electrons_ptCut;
 }
+int WZEvent::getGenLeptonPtCutNumber()
+{
+    return counter.leptons_ptCut;
+}
 float WZEvent::getWMass()
 {
     return WMass;
@@ -70,11 +90,13 @@ void WZEvent::foundLepton()
     switch(abs(particle->PID))
     {
         case 11:
-            processWZLeptons(&counter.electrons, &counter.electrons_ptCut);
+            processWZLepton("electron");
+            counter.electrons++;
             allElectrons.push_back(lepton);
             break;
         case 13:
-            processWZLeptons(&counter.muons, &counter.muons_ptCut);  
+            processWZLepton("muon");
+            counter.muons++;
             allMuons.push_back(lepton);
             break;
         default:
@@ -82,21 +104,27 @@ void WZEvent::foundLepton()
             exit(0);
     }
 }
-
-void WZEvent::processWZLeptons(int* typeCounter, int* typePtCut_counter)
+void WZEvent::processWZLepton(std::string type)
 {
-    *typeCounter++;
-    
-    if(particle->PID == 24)
+    if(particleMother->PID == 24)
     {    
         wzlVectors.leptonFromW.SetPtEtaPhiM(particle->PT,
                         particle->Eta,particle->Phi,particle->M);
         WMass = particleMother->M;
     }
-    if(fabs(particle->Eta) < cuts.leptonEta && particle->PT < cuts.leptonPt) 
+    if(fabs(particle->Eta) < cuts.leptonEta && particle->PT > cuts.leptonPt) 
     {
-        *typePtCut_counter++;
-        switch(counter.leptons)
+        counter.leptons_ptCut++;
+        if(type == "muon")
+            this->counter.muons_ptCut++;
+        else if(type == "electron")
+            this->counter.electrons_ptCut++;
+        else
+        {
+            std::cout << "A critical error occured in processLepton() function.";
+            exit(0);
+        }
+        switch(counter.leptons_ptCut)
         {
             case 1:
                 wzlVectors.lepton1.SetPtEtaPhiM(particle->PT,
@@ -114,15 +142,25 @@ void WZEvent::processWZLeptons(int* typeCounter, int* typePtCut_counter)
                 //lepton3Type = type;
                 break;
             default:
-                std::cout << "A critical error occured in processLepton() function.";
-                exit(0);
+                std::cout << "More than 3 hight PT leptons\n";
+                //std::cout << "A critical error occured in processLepton() function.";
+                //exit(0);
          }
     }
+}
+void WZEvent::removeCuts()
+{
+    cuts.leptonPt = 0.;
+    cuts.jetPt = 0.;
+    cuts.leptonEta = 0.;
+    cuts.jetEta = 0.;
 }
 void WZEvent::resetEvent()
 {
     particle = NULL;
-    particle = NULL;
+    particleMother = NULL;
+    allElectrons.clear();
+    allMuons.clear();
     counter.leptons = 0;
     counter.jets = 0;
     counter.electrons = 0;
@@ -131,10 +169,6 @@ void WZEvent::resetEvent()
     counter.electrons_ptCut = 0;
     counter.muons_ptCut = 0;
     counter.jets_ptCut = 0;
-
-    cuts.leptonPt = 0.;
-    cuts.jetPt = 0.;
-    cuts.leptonEta = 0.;
-    cuts.jetEta = 0.;
 }
+    
 

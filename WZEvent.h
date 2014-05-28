@@ -4,6 +4,7 @@
 #include "TLorentzVector.h"
 #include "external/ExRootAnalysis/ExRootClasses.h"
 #include <vector>
+#include <string>
 
 struct GeneratorParticle
 {
@@ -60,7 +61,7 @@ private:
     std::vector<GeneratorParticle> allElectrons;
     std::vector<GeneratorParticle> allMuons;
     
-    void processWZLeptons(int* typeCounter, int* typePtCut_counter);
+    void processWZLepton(std::string type);
 
 public:
     WZEvent();
@@ -72,8 +73,12 @@ public:
     bool particleIsLepton();
     bool isGeneratedParticle(); 
     void foundLepton();
+    void setLeptonCuts(float, float);
+    void setJetCuts(float, float);
+    void removeCuts();
     TLorentzVector getWZSum();
     TLorentzVector getWZleptonSum();
+    TLorentzVector getleptonFromW();
     //foundJet();
     void resetEvent();
     float getWMass();
@@ -81,6 +86,7 @@ public:
     int getGenMuonNumber();
     int getGenMuonPtCutNumber();
     int getGenElectronPtCutNumber();
+    int getGenLeptonPtCutNumber();
 };
 
 #endif

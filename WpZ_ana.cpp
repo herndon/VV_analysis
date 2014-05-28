@@ -413,6 +413,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 
     
     WZEvent wzEvent;
+    wzEvent.setLeptonCuts(20, 2.4);
+    wzEvent.setJetCuts(30, 4.7);
     // Lorentz vectors
 
     TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorRl, lVectorj1, 
@@ -522,24 +524,39 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 
         nGenElectron = wzEvent.getGenElectronNumber();
         nGenMuon = wzEvent.getGenMuonNumber();
-        nGenElectron20 = wzEvent.getGenMuonPtCutNumber();
-        nGenMuon20 = wzEvent.getGenElectronPtCutNumber();
+        nGenElectron20 = wzEvent.getGenElectronPtCutNumber();
+        nGenMuon20 = wzEvent.getGenMuonPtCutNumber();
         WMass = wzEvent.getWMass();
+       
+        nGenLepton20 = nGenElectron20 + nGenMuon20;
+        
+        if(nGenLepton20 == 3)
+        {
+            cout << "Values:\n"
+                 << "\nnGenElectron =" << nGenElectron
+                 << "\nnGenMuon = " << nGenMuon
+                 << "\nnGenElectron20 = " << nGenElectron20
+                 << "\nnGenMuon20 = " << nGenMuon20;
+        }
+        if(nGenLepton20 != wzEvent.getGenLeptonPtCutNumber())
+            cout << "That ain't good!";
 
+        
         plots->gall_zpt->Fill(lVectorZ.Pt());
-
+        lVectorW = wzEvent.getleptonFromW();
         lVectorRj = lVectorj1+lVectorj2;
         plots->gall_mjj->Fill(lVectorRj.M());
         plots->gall_deltaetajj->Fill(fabs(lVectorj1.Eta()-lVectorj2.Eta()));
 		
         //lVectorRl = lVectorl1+lVectorl2+lVectorl3+lVectorMET;
-        lVectorRl = wzEvent.getWZleptonSum();
+        lVectorRl = wzEvent.getWZleptonSum() + lVectorMET;
         plots->gall_wztmass->Fill(lVectorRl.M());
 		
         lVectorWZ = lVectorW + lVectorZ;
         plots->gall_wzmass->Fill(lVectorWZ.M());
 		
 		
+        wzEvent.resetEvent();
         // WZ mass calculation
         // Need to define Wlepton lVectorlW
         bool correctp = WZMassCalculation(lVectorlW, lVectorMET,  WMass, neutrino_pz); 
@@ -560,7 +577,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
             if(lVectorWZ.M() > 1200.)
                 mCorrectPS++;
         }
-        nGenLepton20 = nGenElectron20 + nGenMuon20;
         Int_t genltype = 0;
 		
         //if (nGenLepton20 != 3)
