@@ -56,6 +56,10 @@ void WZEvent::setJetCuts(float jetPt, float jetEta)
     cuts.jetPt = jetPt;
     cuts.jetEta = jetEta;
 }
+int WZEvent::getGenLeptonNumber()
+{
+    return counter.leptons;
+}
 int WZEvent::getGenElectronNumber()
 {
     return counter.electrons;

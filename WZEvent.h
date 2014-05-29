@@ -82,6 +82,7 @@ public:
     //foundJet();
     void resetEvent();
     float getWMass();
+    int getGenLeptonNumber();
     int getGenElectronNumber();
     int getGenMuonNumber();
     int getGenMuonPtCutNumber();

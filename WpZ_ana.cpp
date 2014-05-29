@@ -477,6 +477,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
             {
                 if(wzEvent.isGeneratedParticle(i) && wzEvent.particleIsLepton())
                 {
+                    nLepton++;
                     particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
                     wzEvent.setParticleMother(particleM);
                     wzEvent.foundLepton(); 
@@ -530,20 +531,24 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
        
         nGenLepton20 = nGenElectron20 + nGenMuon20;
         
-        if(nGenLepton20 == 3)
-        {
+        if(entry % 100 == 0)
+         {
             cout << "Values:\n"
+                 << "\nLeptonsClass = " << wzEvent.getGenLeptonNumber()
+                 << "LeptonsNoClass = " << nLepton
+                 << "\nLeptons20 =" << wzEvent.getGenLeptonPtCutNumber()
                  << "\nnGenElectron =" << nGenElectron
                  << "\nnGenMuon = " << nGenMuon
                  << "\nnGenElectron20 = " << nGenElectron20
                  << "\nnGenMuon20 = " << nGenMuon20;
         }
         if(nGenLepton20 != wzEvent.getGenLeptonPtCutNumber())
-            cout << "That ain't good!";
-
+        {
+                cout << "\nThat ain't good! At entry = ";
+                cout << entry << endl;
+        }
         
         plots->gall_zpt->Fill(lVectorZ.Pt());
-        lVectorW = wzEvent.getleptonFromW();
         lVectorRj = lVectorj1+lVectorj2;
         plots->gall_mjj->Fill(lVectorRj.M());
         plots->gall_deltaetajj->Fill(fabs(lVectorj1.Eta()-lVectorj2.Eta()));
@@ -578,9 +583,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                 mCorrectPS++;
         }
         Int_t genltype = 0;
-		
-        //if (nGenLepton20 != 3)
-        //    genbr1Event = false;
+        
         if (nGenLepton20 != 3)
             genbr1Event = false;
         if(genbr1Event)    
