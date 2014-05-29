@@ -583,7 +583,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 		
         // WZ mass calculation
         // Need to define Wlepton lVectorlW
-        bool correctp = WZMassCalculation(lVectorlW, lVectorMET,  WMass, pz); 
+        bool correctp = WZMassCalculation(lVectorlW, lVectorMET,  WMass, neutrino_pz); 
 		
 
         //cout << "New pzp " << pzp << " pzm " << pzm << endl;
@@ -603,7 +603,17 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         }
         nGenLepton20 = nGenElectron20 + nGenMuon20;
         Int_t genltype = 0;
-		
+	    
+        
+        if(entry% 100 == 0)
+        {
+            cout << "\n\nValues:"
+                 << "\nnLepton = " << nLepton
+                 << "\nnGenLepton20 = " << nGenLepton20
+                 << "\nnGenElectron = " << nGenElectron
+                 << "\nnGenElectron20 = " << nGenElectron20
+        	     << "\nnGenMuon20 = " << nGenMuon20;
+        }
         //if (nGenLepton20 != 3)
         //    genbr1Event = false;
         if (nGenLepton20 != 3)
