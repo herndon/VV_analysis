@@ -351,13 +351,13 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 
     // Get pointers to branches used in analysis
     TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
-    TClonesArray *branchEvent = treeReader->UseBranch("Event");
+    //TClonesArray *branchEvent = treeReader->UseBranch("Event");
 
     TRootLHEFParticle *particle;
     TRootLHEFParticle *particleM;
-    TRootLHEFEvent *event;
     
     Long64_t allEntries = treeReader->GetEntries();
+    cout << "allEntries = " << allEntries;
 
     cout << "** Chain contains " << allEntries << " events" << endl;
     cout.flush();
@@ -412,7 +412,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     Int_t mCorrectPS = 0;
 
     
-    WZEvent wzEvent;
+    WZEvent wzEvent = WZEvent();
     wzEvent.setLeptonCuts(20, 2.4);
     wzEvent.setJetCuts(30, 4.7);
     // Lorentz vectors
@@ -443,7 +443,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 
         // Generator Baseline region 1: 
 
-        Int_t nGenJet = 0;
+        //Int_t nGenJet = 0;
         Int_t nGenElectron = 0;
         Int_t nGenMuon = 0; 
 
@@ -468,6 +468,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         genPureSignalRegion = false;
 
 
+        wzEvent.resetEvent();
         for(int i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
         {
             particle = (TRootLHEFParticle*) branchGenParticle->At(i);
@@ -475,35 +476,24 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
             wzEvent.setParticle(particle);
             if(wzEvent.particleIsStable())
             {
-                if(wzEvent.isGeneratedParticle(i) && wzEvent.particleIsLepton())
+                if((particle->Mother1 < i+2) && (abs(particle->PID) == 11 || abs(particle->PID) == 13))
                 {
-                    nLepton++;
                     particleM = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
                     wzEvent.setParticleMother(particleM);
                     wzEvent.foundLepton(); 
-        	        //plots->gall_electronpt->Fill(particle->PT);
-                    //plots->gall_electroneta->Fill(particle->Eta);
+        	        plots->gall_electronpt->Fill(particle->PT);
+                    plots->gall_electroneta->Fill(particle->Eta);
     	    	}
                 // for W+Z event initial particles end after 4. Status is not 2 which indicates
                 // intermediate history Pythia/delphies populates every event with extra substantially 
                 // increasing the events that pass
                 if (i>5 && (abs(particle->PID) < 6||abs(particle->PID) == 21))
                 { 
-                    nGenJet++;
                     plots->gall_jetpt->Fill(particle->PT);
                     plots->gall_jeteta->Fill(particle->Eta);
-    		
-                   if (particle->PT >jetPTCut && fabs(particle->Eta) <4.7) 
-                   {
-                       nGenJet30++;
-                            
-                       if (foundJet1) 
-                           lVectorj2.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                        else
-                            lVectorj1.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-                        foundJet1 = true;
-                    }
+    		        wzEvent.foundJet();
                 }
+                            
                 if ((abs(particle->PID) == 12 || abs(particle->PID) == 14) 
     		    		&& particle->PT > genMet) 
                 {
@@ -521,33 +511,19 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                 lVectorZ.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
             if (particle->PID==24)  
                 lVectorW.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
-    	}
+        }
 
         nGenElectron = wzEvent.getGenElectronNumber();
         nGenMuon = wzEvent.getGenMuonNumber();
         nGenElectron20 = wzEvent.getGenElectronPtCutNumber();
         nGenMuon20 = wzEvent.getGenMuonPtCutNumber();
         WMass = wzEvent.getWMass();
-       
+        nGenJet30 =  wzEvent.getNumPostCutJets();
         nGenLepton20 = nGenElectron20 + nGenMuon20;
         
-        if(entry % 100 == 0)
-         {
-            cout << "Values:\n"
-                 << "\nLeptonsClass = " << wzEvent.getGenLeptonNumber()
-                 << "LeptonsNoClass = " << nLepton
-                 << "\nLeptons20 =" << wzEvent.getGenLeptonPtCutNumber()
-                 << "\nnGenElectron =" << nGenElectron
-                 << "\nnGenMuon = " << nGenMuon
-                 << "\nnGenElectron20 = " << nGenElectron20
-                 << "\nnGenMuon20 = " << nGenMuon20;
-        }
-        if(nGenLepton20 != wzEvent.getGenLeptonPtCutNumber())
-        {
-                cout << "\nThat ain't good! At entry = ";
-                cout << entry << endl;
-        }
         
+        lVectorj1 = wzEvent.getJet1();
+        lVectorj2 = wzEvent.getJet2(); 
         plots->gall_zpt->Fill(lVectorZ.Pt());
         lVectorRj = lVectorj1+lVectorj2;
         plots->gall_mjj->Fill(lVectorRj.M());
@@ -560,7 +536,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         lVectorWZ = lVectorW + lVectorZ;
         plots->gall_wzmass->Fill(lVectorWZ.M());
 		
-		
+	    lVectorlW = wzEvent.getLeptonFromW();	
         wzEvent.resetEvent();
         // WZ mass calculation
         // Need to define Wlepton lVectorlW
@@ -596,7 +572,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                 if(lVectorRl.M() > 1200.)
                 {
                     nGenWZPS_leptons++;    
-                    nGenWZPS_leptons3m++;
+                    nGenWZPS_leptons3e++;
                 }
             }
             else if (nGenElectron20 == 2)
@@ -657,7 +633,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
             nGenWZ_Z++;
         if (genbr1Event&&genPureSignalRegion) 
             nGenWZPS_Z++;
-	    if (nGenJet>2) 
+	    
+        /*
+        if (nGenJet>2) 
         {
             cout << "Too many jets " << endl;
             for(int i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
@@ -667,7 +645,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                      << " m1 " << particle->Mother1 << " m2 " << particle->Mother2 <<  " "
                      << particle->PT <<  " " << particle->Eta << endl;
             }
-        }
+        }*/
         if (genbr1Event) 
         {
             plots->gbr1_zpt->Fill(lVectorZ.Pt());

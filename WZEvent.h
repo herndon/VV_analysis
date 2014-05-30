@@ -37,7 +37,7 @@ struct EventCounter
     int leptons_ptCut;
     int electrons_ptCut;
     int muons_ptCut;
-    int jets_ptCut;
+    int jetsPostCut;
 };
 
 struct Cuts
@@ -60,7 +60,7 @@ private:
     WZlVectors wzlVectors;
     std::vector<GeneratorParticle> allElectrons;
     std::vector<GeneratorParticle> allMuons;
-    
+    std::vector<GeneratorParticle> allJets; 
     void processWZLepton(std::string type);
 
 public:
@@ -78,8 +78,10 @@ public:
     void removeCuts();
     TLorentzVector getWZSum();
     TLorentzVector getWZleptonSum();
-    TLorentzVector getleptonFromW();
-    //foundJet();
+    TLorentzVector getLeptonFromW();
+    TLorentzVector getJet1();
+    TLorentzVector getJet2();
+    void foundJet();
     void resetEvent();
     float getWMass();
     int getGenLeptonNumber();
@@ -88,6 +90,7 @@ public:
     int getGenMuonPtCutNumber();
     int getGenElectronPtCutNumber();
     int getGenLeptonPtCutNumber();
+    int getNumPostCutJets();
 };
 
 #endif
