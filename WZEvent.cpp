@@ -83,7 +83,11 @@ int WZEvent::getGenLeptonPtCutNumber()
 float WZEvent::getWMass()
 {
     return WMass;
-}      
+}
+float WZEvent::getZMass()
+{
+    return ZMass;
+}
 void WZEvent::foundLepton()
 {
     counter.leptons++;
@@ -194,6 +198,17 @@ TLorentzVector WZEvent::getJet2()
 int WZEvent::getNumPostCutJets()
 {
     return counter.jetsPostCut;
+}
+void WZEvent::foundZ()
+{
+    ZMass = particle->M;
+    wzlVectors.Z.SetPtEtaPhiM(particle->PT,
+                        particle->Eta,particle->Phi,particle->M);
+}
+void WZEvent::foundW()
+{
+    wzlVectors.W.SetPtEtaPhiM(particle->PT,
+                        particle->Eta,particle->Phi,particle->M);
 }
 void WZEvent::removeCuts()
 {
