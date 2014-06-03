@@ -21,11 +21,13 @@ struct WZlVectors
     TLorentzVector leptonFromW;
     TLorentzVector jet1;
     TLorentzVector jet2;
-    TLorentzVector jetsSum;
+    //TLorentzVector jetsSum;
     //Includes MET
-    TLorentzVector leptonSum;
-    TLorentzVector WZSum;
-    TLorentzVector met;
+    //TLorentzVector leptonSum;
+    //TLorentzVector WZSum;
+    TLorentzVector MET;
+    TLorentzVector W;
+    TLorentzVector Z;
 };
 
 struct EventCounter
@@ -55,6 +57,8 @@ private:
     TRootLHEFParticle* particle;
     TRootLHEFParticle* particleMother;
     float WMass;
+    float ZMass;
+    float MET;
     EventCounter counter;
     Cuts cuts;
     WZlVectors wzlVectors;
@@ -73,23 +77,34 @@ public:
     bool particleIsLepton();
     bool isGeneratedParticle(); 
     void foundLepton();
+    void foundJet();
+    void foundW();
+    void foundZ();
+    void foundMET();
     void setLeptonCuts(float, float);
     void setJetCuts(float, float);
     void removeCuts();
     TLorentzVector getWZSum();
-    TLorentzVector getWZleptonSum();
+    TLorentzVector getWZleptonMETSum();
     TLorentzVector getLeptonFromW();
     TLorentzVector getJet1();
     TLorentzVector getJet2();
-    void foundJet();
+    TLorentzVector getMETVector();
+    TLorentzVector getJetSum();
+    TLorentzVector getZ();
+    std::vector<GeneratorParticle> getAllElectrons();
+    std::vector<GeneratorParticle> getAllMuons();
+    std::vector<GeneratorParticle> getAllJets();
     void resetEvent();
     float getWMass();
+    float getZMass();
+    float getMET();
     int getGenLeptonNumber();
     int getGenElectronNumber();
     int getGenMuonNumber();
-    int getGenMuonPtCutNumber();
-    int getGenElectronPtCutNumber();
-    int getGenLeptonPtCutNumber();
+    int getNumHighPtMuons();
+    int getNumHighPtElectrons();
+    int getNumHighPtLeptons();
     int getNumPostCutJets();
 };
 

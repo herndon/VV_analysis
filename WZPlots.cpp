@@ -2,13 +2,13 @@
 
 WZPlots::WZPlots(ExRootResult* result)
 {
-    WZPlots(result, 1, 1, "");
+    WZPlots(result, 1, "");
 }
-WZPlots::WZPlots(ExRootResult* result,const int NUM_JETS,const int NUM_WEIGHTS, std::string nameBase)
+WZPlots::WZPlots(ExRootResult* result,const int NUM_WEIGHTS, std::string nameBase)
 {
     this->result = result;
-    jet_pt.resize(NUM_JETS);
-    jet_eta.resize(NUM_JETS);
+    //jet_pt.resize(NUM_JETS);
+    //jet_eta.resize(NUM_JETS);
     wztmassWeights.resize(NUM_WEIGHTS);
 
     std::string histObjName = nameBase + "_electronPt";
@@ -30,17 +30,17 @@ WZPlots::WZPlots(ExRootResult* result,const int NUM_JETS,const int NUM_WEIGHTS, 
     muon_eta = result->AddHist1D(histObjName.c_str(), "Muon Eta",
                                  "Muon Eta", "Number of Muons",
                                   20, -4.0, 4.0);
-    for(int i = 0; i < NUM_JETS; i++)
-    {    
-        histObjName = nameBase + "_jet" + std::to_string(i) + "Pt";
-        jet_pt[i] = result->AddHist1D(histObjName.c_str(), "Jet P_{T}",
+    //for(int i = 0; i < NUM_JETS; i++)
+    //{    
+    histObjName = nameBase + "_jetPt";// + std::to_string(i) + "Pt";
+    jet_pt = result->AddHist1D(histObjName.c_str(), "Jet P_{T}",
                                       "Jet P_{T} (GeV/c)", "Number of Jets",
                                        20, 0.0, 200.0);
-        histObjName = nameBase + "_jet" + std::to_string(i) + "Eta";
-        jet_pt[i] = result->AddHist1D(histObjName.c_str(), "Jet Eta",
+    histObjName = nameBase + "_jetEta";// + std::to_string(i) + "Eta";
+    jet_eta = result->AddHist1D(histObjName.c_str(), "Jet Eta",
                                       "Jet Eta", "Number of Jets",
                                        20, 0.0, 200.0);
-    }
+    //}
     
     histObjName = nameBase + "_deltaEta_jj";
     deltaEta_jj = result->AddHist1D(histObjName.c_str(), "Delta Eta JJ",
@@ -90,10 +90,10 @@ void WZPlots::addMuon(float pt, float eta)
     muon_pt->Fill(pt);
     muon_eta->Fill(eta);
 }
-void WZPlots::addJet(float pt, float eta, int jetNum)
+void WZPlots::addJet(float pt, float eta)
 {
-    jet_pt[jetNum-1]->Fill(pt);
-    jet_eta[jetNum-1]->Fill(eta);
+    jet_pt->Fill(pt);
+    jet_eta->Fill(eta);
 }
 void WZPlots::fillMET(float met)
 {

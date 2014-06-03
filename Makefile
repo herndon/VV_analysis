@@ -1,9 +1,9 @@
 CXX           = g++
-CXXFLAGS      = $(OPT2) $(ROOTCFLAGS) -Wall -O2 -std=c++11
+CXXFLAGS      = $(OPT2) $(ROOTCFLAGS) -Wall -g -O2 -std=c++11
 LD            = g++
 LDFLAGS       = $(OPT2)
 
-SRCS = WpZ_ana.cpp readWeights.cpp WZEvent.cpp
+SRCS = WZEventsTracker.cpp WZPlots.cpp WpZ_ana.cpp readWeights.cpp WZEvent.cpp
 
 ROOTINCLUDES = -I$(ROOTSYS)/include
 ROOTLDLIBS = `$(ROOTSYS)/bin/root-config --cflags --glibs` -lEG

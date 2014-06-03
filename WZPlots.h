@@ -14,8 +14,8 @@ private:
     TH1* electron_eta;
     TH1* muon_pt;
     TH1* muon_eta;
-    std::vector<TH1*> jet_pt;
-    std::vector<TH1*> jet_eta;
+    TH1* jet_pt;
+    TH1* jet_eta;
     TH1* met;
     TH1* deltaEta_jj;
     TH1* mjj;
@@ -25,10 +25,10 @@ private:
     std::vector<TH1*> wztmassWeights;
 public:
     WZPlots(ExRootResult* result);
-    WZPlots(ExRootResult* result, const int, const int, std::string);
+    WZPlots(ExRootResult* result, const int, std::string);
     void addElectron(float pt, float eta);
     void addMuon(float pt, float eta);
-    void addJet(float pt, float eta, int jetNum);
+    void addJet(float pt, float eta);
     void fillMET(float met);
     void fillDeltaEta_jj(double deltaEta_jj);
     void fillMjj(double mjj);
@@ -36,6 +36,6 @@ public:
     void fillWZtMass(double wztmass);
     void fillWZMass(double);
     void printHistograms(const char*);
-};   
+};
 
 #endif    

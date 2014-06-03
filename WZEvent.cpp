@@ -34,18 +34,26 @@ bool WZEvent::isGeneratedParticle(int particleCount)
 }
 TLorentzVector WZEvent::getWZSum()
 {
-    return wzlVectors.WZSum;
+    return wzlVectors.W + wzlVectors.Z;
 }
-TLorentzVector WZEvent::getWZleptonSum()
+TLorentzVector WZEvent::getWZleptonMETSum()
 {
-    wzlVectors.leptonSum = wzlVectors.lepton1 + wzlVectors.lepton2
-                                + wzlVectors.lepton3;
-    return wzlVectors.leptonSum;
+    return  wzlVectors.lepton1 + wzlVectors.lepton2
+                           + wzlVectors.MET  + wzlVectors.lepton3;
 }
 TLorentzVector WZEvent::getLeptonFromW()
 {
     return wzlVectors.leptonFromW;
 }
+TLorentzVector WZEvent::getJetSum()
+{
+    return wzlVectors.jet1 + wzlVectors.jet2;
+}
+TLorentzVector WZEvent::getZ()
+{
+    return wzlVectors.Z;
+}
+
 void WZEvent::setLeptonCuts(float leptonPt, float leptonEta)
 {
     cuts.leptonPt = leptonPt;
@@ -68,15 +76,15 @@ int WZEvent::getGenMuonNumber()
 {
     return counter.muons;
 }
-int WZEvent::getGenMuonPtCutNumber()
+int WZEvent::getNumHighPtMuons()
 {
     return counter.muons_ptCut;
 }
-int WZEvent::getGenElectronPtCutNumber()
+int WZEvent::getNumHighPtElectrons()
 {
     return counter.electrons_ptCut;
 }
-int WZEvent::getGenLeptonPtCutNumber()
+int WZEvent::getNumHighPtLeptons()
 {
     return counter.leptons_ptCut;
 }
@@ -87,6 +95,26 @@ float WZEvent::getWMass()
 float WZEvent::getZMass()
 {
     return ZMass;
+}
+float WZEvent::getMET()
+{
+    return MET;
+}
+std::vector<GeneratorParticle> WZEvent::getAllElectrons()
+{
+    return allElectrons;
+}
+std::vector<GeneratorParticle> WZEvent::getAllMuons()
+{
+    return allMuons;
+}
+std::vector<GeneratorParticle> WZEvent::getAllJets()
+{
+    return allJets;
+}
+TLorentzVector WZEvent::getMETVector()
+{
+    return wzlVectors.MET;
 }
 void WZEvent::foundLepton()
 {
@@ -186,6 +214,12 @@ void WZEvent::foundJet()
         }
     }
 }
+void WZEvent::foundMET()
+{
+    MET = particle->PT;
+    wzlVectors.MET.SetPtEtaPhiM(particle->PT, 0.0,
+                        particle->Phi,particle->M);
+}
 TLorentzVector WZEvent::getJet1()
 {
     return wzlVectors.jet1;
@@ -224,14 +258,7 @@ void WZEvent::resetEvent()
     allElectrons.clear();
     allMuons.clear();
     allJets.clear();
-    counter.leptons = 0;
-    counter.jets = 0;
-    counter.electrons = 0;
-    counter.muons = 0;
-    counter.leptons_ptCut = 0;
-    counter.electrons_ptCut = 0;
-    counter.muons_ptCut = 0;
-    counter.jetsPostCut = 0;
+    counter = {0};
 }
     
 

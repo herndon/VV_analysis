@@ -36,6 +36,7 @@ root -l WpZ_ana.C\(\".root\"\)
 #include "readWeights.h" 
 #include "WZEvent.h"
 #include "WZPlots.h"
+#include "WZEventsTracker.h"
 
 struct MyPlots;
 void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots,
@@ -340,7 +341,7 @@ void BookHistograms(ExRootResult *result, MyPlots *plots, Int_t NUM_WEIGHTS)
 
 //------------------------------------------------------------------------------
 
-void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inputFile, int NUM_WEIGHTS, WZPlots* baselinePlots)
+void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inputFile, int NUM_WEIGHTS)
 {
     cout << "Processing file " << inputFile << endl;
   
@@ -358,7 +359,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     TRootLHEFParticle *particleM;
     
     Long64_t allEntries = treeReader->GetEntries();
-    cout << "allEntries = " << allEntries;
 
     cout << "** Chain contains " << allEntries << " events" << endl;
     cout.flush();
@@ -371,9 +371,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     cout << "Using Jet pt     cut " << jetPTCut << endl;
     cout << "Using jetCut " << jetPTCut << endl;
 
-    vector<Float_t> nwGenWZ_all(NUM_WEIGHTS, 0.);
-    vector<Float_t> nwGenWZ_gbr2(NUM_WEIGHTS, 0.);
-    vector<Float_t> nwGenWZ_wztmass(NUM_WEIGHTS, 0.);
+    vector<float> nwGenWZ_all(NUM_WEIGHTS, 0.);
+    vector<float> nwGenWZ_gbr2(NUM_WEIGHTS, 0.);
+    vector<float> nwGenWZ_wztmass(NUM_WEIGHTS, 0.);
 
     Int_t nGenWZ_leptons = 0;
     Int_t nGenWZ_leptons3m = 0;
@@ -412,23 +412,22 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     Int_t pCorrectPS = 0;
     Int_t mCorrectPS = 0;
 
-   // WZPlots baselinePlots(result, 1, 1, "baseline"); 
     WZEvent wzEvent = WZEvent();
     wzEvent.setLeptonCuts(20, 2.4);
     wzEvent.setJetCuts(30, 4.7);
-    // Lorentz vectors
 
-    TLorentzVector lVectorl1, lVectorl2,lVectorl3, lVectorRl, lVectorj1, 
-                   lVectorj2, lVectorRj, lVectorZ, lVectorW, lVectorWZ;
-
-    //TLorentzVector* lVectorlW = new TLorentzVector;
-    //TLorentzVector* lVectorMET = new TLorentzVector;
+    
+    ExRootResult* classResult = new ExRootResult;
+    
+    WZEventsTracker generatorEvents(classResult, 31, "generator", true);
+    generatorEvents.setLeptonSelection(3);
+    generatorEvents.setJetSelection(2);
+    generatorEvents.setMetCut(30);
+    generatorEvents.setZMassCut(20);
     // Loop over all events
     for(unsigned int entry = 0; entry < allEntries; ++entry) 
     {
         // Load selected branches with data from specified event
-    	TLorentzVector lVectorlW;
-        TLorentzVector lVectorMET;
         //Updates entry pointed to by branchGenParticle and branchEvent 
         treeReader->ReadEntry(entry);
 	    
@@ -438,8 +437,10 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         {
             readWeights(NUM_WEIGHTS, weights, lheFile);
     
-            for(int i = 0; i < NUM_WEIGHTS; ++i)
+            for(int i = 0; i < NUM_WEIGHTS; i++)
+            {
                 nwGenWZ_all[i] += weights[i]; 
+            }
         }  
 
         // Generator Baseline region 1: 
@@ -448,7 +449,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         Int_t nGenElectron = 0;
         Int_t nGenMuon = 0; 
 
-        Int_t nGenLepton10= 0;
         Int_t nGenLepton20 = 0;
         Int_t nGenElectron20 = 0;
         Int_t nGenMuon20 = 0;
@@ -458,22 +458,18 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
         Float_t genZMass = 0.0;
 
         Bool_t genbr1Event = true;
-        Bool_t foundJet1 = false;
 
- 
         Float_t neutrino_pz = 0;
         Float_t WMass = 0;
 
-        Int_t nLepton = 0;
-
         genPureSignalRegion = false;
-
-
+        
         wzEvent.resetEvent();
         for(int i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
         {
             particle = (TRootLHEFParticle*) branchGenParticle->At(i);
-
+            
+            
             wzEvent.setParticle(particle);
             if(wzEvent.particleIsStable())
             {
@@ -499,13 +495,10 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
                 else if ((abs(particle->PID) == 12 || abs(particle->PID) == 14) 
     		    		&& particle->PT > genMet) 
                 {
-                    //cout << "Filled Gen met" << endl;
-                    genMet = particle->PT;
+                    wzEvent.foundMET();
                     plots->gall_met->Fill(particle->PT);
                     //baselinePlots.fillMET(particle->PT);
-                    lVectorMET.SetPtEtaPhiM(particle->PT,0.0,particle->Phi,particle->M);
                     neutrino_pz = particle->Pz;
-    		    //cout << "Set MET " << particle->PT << " " << lVectorMET.Pt() << " " << pz << endl;
                 }
             }
             if (particle->PID==23)
@@ -513,40 +506,43 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
             else if (particle->PID==24)  
                 wzEvent.foundW();
         }
-        baselinePlots.printHistograms("png");
+        //baselinePlots.printHistograms("png");
 
         nGenElectron = wzEvent.getGenElectronNumber();
         nGenMuon = wzEvent.getGenMuonNumber();
-        nGenElectron20 = wzEvent.getGenElectronPtCutNumber();
-        nGenMuon20 = wzEvent.getGenMuonPtCutNumber();
+        nGenElectron20 = wzEvent.getNumHighPtElectrons();
+        nGenMuon20 = wzEvent.getNumHighPtMuons();
         WMass = wzEvent.getWMass();
         genZMass = wzEvent.getZMass();
         nGenJet30 =  wzEvent.getNumPostCutJets();
         nGenLepton20 = nGenElectron20 + nGenMuon20;
+        genMet = wzEvent.getMET();
+
+        TLorentzVector lVectorMET = wzEvent.getMETVector(); 
+        TLorentzVector lVectorj1 = wzEvent.getJet1();
+        TLorentzVector lVectorj2 = wzEvent.getJet2(); 
+       
+        TLorentzVector lVectorRj = wzEvent.getJetSum();
+        TLorentzVector lVectorRl = wzEvent.getWZleptonMETSum();
+
+        TLorentzVector lVectorZ = wzEvent.getZ();	
+	    TLorentzVector lVectorlW = wzEvent.getLeptonFromW();
+        TLorentzVector lVectorWZ = wzEvent.getWZSum();
         
-        
-        lVectorj1 = wzEvent.getJet1();
-        lVectorj2 = wzEvent.getJet2(); 
         plots->gall_zpt->Fill(lVectorZ.Pt());
-        lVectorRj = lVectorj1+lVectorj2;
         plots->gall_mjj->Fill(lVectorRj.M());
         plots->gall_deltaetajj->Fill(fabs(lVectorj1.Eta()-lVectorj2.Eta()));
-		
-        //lVectorRl = lVectorl1+lVectorl2+lVectorl3+lVectorMET;
-        lVectorRl = wzEvent.getWZleptonSum() + lVectorMET;
         plots->gall_wztmass->Fill(lVectorRl.M());
 		
-        lVectorWZ = wzEvent.getWZSum();
         plots->gall_wzmass->Fill(lVectorWZ.M());
 		
-	    lVectorlW = wzEvent.getLeptonFromW();	
-        wzEvent.resetEvent();
+        generatorEvents.processEvent(&wzEvent);
         // WZ mass calculation
         // Need to define Wlepton lVectorlW
-        bool correctp = WZMassCalculation(lVectorlW, lVectorMET,  WMass, neutrino_pz); 
+        //bool correctp = WZMassCalculation(lVectorlW, lVectorMET,  WMass, neutrino_pz); 
         //cout << "New pzp " << pzp << " pzm " << pzm << endl;
         //cout << "New pz " << pz << endl;
-		
+		/*
         if (correctp)
         {    
             pCorrect++;
@@ -558,7 +554,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
             mCorrect++;
             if(lVectorWZ.M() > 1200.)
                 mCorrectPS++;
-        }
+        }*/
         Int_t genltype = 0;
         
         if (nGenLepton20 != 3)
@@ -713,8 +709,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     //FT1 = 0 corresponds to SM, which is the 16th parameter used in Cards/reweight_card.dat
     const Float_t sm_crossx = nwGenWZ_all[15];
     const Float_t luminosity = 19.6; //Integrated Luminosity in fb^-1 
-    const Float_t scale = sm_crossx*1000*luminosity; //Number of events at given luminosity
-
+    float scale = sm_crossx*1000*luminosity; //Number of events at given luminosity
+    scale = 1.;
     cout << "Processing file " << inputFile << " with scale factor " << scale << endl;
  
     if (useWeightInfo)
@@ -730,30 +726,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
 	         << nwGenWZ_wztmass[i]*1000*luminosity << endl;
         }
     }
-    cout << "Gen event counts" << endl;
-    cout << "Gen Baseline selection 1, leptons: " << nGenWZ_leptons << endl;
-    cout << "Gen Baseline selection 1, 3m     : " << nGenWZ_leptons3m << endl;
-    cout << "Gen Baseline selection 1, 2m1e   : " << nGenWZ_leptons2m1e << endl;
-    cout << "Gen Baseline selection 1, 2e1m   : " << nGenWZ_leptons2e1m << endl;
-    cout << "Gen Baseline selection 1, 3e     : " << nGenWZ_leptons3e << endl;
-    cout << "Gen Baseline selection 1, jets   : " << nGenWZ_jets << endl;
-    cout << "Gen Baseline selection 1, MET    : " << nGenWZ_met << endl;
-    cout << "Gen Baseline selection 1, Z      : " << nGenWZ_Z << endl;
-    cout << "Gen Baseline selection 1, m_jj   : " << nGenWZ_mjj << endl;
-    cout << "Gen Baseline selection 1, eta jj : " << nGenWZ_etajj << endl;
-    cout << " " << endl;
-    cout << " Gen event counts scale by lumi and cross section" << endl;
-    cout << "Gen Baseline selection 1, leptons: " << scale*nGenWZ_leptons << endl;
-    cout << "Gen Baseline selection 1, 3m     : " << scale*nGenWZ_leptons3m << endl;
-    cout << "Gen Baseline selection 1, 2m1e   : " << scale*nGenWZ_leptons2m1e << endl;
-    cout << "Gen Baseline selection 1, 2e1m   : " << scale*nGenWZ_leptons2e1m << endl;
-    cout << "Gen Baseline selection 1, 3e     : " << scale*nGenWZ_leptons3e << endl;
-    cout << "Gen Baseline selection 1, jets   : " << scale*nGenWZ_jets << endl;
-    cout << "Gen Baseline selection 1, MET    : " << scale*nGenWZ_met << endl;
-    cout << "Gen Baseline selection 1, Z      : " << scale*nGenWZ_Z << endl;
-    cout << "Gen Baseline selection 1, m_jj   : " << scale*nGenWZ_mjj << endl;
-    cout << "Gen Baseline selection 1, eta jj : " << scale*nGenWZ_etajj << endl;
-
     //cout << "Gen Baseline selection 1, opp eta: " << nGenWZ_oppetajj << endl;
     cout << "Gen Baseline selection 1, wztmas : " << scale*nGenWZ_wztmass << endl;
     cout << "Gen Baseline selection 1, 3m     : " << scale*nGenWZ_wztmass3m << endl;
@@ -776,8 +748,12 @@ void AnalyseEvents(ExRootTreeReader *treeReader, MyPlots *plots, const char* inp
     cout << "Gen Baseline selection PS, wztmas : " << nGenWZPS_wztmass << endl;
     //cout << "Matching selection num " << nMatchedNum << endl;
     //cout << "Matching selection denom " << nMatchedDenom << endl;
-    cout << "Correct + " << pCorrect << " - " << mCorrect << endl;
-    cout << "Correct PS + " << pCorrectPS << " - " << mCorrectPS << endl;
+    //cout << "Correct + " << pCorrect << " - " << mCorrect << endl;
+    //cout << "Correct PS + " << pCorrectPS << " - " << mCorrectPS << endl;
+
+    generatorEvents.printEventInfo();
+    classResult->Write("classResult.root");
+    delete classResult;
 }
 //------------------------------------------------------------------------------
 bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVectorMET,
@@ -799,7 +775,7 @@ bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVe
         pzp = t1 + sqrt(t2-t3);
         pzm = t1 - sqrt(t2-t3);      
     }
-    if (t3>t2) 
+    else
     {
         pzp = t1;
         pzm = t1;      
@@ -826,7 +802,7 @@ bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVe
         pzm = (-b - sqrt(t2-t3))/(2.0*a);      
         //cout << "New Root was real" << endl;
     }
-    if (t3>t2)
+    else
     {
         pzp = -b/(2.0*a);
         pzm = -b/(2.0*a);      
@@ -840,7 +816,7 @@ bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVe
         pzsmall = pzp;
         pzlarge = pzm;
     }
-    if (fabs(pzp) > fabs(pzm))
+    else
     {
         pzsmall = pzm; 
         pzlarge = pzp;
@@ -870,7 +846,7 @@ void WpZ_ana(const char* inputFile, int NUM_WEIGHTS)
 
     BookHistograms(result, plots, NUM_WEIGHTS);
     AnalyseEvents(treeReader, plots, inputFile, NUM_WEIGHTS);
-
+    
     //PrintHistograms(result, plots);
 
     // 1 default
@@ -884,6 +860,7 @@ void WpZ_ana(const char* inputFile, int NUM_WEIGHTS)
     delete result;
     delete treeReader;
     delete chain;
+   
 }
 //------------------------------------------------------------------------------
 
