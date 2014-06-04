@@ -2,7 +2,8 @@
 #define __READWEIGHTS_H__
 
 #include <fstream>
+#include <vector>
 
-void readWeights(const int NUM_WEIGHTS, float* weights, std::fstream& lheFile);
+void readWeights(const int NUM_WEIGHTS, std::vector<float> weights, std::fstream& lheFile);
 
 #endif

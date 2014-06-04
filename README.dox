@@ -1,0 +1,15 @@
+/**
+* @mainpage Analysis Code for W+Z VBF Events
+* 
+* @author Matt Herndon <herndon@wisc.edu>
+* @author Kenneth Long <kdlong@wisc.edu>
+*
+* This analysis code was originally written by Matt Herndon and was modified
+* to its current form by Kenneth Long. It creates ROOT histrograms from 
+* MadGraph simulations of pp >  w+zjj events. Selections are made to identify
+* VBF events. The Reweight feature of mg5_amC is used to determine which 
+* extentions of the standard model legrangian resulting in  anamolous gauge 
+* couplings of the vector bosons would be statistically significant at the 
+* 13 TeV 2015 LHC.
+*/
+

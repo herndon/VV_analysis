@@ -33,8 +33,9 @@ public:
     void fillDeltaEta_jj(double deltaEta_jj);
     void fillMjj(double mjj);
     void fillZpt(double Zpt);
-    void fillWZtMass(double wztmass);
+    void fillWZTMass(double wztmass);
     void fillWZMass(double);
+    void fillWZTMassWeights(float wztmass, std::vector<float> weights);
     void printHistograms(const char*);
 };
 

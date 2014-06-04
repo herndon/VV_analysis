@@ -7,8 +7,6 @@ WZPlots::WZPlots(ExRootResult* result)
 WZPlots::WZPlots(ExRootResult* result,const int NUM_WEIGHTS, std::string nameBase)
 {
     this->result = result;
-    //jet_pt.resize(NUM_JETS);
-    //jet_eta.resize(NUM_JETS);
     wztmassWeights.resize(NUM_WEIGHTS);
 
     std::string histObjName = nameBase + "_electronPt";
@@ -30,8 +28,6 @@ WZPlots::WZPlots(ExRootResult* result,const int NUM_WEIGHTS, std::string nameBas
     muon_eta = result->AddHist1D(histObjName.c_str(), "Muon Eta",
                                  "Muon Eta", "Number of Muons",
                                   20, -4.0, 4.0);
-    //for(int i = 0; i < NUM_JETS; i++)
-    //{    
     histObjName = nameBase + "_jetPt";// + std::to_string(i) + "Pt";
     jet_pt = result->AddHist1D(histObjName.c_str(), "Jet P_{T}",
                                       "Jet P_{T} (GeV/c)", "Number of Jets",
@@ -40,7 +36,6 @@ WZPlots::WZPlots(ExRootResult* result,const int NUM_WEIGHTS, std::string nameBas
     jet_eta = result->AddHist1D(histObjName.c_str(), "Jet Eta",
                                       "Jet Eta", "Number of Jets",
                                        20, 0.0, 200.0);
-    //}
     
     histObjName = nameBase + "_deltaEta_jj";
     deltaEta_jj = result->AddHist1D(histObjName.c_str(), "Delta Eta JJ",
@@ -74,7 +69,7 @@ WZPlots::WZPlots(ExRootResult* result,const int NUM_WEIGHTS, std::string nameBas
     for(int i = 0; i < NUM_WEIGHTS; i++)
     {
         histObjName = nameBase + "_wztmass_weight" + std::to_string(i);
-        wztmass = result->AddHist1D(histObjName.c_str(), "WZ Transverse Mass",
+        wztmassWeights[i] = result->AddHist1D(histObjName.c_str(), "WZ Transverse Mass",
                                 "WZ Transverse Mass, GeV/c^{2})", "Number of Events",
                                  20, 0.0, 2000.0);
     }
@@ -111,13 +106,20 @@ void WZPlots::fillZpt(double Zpt)
 {
     this->Z_pt->Fill(Zpt);
 }
-void WZPlots::fillWZtMass(double wztmass)
+void WZPlots::fillWZTMass(double wztmass)
 {
     this->wztmass->Fill(wztmass);
 }
 void WZPlots::fillWZMass(double wzmass)
 {
     this->wzmass->Fill(wzmass);
+}
+void WZPlots::fillWZTMassWeights(float wztmass, std::vector<float> weights)
+{
+    for(unsigned int i = 0; i < wztmassWeights.size(); i++)
+     {
+         wztmassWeights[i]->Fill(wztmass, weights[i]);
+     }
 }
 void WZPlots::printHistograms(const char* type)
 {
