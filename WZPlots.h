@@ -35,7 +35,7 @@ public:
     void fillZpt(double Zpt);
     void fillWZTMass(double wztmass);
     void fillWZMass(double);
-    void fillWZTMassWeights(float wztmass, std::vector<float> weights);
+    void fillWZTMassWeights(float wztmass, std::vector<float>& weights);
     void printHistograms(const char*);
 };
 

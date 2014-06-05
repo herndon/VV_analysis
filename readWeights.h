@@ -4,6 +4,6 @@
 #include <fstream>
 #include <vector>
 
-void readWeights(const int NUM_WEIGHTS, std::vector<float> weights, std::fstream& lheFile);
+void readWeights(const int NUM_WEIGHTS, std::vector<float>& weights, std::fstream& lheFile);
 
 #endif
