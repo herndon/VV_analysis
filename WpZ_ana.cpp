@@ -1,31 +1,13 @@
-/*
-root -b rootlogin.C
-gSystem->Load("libExRootAnalysis.so");
-.L WpZ_ana.C+
-WpZ_ana("1")
-
-
-WpZ_ana("unweighted_events.lhe.root")
-
-
-root -l WpZ_ana.C\(\".root\"\)
-*/
-
 #include "TSystem.h"
 #include "THStack.h"
 #include "TLegend.h"
 #include "TPaveText.h"
-//#include "TLorentzVector.h"
-
-
 
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
 #include "external/ExRootAnalysis/ExRootTreeWriter.h"
 #include "external/ExRootAnalysis/ExRootTreeBranch.h"
 #include "external/ExRootAnalysis/ExRootResult.h"
 #include "external/ExRootAnalysis/ExRootUtilities.h"
-//#include "external/ExRootAnalysis/ExRootClasses.h"
-
 
 #include "iostream"
 #include <vector>
@@ -36,8 +18,8 @@ root -l WpZ_ana.C\(\".root\"\)
 
 void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_WEIGHTS);
 void WpZ_ana(const char *inputFile, int NUM_WEIGHTS);
-bool WZMassCalculation(const TLorentzVector& lVectorlW, const TLorentzVector& lVectorMET,
-                           Float_t WMass, Float_t pz);
+bool WZMassCalculation(const TLorentzVector& lVectorlW,
+                     const TLorentzVector& lVectorMET, Float_t WMass, Float_t pz);
 
 using namespace std;
 
@@ -53,7 +35,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
     cout << "Processing file " << inputFile << endl;
   
     bool useWeightInfo = true;
-    vector<float> weights;//(NUM_WEIGHTS, 0.);
+    vector<float> weights;
     weights.resize(NUM_WEIGHTS);
     
     fstream lheFile;
@@ -61,7 +43,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
 
     // Get pointers to branches used in analysis
     TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
-    //TClonesArray *branchEvent = treeReader->UseBranch("Event");
     
     Long64_t allEntries = treeReader->GetEntries();
     cout << "** Chain contains " << allEntries << " events" << endl;
@@ -89,7 +70,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
     selectionEvents.setJetSelection(2);
     selectionEvents.setMetCut(30);
     selectionEvents.setZMassCut(20);
-    //selectionEvents.setWZTMassCut(1200);
+    selectionEvents.setWZTMassCut(1200);
     selectionEvents.setJetMassCut(600);
     selectionEvents.setEtajjCut(4.);
 
@@ -106,7 +87,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
         if (useWeightInfo) 
         {
             readWeights(NUM_WEIGHTS, weights, lheFile);
-    
+            
             for(int i = 0; i < NUM_WEIGHTS; i++)
             {
                 nwGenWZ_all[i] += weights[i]; 
@@ -117,9 +98,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
         wzEvent.loadEvent(branchGenParticle);
        
         generatorEvents.processEvent(&wzEvent, weights);
-       
-        //if(entry % 100 == 1)
-          //  cout << "weights 1 = " << weights[1];
         selectionEvents.processEvent(&wzEvent, weights);
     }
     //Standard Model cross section in picobarns

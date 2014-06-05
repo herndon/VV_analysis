@@ -13,6 +13,13 @@ void readWeights(const int NUM_WEIGHTS, vector<float>& weights, fstream& lheFile
     char lheFileWeight[14];
     bool foundPos = false;
 
+    while (!foundPos)
+    {
+        lheFile.read ((char*)&lheFileLine,sizeof(lheFileLine));
+        if (strcmp(lheFileLine,"<rwgt>")==0)
+            foundPos = true;
+        lheFile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+    }
     for(int i = 0; i < NUM_WEIGHTS; ++i)
     {
         foundPos = false;
