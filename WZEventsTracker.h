@@ -50,7 +50,7 @@ public:
     void setWZTMassCut(float WZTMass);
     void setZMassCut(float ZMass);
     void setEtajjCut(float eta_jj);
-    void processEvent(WZEvent* wzEvent, std::vector<float> weights);
+    void processEvent(WZEvent* wzEvent, std::vector<float>& weights);
     void printEventInfo();
-    void fillPlots(std::vector<float> weights);
+    void fillPlots(std::vector<float>& weights);
 };

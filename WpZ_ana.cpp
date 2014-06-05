@@ -53,7 +53,8 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
     cout << "Processing file " << inputFile << endl;
   
     bool useWeightInfo = true;
-    vector<float> weights(NUM_WEIGHTS, 0.);
+    vector<float> weights;//(NUM_WEIGHTS, 0.);
+    weights.resize(NUM_WEIGHTS);
     
     fstream lheFile;
     lheFile.open("unweighted_events.lhe", ios::in | ios::binary);
@@ -88,7 +89,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
     selectionEvents.setJetSelection(2);
     selectionEvents.setMetCut(30);
     selectionEvents.setZMassCut(20);
-    selectionEvents.setWZTMassCut(1200);
+    //selectionEvents.setWZTMassCut(1200);
     selectionEvents.setJetMassCut(600);
     selectionEvents.setEtajjCut(4.);
 
@@ -116,6 +117,9 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
         wzEvent.loadEvent(branchGenParticle);
        
         generatorEvents.processEvent(&wzEvent, weights);
+       
+        //if(entry % 100 == 1)
+          //  cout << "weights 1 = " << weights[1];
         selectionEvents.processEvent(&wzEvent, weights);
     }
     //Standard Model cross section in picobarns

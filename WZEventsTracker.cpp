@@ -51,7 +51,7 @@ void WZEventsTracker::setEtajjCut(float eta_jj)
 }
 
 //THESE ARE TIERED CUTS!
-void WZEventsTracker::processEvent(WZEvent* event)
+void WZEventsTracker::processEvent(WZEvent* event, std::vector<float>& weights)
 {
     wzEvent = event;
     
@@ -80,7 +80,7 @@ void WZEventsTracker::processEvent(WZEvent* event)
             return;
     }
     
-    fillPlots();
+    fillPlots(weights);
       
 }
 
@@ -133,7 +133,7 @@ void WZEventsTracker::printEventInfo()
     cout << " " << endl << "____________________________\n";
 }
 
-void WZEventsTracker::fillPlots()
+void WZEventsTracker::fillPlots(std::vector<float>& weights)
 {
     for(auto electron : wzEvent->getAllElectrons())
     {
@@ -151,7 +151,8 @@ void WZEventsTracker::fillPlots()
     plots->fillDeltaEta_jj(std::abs(wzEvent->getJet1().Eta() - wzEvent->getJet2().Eta()));
     plots->fillMjj(wzEvent->getJetSum().M());
     plots->fillZpt(wzEvent->getZ().Pt());
-    plots->fillWZtMass(wzEvent->getWZleptonMETSum().M());
+    plots->fillWZTMass(wzEvent->getWZleptonMETSum().M());
     plots->fillWZMass(wzEvent->getWZSum().M());
+    plots->fillWZTMassWeights(wzEvent->getWZleptonMETSum().M(), weights);
 }
 
