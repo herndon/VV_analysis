@@ -119,6 +119,11 @@ TLorentzVector WZEvent::getMETVector()
 {
     return wzlVectors.MET;
 }
+//const& std::vector<float> WZEvent::getWeights()
+//{
+//    return weights;
+//}
+//void readWeights
 void WZEvent::foundLepton()
 {
     counter.leptons++;

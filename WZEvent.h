@@ -121,6 +121,7 @@ class WZEvent
 private: 
     TRootLHEFParticle* particle;
     TRootLHEFParticle* particleMother;
+    //vector<float> weights;
     float WMass;
     float ZMass;
     float MET;
@@ -136,7 +137,7 @@ private:
     void foundW();
     void foundZ();
     void foundMET();
-    
+    //void readWeights();   
 public:
     /// Constructor
     WZEvent();

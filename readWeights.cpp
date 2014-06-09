@@ -3,35 +3,63 @@
 #include <iostream>
 #include <limits>
 #include <stdlib.h>
+#include <string>
 
 using namespace std;
-
-void readWeights(const int NUM_WEIGHTS, vector<float>& weights, fstream& lheFile)
+/*
+int main()
 {
-    char lheFileLine[6];
-    char lheFileChar;
-    char lheFileWeight[14];
-    bool foundPos = false;
+    std::vector<float> weights;
+    fstream lheFile;
+    lheFile.open("unweighted_events.lhe", ios::in | ios::binary); 
 
-    while (!foundPos)
+    for(int entry = 0; entry < 10; entry++)
     {
-        lheFile.read ((char*)&lheFileLine,sizeof(lheFileLine));
-        if (strcmp(lheFileLine,"<rwgt>")==0)
-            foundPos = true;
-        lheFile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
-    }
-    for(int i = 0; i < NUM_WEIGHTS; ++i)
-    {
-        foundPos = false;
-	    while (!foundPos)
+        weights.clear();
+        readWeights(weights, lheFile);
+        
+        cout << "\nFor Entry " << entry << endl;
+
+        for(unsigned int i = 0; i < weights.size(); i++)
         {
-	        lheFile.read ((char*)&lheFileChar,sizeof(lheFileChar));
-            if (lheFileChar=='>')  foundPos = true;
+            cout << "weight " << i << " = " << weights[i] << endl;
         }
-	    lheFile.read ((char*)&lheFileChar,sizeof(lheFileChar));
-        lheFile.read ((char*)&lheFileWeight,sizeof(lheFileWeight));
-        weights[i] = atof(lheFileWeight);
-        lheFile.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+    }
+    return 0;
+}*/
+void readWeights(vector<float>& weights, fstream& lheFile)
+{
+    char line[256];
+    int position;   
+    string lheFileLine;
+    bool foundEventWeights = false;
+    const int WEIGHT_SIZE = 14;
+
+    weights.clear();
+
+    do {
+        lheFile.getline(line, 256);
+        lheFileLine.assign(line);
+    } while(lheFileLine.find("<rwgt>") ==  string::npos);
+
+    if(lheFile.good() && !lheFile.eof())
+        foundEventWeights = true;
+    else
+        cout << "Error in reading .lhe file\n";
+
+    while(foundEventWeights)
+    {
+        lheFile.getline(line, 256);
+        string lheFileLine = line;
+        position = lheFileLine.find("</wgt>");
+        if(position == string::npos)
+            foundEventWeights = false;
+        else
+        {   
+            const char* lheEventWeight =
+                lheFileLine.substr(position - WEIGHT_SIZE - 1, position - 1).c_str();
+            weights.push_back(atof(lheEventWeight));
+        }
     }
 }
 

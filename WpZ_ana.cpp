@@ -36,7 +36,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
   
     bool useWeightInfo = true;
     vector<float> weights;
-    weights.resize(NUM_WEIGHTS);
+    //weights.resize(NUM_WEIGHTS);
     
     fstream lheFile;
     lheFile.open("unweighted_events.lhe", ios::in | ios::binary);
@@ -70,7 +70,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
     selectionEvents.setJetSelection(2);
     selectionEvents.setMetCut(30);
     selectionEvents.setZMassCut(20);
-    selectionEvents.setWZTMassCut(1200);
+   // selectionEvents.setWZTMassCut(1200);
     selectionEvents.setJetMassCut(600);
     selectionEvents.setEtajjCut(4.);
 
@@ -86,7 +86,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
 
         if (useWeightInfo) 
         {
-            readWeights(NUM_WEIGHTS, weights, lheFile);
+            readWeights(weights, lheFile);
             
             for(int i = 0; i < NUM_WEIGHTS; i++)
             {
