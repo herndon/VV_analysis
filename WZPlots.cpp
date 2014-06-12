@@ -114,7 +114,7 @@ void WZPlots::fillWZMass(double wzmass)
 {
     this->wzmass->Fill(wzmass);
 }
-void WZPlots::fillWZTMassWeights(float wztmass, std::vector<float>& weights)
+void WZPlots::fillWZTMassWeights(float wztmass,const std::vector<float>& weights)
 {
     for(unsigned int i = 0; i < wztmassWeights.size(); i++)
      {
