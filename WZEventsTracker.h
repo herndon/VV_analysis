@@ -24,7 +24,7 @@ struct WZTieredCuts
 struct WZKinematicCuts
 {
     float WZTMass;
-    float jetMass;
+    float diJetMass;
     float jetDeltaEta;
 };
 class WZEventsTracker
@@ -34,23 +34,24 @@ private:
     WZEvent* wzEvent;
     WZPlots* plots;
     std::string nameBase;
-    bool useCuts; 
+    bool useWeights;
+    std::vector<float> crossSections;
     WZTieredCuts tieredCuts;
     WZKinematicCuts kinCuts;
     EventCounters eventCounts;
     void processByLeptonType();
     bool passedKinematicCuts();
 public:
-    WZEventsTracker(ExRootResult* result, const int NUM_WEIGHTS, std::string name, bool cuts);
+    WZEventsTracker(ExRootResult* result, const int NUM_WEIGHTS, std::string name);
     ~WZEventsTracker();
     void setLeptonSelection(int numLeptons);
     void setJetSelection(int numJets);
     void setMetCut(float metCut);
-    void setJetMassCut(float jetMass);
+    void setJetMassCut(float diJetMass);
     void setWZTMassCut(float WZTMass);
     void setZMassCut(float ZMass);
     void setEtajjCut(float eta_jj);
-    void processEvent(WZEvent* wzEvent, std::vector<float>& weights);
+    void processEvent(WZEvent* wzEvent);
     void printEventInfo();
-    void fillPlots(std::vector<float>& weights);
+    void fillPlots();
 };

@@ -3,13 +3,19 @@
 
 using namespace std;
 
-WZEventsTracker::WZEventsTracker(ExRootResult* result, 
-                                            const int NUM_WEIGHTS, std::string name, bool cuts)
+WZEventsTracker::WZEventsTracker(ExRootResult* result, const int NUM_WEIGHTS, std::string name)
 {
-    useCuts = cuts;
     nameBase = name;
     plots = new WZPlots(result, NUM_WEIGHTS, nameBase);
-
+    
+    if(NUM_WEIGHTS > 1)
+    {
+        useWeights = true;
+        crossSections.resize(NUM_WEIGHTS);
+        crossSections = {0.};
+    }
+    else
+        useWeights = false;
     eventCounts = {0};
     kinCuts = {0.};
     tieredCuts.numHighPtLeptons = 0;
@@ -17,6 +23,7 @@ WZEventsTracker::WZEventsTracker(ExRootResult* result,
     tieredCuts.met = 0.;
     tieredCuts.ZMassRange = 0.;
 }
+
 WZEventsTracker::~WZEventsTracker()
 {
     delete plots;
@@ -41,9 +48,9 @@ void WZEventsTracker::setWZTMassCut(float WZTMass)
 {  
     kinCuts.WZTMass = WZTMass;
 }
-void WZEventsTracker::setJetMassCut(float jetMass)
+void WZEventsTracker::setJetMassCut(float diJetMass)
 {
-    kinCuts.jetMass = jetMass;
+    kinCuts.diJetMass = diJetMass;
 }
 void WZEventsTracker::setEtajjCut(float eta_jj)
 {
@@ -51,46 +58,53 @@ void WZEventsTracker::setEtajjCut(float eta_jj)
 }
 
 //THESE ARE TIERED CUTS!
-void WZEventsTracker::processEvent(WZEvent* event, std::vector<float>& weights)
+void WZEventsTracker::processEvent(WZEvent* event)
 {
     wzEvent = event;
-    
-    if(useCuts)
+
+    if(!passedKinematicCuts())
+        return;
+    if(wzEvent->getNumPostCutLeptons() == tieredCuts.numHighPtLeptons)
     {
-        if(!passedKinematicCuts())
-            return;
-        if(wzEvent->getNumHighPtLeptons() == tieredCuts.numHighPtLeptons)
-        {
-            eventCounts.passedLeptonCut++;
-            processByLeptonType();
-        }
-        else
-            return;
-        if(wzEvent->getNumPostCutJets() == tieredCuts.numHighPtJets)
-            eventCounts.passedJetCut++;
-        else
-            return;
-        if(wzEvent->getMET() > tieredCuts.met)
-            eventCounts.passedMETCut++;
-        else
-            return;
-        if(std::abs(wzEvent->getZMass() - ON_SHELL_ZMASS) < tieredCuts.ZMassRange)     
-            eventCounts.passedZMassCut++;       
-        else
-            return;
+        eventCounts.passedLeptonCut++;
+        processByLeptonType();
     }
-    
-    fillPlots(weights);
-      
+    else
+        return;
+    if(wzEvent->getNumPostCutJets() == tieredCuts.numHighPtJets)
+        eventCounts.passedJetCut++;
+    else
+        return;
+    if(wzEvent->getMET() > tieredCuts.met)
+        eventCounts.passedMETCut++;
+    else
+        return;
+    if(std::abs(wzEvent->getZMass() - ON_SHELL_ZMASS) < tieredCuts.ZMassRange)     
+        eventCounts.passedZMassCut++;       
+    else
+        return;
+
+    if(useWeights)
+    {
+        int i = 0;
+        for(auto weight : wzEvent->getWeights())
+        {
+            crossSections[i] += weight;
+            i++;
+        }
+    }
+
+    fillPlots();
+
 }
 
 bool WZEventsTracker::passedKinematicCuts()
 {
-    if(wzEvent->getWZleptonMETSum().M() < kinCuts.WZTMass)
+    if(wzEvent->getWZTransMass() < kinCuts.WZTMass)
         return false;
-    else if(std::abs(wzEvent->getJet1().Eta() - wzEvent->getJet2().Eta()) < kinCuts.jetDeltaEta)
+    else if(std::abs(wzEvent->getJetDeltaEta() < kinCuts.jetDeltaEta))
         return false;
-    else if(wzEvent->getJetSum().M() < kinCuts.jetMass)
+    else if(wzEvent->getDiJetInvMass() < kinCuts.diJetMass)
         return false;
     
     return true;
@@ -99,8 +113,8 @@ bool WZEventsTracker::passedKinematicCuts()
 
 void WZEventsTracker::processByLeptonType()
 {
-    int numHighPtE = wzEvent->getNumHighPtElectrons();
-    int numHighPtMu = wzEvent->getNumHighPtMuons();
+    int numHighPtE = wzEvent->getNumPostCutElectrons();
+    int numHighPtMu = wzEvent->getNumPostCutMuons();
 
     if(numHighPtE == 3 && numHighPtMu == 0)
         eventCounts.events3e++;
@@ -119,21 +133,31 @@ void WZEventsTracker::processByLeptonType()
 }
 void WZEventsTracker::printEventInfo()
 {
-    cout << "\nOutput from the WZEventsTrackerClass\n";
+    cout << "\n\nEvents Passing Selection for " << nameBase << " class" << endl;
+    cout << "Kinematic cuts applied to all events: " << endl;
+    cout << "di-Jet invariant mass > " << kinCuts.diJetMass << " GeV" << endl;
+    cout << "Jet eta separation > " << kinCuts.jetDeltaEta << endl;
+    cout << "WZ transverse mass > " << kinCuts.WZTMass << " GeV" << endl << endl;
 
-    cout << "Gen event counts" << endl;
-    cout << "Gen Baseline selection 1, leptons: " << eventCounts.passedLeptonCut << endl;
-    cout << "Gen Baseline selection 1, 3m     : " << eventCounts.events3mu << endl;
-    cout << "Gen Baseline selection 1, 2m1e   : " << eventCounts.events2mu1e << endl;
-    cout << "Gen Baseline selection 1, 2e1m   : " << eventCounts.events2e1mu << endl;
-    cout << "Gen Baseline selection 1, 3e     : " << eventCounts.events3e << endl;
-    cout << "Gen Baseline selection 1, jets   : " << eventCounts.passedJetCut << endl;
-    cout << "Gen Baseline selection 1, MET    : " << eventCounts.passedMETCut << endl;
-    cout << "Gen Baseline selection 1, Z      : " << eventCounts.passedZMassCut << endl;
-    cout << " " << endl << "____________________________\n";
+    cout << "Number of events passing post cut lepton number = "
+         << tieredCuts.numHighPtLeptons << ": "  << eventCounts.passedLeptonCut
+         << endl;
+    cout << "Number of 3 muon events: " << eventCounts.events3mu << endl;
+    cout << "Number of 1 electron 2 muon events:  " << eventCounts.events2mu1e 
+         << endl;
+    cout <<  "Number of 2 electron 1 muon events:  " << eventCounts.events2e1mu
+         << endl;
+    cout <<  "Number of 3 electon  events:  " << eventCounts.events3e << endl;
+    cout << "Number of events passing post cut jet number: "
+         << tieredCuts.numHighPtJets  << eventCounts.passedJetCut << endl;
+    cout << "Number of events with MET > " << tieredCuts.met << " GeV: "
+         << eventCounts.passedMETCut << endl;
+    cout << "Number of events with Z Mass within " << tieredCuts.ZMassRange
+         << " GeV of on-shell Z mass: " << eventCounts.passedZMassCut << endl;
+    cout << "\n__________________________________________________________________\n";
 }
 
-void WZEventsTracker::fillPlots(std::vector<float>& weights)
+void WZEventsTracker::fillPlots()
 {
     for(auto electron : wzEvent->getAllElectrons())
     {
@@ -148,11 +172,14 @@ void WZEventsTracker::fillPlots(std::vector<float>& weights)
         plots->addJet(jet.pt, jet.eta);
     }
     plots->fillMET(wzEvent->getMET());
-    plots->fillDeltaEta_jj(std::abs(wzEvent->getJet1().Eta() - wzEvent->getJet2().Eta()));
-    plots->fillMjj(wzEvent->getJetSum().M());
-    plots->fillZpt(wzEvent->getZ().Pt());
-    plots->fillWZTMass(wzEvent->getWZleptonMETSum().M());
-    plots->fillWZMass(wzEvent->getWZSum().M());
-    plots->fillWZTMassWeights(wzEvent->getWZleptonMETSum().M(), weights);
+    plots->fillDeltaEta_jj(wzEvent->getJetDeltaEta());
+    plots->fillMjj(wzEvent->getDiJetInvMass());
+    plots->fillZpt(wzEvent->getZpt());
+    plots->fillWZTMass(wzEvent->getWZTransMass());
+    plots->fillWZMass(wzEvent->getWZInvMass());
+    if(useWeights)
+    {
+        plots->fillWZTMassWeights(wzEvent->getWZTransMass(), wzEvent->getWeights());
+    }
 }
 

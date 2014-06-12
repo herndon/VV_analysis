@@ -2,9 +2,25 @@
 #include <cmath>
 #include <iostream>
 
+WZEvent::WZEvent(const char* lheFileName)
+{
+    weights = new LHEWeights(lheFileName);
+    useWeights = true;
+    resetEvent();
+}
 WZEvent::WZEvent()
 {
+    useWeights = false;
+    weights = NULL;
     resetEvent();
+}
+WZEvent::~WZEvent()
+{
+    delete weights;
+}
+const std::vector<float>& WZEvent::getWeights()
+{
+    return weights->getVector();
 }
 void WZEvent::loadEvent(TClonesArray* branchGenParticle)
 {
@@ -34,29 +50,35 @@ void WZEvent::loadEvent(TClonesArray* branchGenParticle)
         else if (particle->PID==24)  
             foundW();
     }
-}
-TLorentzVector WZEvent::getWZSum()
-{
-    return wzlVectors.W + wzlVectors.Z;
-}
-TLorentzVector WZEvent::getWZleptonMETSum()
-{
-    return  wzlVectors.lepton1 + wzlVectors.lepton2
-                           + wzlVectors.MET  + wzlVectors.lepton3;
-}
-TLorentzVector WZEvent::getLeptonFromW()
-{
-    return wzlVectors.leptonFromW;
-}
-TLorentzVector WZEvent::getJetSum()
-{
-    return wzlVectors.jet1 + wzlVectors.jet2;
-}
-TLorentzVector WZEvent::getZ()
-{
-    return wzlVectors.Z;
-}
+    if(useWeights)
+        weights->readWeights();
 
+}
+float WZEvent::getWZInvMass()
+{
+    return (wzlVectors.W + wzlVectors.Z).M();
+}
+float WZEvent::getWZTransMass()
+{
+    return  (wzlVectors.lepton1 + wzlVectors.lepton2  + wzlVectors.lepton3
+                                     + wzlVectors.MET).M();
+}
+float WZEvent::getDiJetInvMass()
+{
+    return (wzlVectors.jet1 + wzlVectors.jet2).M();
+}
+float WZEvent::getJetDeltaEta()
+{
+    return std::abs(wzlVectors.jet1.Eta() - wzlVectors.jet2.Eta());
+}
+float WZEvent::getZpt()
+{
+    return wzlVectors.Z.Pt();
+}
+int WZEvent::getNumWeights()
+{
+    return weights->getNumWeights();
+}
 void WZEvent::setLeptonCuts(float leptonPt, float leptonEta)
 {
     cuts.leptonPt = leptonPt;
@@ -67,27 +89,27 @@ void WZEvent::setJetCuts(float jetPt, float jetEta)
     cuts.jetPt = jetPt;
     cuts.jetEta = jetEta;
 }
-int WZEvent::getGenLeptonNumber()
+int WZEvent::getNumLeptons()
 {
     return counter.leptons;
 }
-int WZEvent::getGenElectronNumber()
+int WZEvent::getNumElectrons()
 {
     return counter.electrons;
 }
-int WZEvent::getGenMuonNumber()
+int WZEvent::getNumMuons()
 {
     return counter.muons;
 }
-int WZEvent::getNumHighPtMuons()
+int WZEvent::getNumPostCutMuons()
 {
     return counter.muonsPostCut;
 }
-int WZEvent::getNumHighPtElectrons()
+int WZEvent::getNumPostCutElectrons()
 {
     return counter.electronsPostCut;
 }
-int WZEvent::getNumHighPtLeptons()
+int WZEvent::getNumPostCutLeptons()
 {
     return counter.leptonsPostCut;
 }
@@ -115,15 +137,7 @@ std::vector<GeneratorParticle> WZEvent::getAllJets()
 {
     return allJets;
 }
-TLorentzVector WZEvent::getMETVector()
-{
-    return wzlVectors.MET;
-}
-//const& std::vector<float> WZEvent::getWeights()
-//{
-//    return weights;
-//}
-//void readWeights
+
 void WZEvent::foundLepton()
 {
     counter.leptons++;
@@ -219,15 +233,6 @@ void WZEvent::foundMET()
     MET = particle->PT;
     wzlVectors.MET.SetPtEtaPhiM(particle->PT, 0.0,
                         particle->Phi,particle->M);
-}
-TLorentzVector WZEvent::getJet1()
-{
-    return wzlVectors.jet1;
-}
-
-TLorentzVector WZEvent::getJet2()
-{
-    return wzlVectors.jet2;
 }
 int WZEvent::getNumPostCutJets()
 {

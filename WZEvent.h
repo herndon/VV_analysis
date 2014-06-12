@@ -21,7 +21,7 @@
 #include "external/ExRootAnalysis/ExRootClasses.h"
 #include <vector>
 #include <string>
-
+#include "LHEWeights.h"
 
 
 /**
@@ -121,7 +121,8 @@ class WZEvent
 private: 
     TRootLHEFParticle* particle;
     TRootLHEFParticle* particleMother;
-    //vector<float> weights;
+    LHEWeights* weights;
+    bool useWeights;
     float WMass;
     float ZMass;
     float MET;
@@ -137,40 +138,40 @@ private:
     void foundW();
     void foundZ();
     void foundMET();
-    //void readWeights();   
+    void readWeights();   
 public:
     /// Constructor
     WZEvent();
     /// Constructor with stuff
-    WZEvent(TRootLHEFParticle*, TRootLHEFParticle*);
-    /// Reads Event
-    void loadEvent(TClonesArray* branchGenPArticle);
-    /// Sets Lepton Pt and Eta cuts for identifying a VBF event
+    WZEvent(const char* lheFileName);
+    ~WZEvent();
+    void loadEvent(TClonesArray* branchGenParticle);
     void setLeptonCuts(float, float);
     void setJetCuts(float, float);
     void removeCuts();
-    TLorentzVector getWZSum();
-    TLorentzVector getWZleptonMETSum();
-    TLorentzVector getLeptonFromW();
-    TLorentzVector getJet1();
-    TLorentzVector getJet2();
-    TLorentzVector getMETVector();
-    TLorentzVector getJetSum();
-    TLorentzVector getZ();
+
+    float getDiJetInvMass();
+    float getJetDeltaEta();
+    float getZpt();
+    float getWZTransMass();
+    float getWZInvMass();
+
     std::vector<GeneratorParticle> getAllElectrons();
     std::vector<GeneratorParticle> getAllMuons();
     std::vector<GeneratorParticle> getAllJets();
+    const std::vector<float>& getWeights();
     void resetEvent();
     float getWMass();
     float getZMass();
     float getMET();
-    int getGenLeptonNumber();
-    int getGenElectronNumber();
-    int getGenMuonNumber();
-    int getNumHighPtMuons();
-    int getNumHighPtElectrons();
-    int getNumHighPtLeptons();
+    int getNumLeptons();
+    int getNumElectrons();
+    int getNumMuons();
+    int getNumPostCutMuons();
+    int getNumPostCutElectrons();
+    int getNumPostCutLeptons();
     int getNumPostCutJets();
+    int getNumWeights();
 };
 
 #endif

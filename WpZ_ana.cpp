@@ -9,15 +9,11 @@
 #include "external/ExRootAnalysis/ExRootResult.h"
 #include "external/ExRootAnalysis/ExRootUtilities.h"
 
-#include "iostream"
-#include <vector>
-#include "fstream"
-#include "readWeights.h" 
 #include "WZEvent.h"
 #include "WZEventsTracker.h"
+#include <iostream>
 
-void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_WEIGHTS);
-void WpZ_ana(const char *inputFile, int NUM_WEIGHTS);
+void AnalyseEvents(ExRootTreeReader *treeReader);
 bool WZMassCalculation(const TLorentzVector& lVectorlW,
                      const TLorentzVector& lVectorMET, Float_t WMass, Float_t pz);
 
@@ -27,20 +23,24 @@ using namespace std;
 
 int main()
 {
-    WpZ_ana("unweighted_events.root", 31);
-    return 0;
-}
-void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_WEIGHTS)
-{
-    cout << "Processing file " << inputFile << endl;
-  
-    bool useWeightInfo = true;
-    vector<float> weights;
-    //weights.resize(NUM_WEIGHTS);
-    
-    fstream lheFile;
-    lheFile.open("unweighted_events.lhe", ios::in | ios::binary);
+    const char* inputFile = "unweighted_events.root";
+    TChain *chain = new TChain("LHEF");
 
+    cout << "Processing file " << inputFile << endl;
+    chain->Add(inputFile);
+
+    ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
+
+    AnalyseEvents(treeReader);
+    
+    delete treeReader;
+    delete chain;
+    
+    return 0;   
+}
+//------------------------------------------------------------------------------
+void AnalyseEvents(ExRootTreeReader *treeReader)
+{
     // Get pointers to branches used in analysis
     TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
     
@@ -48,24 +48,22 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
     cout << "** Chain contains " << allEntries << " events" << endl;
     cout.flush();
 
-    vector<float> nwGenWZ_all(NUM_WEIGHTS, 0.);
-    vector<float> nwGenWZ_gbr2(NUM_WEIGHTS, 0.);
-    vector<float> nwGenWZ_wztmass(NUM_WEIGHTS, 0.);
-    WZEvent wzEvent = WZEvent();
+    WZEvent wzEvent = WZEvent("unweighted_events.lhe");
     wzEvent.setLeptonCuts(20, 2.4);
     wzEvent.setJetCuts(30, 4.7);
-
     
     ExRootResult* selectionResult = new ExRootResult;
     ExRootResult* generatorResult = new ExRootResult;
 
-    WZEventsTracker generatorEvents(generatorResult, 31, "generator", true);
+    WZEventsTracker generatorEvents(generatorResult,wzEvent.getNumWeights(),
+                                                                "generator");
     generatorEvents.setLeptonSelection(3);
     generatorEvents.setJetSelection(2);
     generatorEvents.setMetCut(30);
     generatorEvents.setZMassCut(20);
     
-    WZEventsTracker selectionEvents(selectionResult, 31, "selection", true);
+    WZEventsTracker selectionEvents(selectionResult, wzEvent.getNumWeights(),
+                                                                    "selection");
     selectionEvents.setLeptonSelection(3);
     selectionEvents.setJetSelection(2);
     selectionEvents.setMetCut(30);
@@ -82,23 +80,11 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
         //Updates entry pointed to by branchGenParticle and branchEvent 
         treeReader->ReadEntry(entry);
 	    
-        if ((entry%1000) == 0)  cout << entry << endl;
-
-        if (useWeightInfo) 
-        {
-            readWeights(weights, lheFile);
-            
-            for(int i = 0; i < NUM_WEIGHTS; i++)
-            {
-                nwGenWZ_all[i] += weights[i]; 
-            }
-        }  
-
         wzEvent.resetEvent();
         wzEvent.loadEvent(branchGenParticle);
        
-        generatorEvents.processEvent(&wzEvent, weights);
-        selectionEvents.processEvent(&wzEvent, weights);
+        generatorEvents.processEvent(&wzEvent);
+        selectionEvents.processEvent(&wzEvent);
     }
     //Standard Model cross section in picobarns
     //FT1 = 0 corresponds to SM, which is the 16th parameter used in Cards/reweight_card.dat
@@ -113,26 +99,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* inputFile, int NUM_
     selectionResult->Write("selectionResult.root");
     delete generatorResult;
     delete selectionResult;
-}
-//------------------------------------------------------------------------------
-void WpZ_ana(const char* inputFile, int NUM_WEIGHTS)
-{
-    TChain *chain = new TChain("LHEF");
-    //const char * outputFile = "results_wpz_ewk.root";
-
-    cout << "Processing file " << inputFile << endl;
-    chain->Add(inputFile);
-
-    ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
-
-
-    AnalyseEvents(treeReader, inputFile, NUM_WEIGHTS);
-    
-    cout << "** Exiting..." << endl;
-    
-    delete treeReader;
-    delete chain;
-   
 }
 //------------------------------------------------------------------------------
 bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVectorMET,
