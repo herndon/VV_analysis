@@ -54,6 +54,20 @@ void WZEvent::loadEvent(TClonesArray* branchGenParticle)
         weights->readWeights();
 
 }
+float WZEvent::getSMWeight()
+{
+    if(weights == NULL)
+        return 0.;
+    else
+        return weights->getSMWeight();
+}
+const int WZEvent::getSMWeightPos()
+{
+    if(weights == NULL)
+        return 0;
+    else
+        return weights->getSMWeightPos();
+}
 float WZEvent::getWZInvMass()
 {
     return (wzlVectors.W + wzlVectors.Z).M();
@@ -77,7 +91,10 @@ float WZEvent::getZpt()
 }
 int WZEvent::getNumWeights()
 {
-    return weights->getNumWeights();
+    if(weights == NULL)
+        return 0;
+    else
+        return weights->getNumWeights();
 }
 void WZEvent::setLeptonCuts(float leptonPt, float leptonEta)
 {

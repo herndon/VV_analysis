@@ -2,9 +2,10 @@
 
 WZPlots::WZPlots(ExRootResult* result)
 {
-    WZPlots(result, 1, "");
+    WZPlots(result, "", 0, 0);
 }
-WZPlots::WZPlots(ExRootResult* result,const int NUM_WEIGHTS, std::string nameBase)
+WZPlots::WZPlots(ExRootResult* result, std::string nameBase,
+                            const int NUM_WEIGHTS, const int SMWeightPos)
 {
     this->result = result;
     wztmassWeights.resize(NUM_WEIGHTS);
@@ -68,58 +69,63 @@ WZPlots::WZPlots(ExRootResult* result,const int NUM_WEIGHTS, std::string nameBas
                                 1000, 0.0, 10000.0);
     for(int i = 0; i < NUM_WEIGHTS; i++)
     {
-        histObjName = nameBase + "_wztmass_weight" + std::to_string(i);
+        if(i == SMWeightPos)
+            histObjName = nameBase + "_wztmass_" + "SM";
+        else
+            histObjName = nameBase + "_wztmass_weight" + std::to_string(i);
+        
         wztmassWeights[i] = result->AddHist1D(histObjName.c_str(), "WZ Transverse Mass",
-                                "WZ Transverse Mass, GeV/c^{2})", "Number of Events",
+                                "WZ Transverse Mass, (GeV/c^{2})", "Number of Events",
                                  20, 0.0, 2000.0);
     }
 }
-void WZPlots::addElectron(float pt, float eta)
+void WZPlots::addElectron(float pt, float eta, float scale)
 {
-    electron_pt->Fill(pt);
-    electron_eta->Fill(eta);
+    electron_pt->Fill(pt, scale);
+    electron_eta->Fill(eta, scale);
 }
 
-void WZPlots::addMuon(float pt, float eta)
+void WZPlots::addMuon(float pt, float eta, float scale)
 {
-    muon_pt->Fill(pt);
-    muon_eta->Fill(eta);
+    muon_pt->Fill(pt, scale);
+    muon_eta->Fill(eta, scale);
 }
-void WZPlots::addJet(float pt, float eta)
+void WZPlots::addJet(float pt, float eta, float scale)
 {
-    jet_pt->Fill(pt);
-    jet_eta->Fill(eta);
+    jet_pt->Fill(pt, scale);
+    jet_eta->Fill(eta, scale);
 }
-void WZPlots::fillMET(float met)
+void WZPlots::fillMET(float met, float scale)
 {
-    this->met->Fill(met);
+    this->met->Fill(met, scale);
 }
-void WZPlots::fillDeltaEta_jj(double deltaEta_jj)
+void WZPlots::fillDeltaEta_jj(double deltaEta_jj, float scale)
 {
-    this->deltaEta_jj->Fill(deltaEta_jj);
+    this->deltaEta_jj->Fill(deltaEta_jj, scale);
 }
-void WZPlots::fillMjj(double mjj)
+void WZPlots::fillMjj(double mjj, float scale)
 {
-    this->mjj->Fill(mjj);
+    this->mjj->Fill(mjj, scale);
 }
-void WZPlots::fillZpt(double Zpt)
+void WZPlots::fillZpt(double Zpt, float scale)
 {
-    this->Z_pt->Fill(Zpt);
+    this->Z_pt->Fill(Zpt, scale);
 }
-void WZPlots::fillWZTMass(double wztmass)
+void WZPlots::fillWZTMass(double wztmass, float scale)
 {
-    this->wztmass->Fill(wztmass);
+    this->wztmass->Fill(wztmass, scale);
 }
-void WZPlots::fillWZMass(double wzmass)
+void WZPlots::fillWZMass(double wzmass, float scale)
 {
-    this->wzmass->Fill(wzmass);
+    this->wzmass->Fill(wzmass, scale);
 }
-void WZPlots::fillWZTMassWeights(float wztmass,const std::vector<float>& weights)
+void WZPlots::fillWZTMassWeights(float wztmass,const std::vector<float>& weights,
+                                            float luminosity)
 {
     for(unsigned int i = 0; i < wztmassWeights.size(); i++)
-     {
-         wztmassWeights[i]->Fill(wztmass, weights[i]);
-     }
+    {
+        wztmassWeights[i]->Fill(wztmass, weights[i]*luminosity);
+    }
 }
 void WZPlots::printHistograms(const char* type)
 {

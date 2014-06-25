@@ -172,6 +172,8 @@ public:
     int getNumPostCutLeptons();
     int getNumPostCutJets();
     int getNumWeights();
+    const int getSMWeightPos();
+    float getSMWeight();
 };
 
 #endif

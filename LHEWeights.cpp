@@ -7,7 +7,8 @@ LHEWeights::LHEWeights(const char* lheFileName)
 {
     lheFile.open(lheFileName, std::ios::in | std::ios::binary);
 
-    int position;   
+    int position;  
+    SMWeightPos = 0;
 
     do {
         position = searchNextLine("<weightgroup");
@@ -20,6 +21,9 @@ LHEWeights::LHEWeights(const char* lheFileName)
         while(searchNextLine("</weightgroup>") == string::npos)
         {
             weightNames.push_back(substrFromLine("param_card", "#"));
+            if(lheFileLine.find(" 0.0 ") != string::npos)
+                SMWeightPos = weightNames.size() - 1;
+
             lheFile.ignore(256, '\n');
         }
     }
@@ -33,6 +37,7 @@ const char* LHEWeights::substrFromLine(const string& identifier1, const string& 
     return lheFileLine.substr(startPos, length).c_str();
 }
 
+
 int LHEWeights::searchNextLine(const string& searchSequence)
 {
         lheFile.getline(line, 256);
@@ -45,11 +50,19 @@ const std::vector<float>& LHEWeights::getVector()
     return weights;
 }
 
+const float LHEWeights::getSMWeight()
+{
+    return weights[SMWeightPos];
+}
+const int LHEWeights::getSMWeightPos()
+{
+    return SMWeightPos;
+}
 const int LHEWeights::getNumWeights()
 {
     return weightNames.size();
 }
-const std::vector<string>& LHEWeights::getNames()
+const std::vector<std::string>& LHEWeights::getNames()
 {
     return weightNames;
 }

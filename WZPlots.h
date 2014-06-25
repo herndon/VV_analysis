@@ -25,17 +25,18 @@ private:
     std::vector<TH1*> wztmassWeights;
 public:
     WZPlots(ExRootResult* result);
-    WZPlots(ExRootResult* result, const int, std::string);
-    void addElectron(float pt, float eta);
-    void addMuon(float pt, float eta);
-    void addJet(float pt, float eta);
-    void fillMET(float met);
-    void fillDeltaEta_jj(double deltaEta_jj);
-    void fillMjj(double mjj);
-    void fillZpt(double Zpt);
-    void fillWZTMass(double wztmass);
-    void fillWZMass(double);
-    void fillWZTMassWeights(float wztmass, const std::vector<float>& weights);
+    WZPlots(ExRootResult* result, std::string, const int, const int);
+    void addElectron(float pt, float eta, float scale);
+    void addMuon(float pt, float eta, float scale);
+    void addJet(float pt, float eta, float scale);
+    void fillMET(float met, float scale);
+    void fillDeltaEta_jj(double deltaEta_jj, float scale);
+    void fillMjj(double mjj, float scale);
+    void fillZpt(double Zpt, float scale);
+    void fillWZTMass(double wztmass, float scale);
+    void fillWZMass(double, float scale);
+    void fillWZTMassWeights(float wztmass, const std::vector<float>& weights,
+                                                             float luminosity);
     void printHistograms(const char*);
 };
 

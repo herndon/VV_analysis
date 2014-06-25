@@ -36,14 +36,17 @@ private:
     std::string nameBase;
     bool useWeights;
     std::vector<float> crossSections;
+    bool scalePlots;
+    float luminosity;
     WZTieredCuts tieredCuts;
     WZKinematicCuts kinCuts;
     EventCounters eventCounts;
     void processByLeptonType();
     bool passedKinematicCuts();
 public:
-    WZEventsTracker(ExRootResult* result, const int NUM_WEIGHTS, std::string name);
+    WZEventsTracker(ExRootResult* result, WZEvent* event, std::string name);
     ~WZEventsTracker();
+    void setLuminosity(float luminosity);
     void setLeptonSelection(int numLeptons);
     void setJetSelection(int numJets);
     void setMetCut(float metCut);

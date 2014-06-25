@@ -48,27 +48,26 @@ void AnalyseEvents(ExRootTreeReader *treeReader)
     cout << "** Chain contains " << allEntries << " events" << endl;
     cout.flush();
 
-    WZEvent wzEvent = WZEvent("unweighted_events.lhe");
+    WZEvent wzEvent = WZEvent();//"unweighted_events.lhe");
     wzEvent.setLeptonCuts(20, 2.4);
     wzEvent.setJetCuts(30, 4.7);
     
     ExRootResult* selectionResult = new ExRootResult;
     ExRootResult* generatorResult = new ExRootResult;
 
-    WZEventsTracker generatorEvents(generatorResult,wzEvent.getNumWeights(),
-                                                                "generator");
+    WZEventsTracker generatorEvents(generatorResult, &wzEvent, "generator");
     generatorEvents.setLeptonSelection(3);
     generatorEvents.setJetSelection(2);
     generatorEvents.setMetCut(30);
     generatorEvents.setZMassCut(20);
     
-    WZEventsTracker selectionEvents(selectionResult, wzEvent.getNumWeights(),
-                                                                    "selection");
+    WZEventsTracker selectionEvents(selectionResult, &wzEvent, "selection");
+    //selectionEvents.setLuminosity(100.);
     selectionEvents.setLeptonSelection(3);
     selectionEvents.setJetSelection(2);
     selectionEvents.setMetCut(30);
     selectionEvents.setZMassCut(20);
-   // selectionEvents.setWZTMassCut(1200);
+    //selectionEvents.setWZTMassCut(1000);
     selectionEvents.setJetMassCut(600);
     selectionEvents.setEtajjCut(4.);
 
@@ -86,17 +85,12 @@ void AnalyseEvents(ExRootTreeReader *treeReader)
         generatorEvents.processEvent(&wzEvent);
         selectionEvents.processEvent(&wzEvent);
     }
-    //Standard Model cross section in picobarns
-    //FT1 = 0 corresponds to SM, which is the 16th parameter used in Cards/reweight_card.dat
-    //const Float_t sm_crossx = nwGenWZ_all[15];
-    //const Float_t luminosity = 19.6; //Integrated Luminosity in fb^-1 
-    //float scale = sm_crossx*1000*luminosity; //Number of events at given luminosity
  
     generatorEvents.printEventInfo();
     selectionEvents.printEventInfo();
     
-    generatorResult->Write("generatorResult.root");
-    selectionResult->Write("selectionResult.root");
+    generatorResult->Write("generatorResultNW.root");
+    selectionResult->Write("selectionResultNW.root");
     delete generatorResult;
     delete selectionResult;
 }

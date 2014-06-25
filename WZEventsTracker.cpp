@@ -3,23 +3,28 @@
 
 using namespace std;
 
-WZEventsTracker::WZEventsTracker(ExRootResult* result, const int NUM_WEIGHTS, std::string name)
+WZEventsTracker::WZEventsTracker(ExRootResult* result, WZEvent* event,
+                                                            std::string name)
 {
+    wzEvent = event;
     nameBase = name;
-    plots = new WZPlots(result, NUM_WEIGHTS, nameBase);
+
+    const int numWeights =  wzEvent->getNumWeights();
+    plots = new WZPlots(result, nameBase, numWeights, wzEvent->getSMWeightPos());
+    luminosity = 0.0;
     
-    if(NUM_WEIGHTS > 1)
+    if(numWeights > 1)
     {
         useWeights = true;
-        crossSections.resize(NUM_WEIGHTS);
+        crossSections.resize(numWeights);
         crossSections = {0.};
     }
     else
         useWeights = false;
     eventCounts = {0};
     kinCuts = {0.};
-    tieredCuts.numHighPtLeptons = 0;
-    tieredCuts.numHighPtJets = 0;
+    tieredCuts.numHighPtLeptons = 3;
+    tieredCuts.numHighPtJets = 2;
     tieredCuts.met = 0.;
     tieredCuts.ZMassRange = 0.;
 }
@@ -28,6 +33,12 @@ WZEventsTracker::~WZEventsTracker()
 {
     delete plots;
 }
+
+void WZEventsTracker::setLuminosity(float luminosity)
+{
+    this->luminosity = luminosity;
+}
+
 void WZEventsTracker::setLeptonSelection(int numLeptons)
 {
     tieredCuts.numHighPtLeptons = numLeptons;
@@ -148,8 +159,8 @@ void WZEventsTracker::printEventInfo()
     cout <<  "Number of 2 electron 1 muon events:  " << eventCounts.events2e1mu
          << endl;
     cout <<  "Number of 3 electon  events:  " << eventCounts.events3e << endl;
-    cout << "Number of events passing post cut jet number: "
-         << tieredCuts.numHighPtJets  << eventCounts.passedJetCut << endl;
+    cout << "Number of events passing post cut jet number = "
+         << tieredCuts.numHighPtJets << ": "  << eventCounts.passedJetCut << endl;
     cout << "Number of events with MET > " << tieredCuts.met << " GeV: "
          << eventCounts.passedMETCut << endl;
     cout << "Number of events with Z Mass within " << tieredCuts.ZMassRange
@@ -159,27 +170,40 @@ void WZEventsTracker::printEventInfo()
 
 void WZEventsTracker::fillPlots()
 {
+    float scale = 1.0;
+
+    if(luminosity != 0.0 && useWeights)
+        scale = wzEvent->getSMWeight()*luminosity;
+
     for(auto electron : wzEvent->getAllElectrons())
     {
-        plots->addElectron(electron.pt, electron.eta);
+        plots->addElectron(electron.pt, electron.eta, scale);
     }
     for(auto muon : wzEvent->getAllMuons())
     {
-        plots->addMuon(muon.pt, muon.eta);
+        plots->addMuon(muon.pt, muon.eta, scale);
     }
     for(auto jet : wzEvent->getAllJets())
     {
-        plots->addJet(jet.pt, jet.eta);
+        plots->addJet(jet.pt, jet.eta, scale);
     }
-    plots->fillMET(wzEvent->getMET());
-    plots->fillDeltaEta_jj(wzEvent->getJetDeltaEta());
-    plots->fillMjj(wzEvent->getDiJetInvMass());
-    plots->fillZpt(wzEvent->getZpt());
-    plots->fillWZTMass(wzEvent->getWZTransMass());
-    plots->fillWZMass(wzEvent->getWZInvMass());
+    plots->fillMET(wzEvent->getMET(), scale);
+    plots->fillDeltaEta_jj(wzEvent->getJetDeltaEta(),scale);
+    plots->fillMjj(wzEvent->getDiJetInvMass(), scale);
+    plots->fillZpt(wzEvent->getZpt(), scale);
+    plots->fillWZTMass(wzEvent->getWZTransMass(),scale);
+    plots->fillWZMass(wzEvent->getWZInvMass(),scale);
     if(useWeights)
     {
-        plots->fillWZTMassWeights(wzEvent->getWZTransMass(), wzEvent->getWeights());
+        if(luminosity == 0.0)
+            plots->fillWZTMassWeights(wzEvent->getWZTransMass(), 
+                                            wzEvent->getWeights(), 1.);
+        else
+        {
+        //    std::cout << "HI";
+            plots->fillWZTMassWeights(wzEvent->getWZTransMass(), 
+                                            wzEvent->getWeights(), luminosity);
+        }
     }
 }
 
