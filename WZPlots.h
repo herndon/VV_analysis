@@ -5,15 +5,30 @@
 #include "TH1.h"
 #include "external/ExRootAnalysis/ExRootResult.h"
 #include <vector>
+#include "WZEvent.h"
 
 class WZPlots
 {
 private:
     ExRootResult* result;
-    TH1* electron_pt;
-    TH1* electron_eta;
-    TH1* muon_pt;
-    TH1* muon_eta;
+    std::vector<TH1*> lepton_pt;
+    std::vector <TH1*> lepton_eta;
+    
+    TH1* diLeptonMass3eNearZ;
+    TH1* diLeptonMass3eOffZ;
+    TH1* diLeptonPt3eNearZ;
+    TH1* diLeptonPt3eOffZ;
+    
+    TH1* diLeptonMass3muNearZ;
+    TH1* diLeptonMass3muOffZ;
+    TH1* diLeptonPt3muNearZ;
+    TH1* diLeptonPt3muOffZ;
+    
+    TH1* diLeptonMass2mu;
+    TH1* diLeptonPt2mu;
+    TH1* diLeptonMass2e;
+    TH1* diLeptonPt2e;
+
     TH1* jet_pt;
     TH1* jet_eta;
     TH1* met;
@@ -26,8 +41,7 @@ private:
 public:
     WZPlots(ExRootResult* result);
     WZPlots(ExRootResult* result, std::string, const int, const int);
-    void addElectron(float pt, float eta, float scale);
-    void addMuon(float pt, float eta, float scale);
+    void addLeptons(const std::vector<ParticleVector>& leptons, float scale);
     void addJet(float pt, float eta, float scale);
     void fillMET(float met, float scale);
     void fillDeltaEta_jj(double deltaEta_jj, float scale);
@@ -37,6 +51,9 @@ public:
     void fillWZMass(double, float scale);
     void fillWZTMassWeights(float wztmass, const std::vector<float>& weights,
                                                              float luminosity);
+    void add1typeDiLeptons(const std::vector<TLorentzVector>&, std::string, float);
+    void add2muDiLepton(const TLorentzVector& diLepton, float scale);
+    void add2eDiLepton(const TLorentzVector& diLepton, float scale);
     void printHistograms(const char*);
 };
 

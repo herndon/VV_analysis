@@ -56,15 +56,11 @@ void AnalyseEvents(ExRootTreeReader *treeReader)
     ExRootResult* generatorResult = new ExRootResult;
 
     WZEventsTracker generatorEvents(generatorResult, &wzEvent, "generator");
-    generatorEvents.setLeptonSelection(3);
-    generatorEvents.setJetSelection(2);
     generatorEvents.setMetCut(30);
     generatorEvents.setZMassCut(20);
     
     WZEventsTracker selectionEvents(selectionResult, &wzEvent, "selection");
     //selectionEvents.setLuminosity(100.);
-    selectionEvents.setLeptonSelection(3);
-    selectionEvents.setJetSelection(2);
     selectionEvents.setMetCut(30);
     selectionEvents.setZMassCut(20);
     //selectionEvents.setWZTMassCut(1000);

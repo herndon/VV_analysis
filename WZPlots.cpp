@@ -1,4 +1,5 @@
 #include "WZPlots.h"
+#include <iostream>
 
 WZPlots::WZPlots(ExRootResult* result)
 {
@@ -9,26 +10,89 @@ WZPlots::WZPlots(ExRootResult* result, std::string nameBase,
 {
     this->result = result;
     wztmassWeights.resize(NUM_WEIGHTS);
+    std::string histObjName;
 
-    std::string histObjName = nameBase + "_electronPt";
-    electron_pt = result->AddHist1D(histObjName.c_str(), "Electron P_{T}",
-                                    "Electron P_{T} (GeV/c)", "Number of Electrons",
-                                     20, 0.0, 100.0);
+    for(int i = 1; i <= 3; i++)
+    {
+        histObjName = nameBase + "_lepton" + std::to_string(i) + "Pt";
+        lepton_pt.push_back(result->AddHist1D(histObjName.c_str(), "Lepton P_{T}",
+                                    "Lepton P_{T} (GeV/c)", "Number of Leptons",
+                                     20, 0.0, 100.0));
     
-    histObjName = nameBase + "_muonPt";
-    muon_pt = result->AddHist1D(histObjName.c_str(), "Muon P_{T}",
-                               "muon P_{T} (GeV/c)", "Number of Muons",
-                                20, 0.0, 100.0);
+        histObjName = nameBase + "_lepton" + std::to_string(i) + "Eta";
+        lepton_eta.push_back(result->AddHist1D(histObjName.c_str(), "Lepton eta",
+                                    "Lepton Eta", "Number of Leptons",
+                                     20, -4.0, 4.0));
+    }
 
-    histObjName = nameBase + "_electronEta";
-    electron_eta = result->AddHist1D(histObjName.c_str(), "Electron eta",
-                                    "Electron Eta", "Number of Electrons",
-                                     20, -4.0, 4.0);
+    histObjName = nameBase + "_3eMassNearZ";
+    diLeptonMass3eNearZ =  result->AddHist1D(histObjName.c_str(),
+                 "Near Z Di-lepton Mass for 3e Events","di-lepton Mass (GeV/c^2)",
+                 "Number of Events", 20, 0.0, 200.0);
+ 
+    histObjName = nameBase + "_3ePtNearZ";
+    diLeptonPt3eNearZ =  result->AddHist1D(histObjName.c_str(),
+                 "Near Z Di-lepton Pt for 3e Events","di-lepton Pt (GeV/c)",
+                 "Number of Events", 20, 0.0, 200.0);
 
-    histObjName = nameBase + "_muonEta";
-    muon_eta = result->AddHist1D(histObjName.c_str(), "Muon Eta",
-                                 "Muon Eta", "Number of Muons",
-                                  20, -4.0, 4.0);
+    histObjName = nameBase + "_3eMassOffZ";
+    diLeptonMass3eOffZ =  result->AddHist1D(histObjName.c_str(),
+                 "Off Z Di-lepton Mass for 3e Events","di-lepton Mass (GeV/c^2)",
+                 "Number of Events", 20, 0.0, 200.0);
+ 
+    histObjName = nameBase + "_3ePtOffZ";
+    diLeptonPt3eOffZ =  result->AddHist1D(histObjName.c_str(),
+                 "Off Z Di-lepton Pt for 3e Events","di-lepton Pt (GeV/c)",
+                 "Number of Events", 20, 0.0, 200.0);
+
+
+    histObjName = nameBase + "_3muMassNearZ";
+    diLeptonMass3muNearZ =  result->AddHist1D(histObjName.c_str(),
+                 "Near Z Di-lepton Mass for 3mu Events","di-lepton Mass (GeV/c^2)",
+                 "Number of Events", 20, 0.0, 200.0);
+ 
+    histObjName = nameBase + "_3muPtNearZ";
+    diLeptonPt3muNearZ =  result->AddHist1D(histObjName.c_str(),
+                 "Near Z Di-lepton Pt for 3mu Events","di-lepton Pt (GeV/c)",
+                 "Number of Events", 20, 0.0, 200.0);
+
+    histObjName = nameBase + "_3muMassOffZ";
+    diLeptonMass3muOffZ =  result->AddHist1D(histObjName.c_str(),
+                 "Off Z Di-lepton Mass for 3mu Events","di-lepton Mass (GeV/c^2)",
+                 "Number of Events", 20, 0.0, 200.0);
+ 
+    histObjName = nameBase + "_3muPtOffZ";
+    diLeptonPt3muOffZ =  result->AddHist1D(histObjName.c_str(),
+                 "Off Z Di-lepton Pt for 3mu Events","di-lepton Pt (GeV/c)",
+                 "Number of Events", 20, 0.0, 200.0);
+
+////////////////////////////////////////////////////////////////////////////////
+
+    histObjName = nameBase + "_2muMass";
+    diLeptonMass2mu =  result->AddHist1D(histObjName.c_str(),
+                 "Di-lepton Mass for 2mu Events","di-lepton Mass (GeV/c^2)",
+                 "Number of Events", 20, 0.0, 200.0);
+ 
+    histObjName = nameBase + "_2muPt";
+    diLeptonPt2mu =  result->AddHist1D(histObjName.c_str(),
+                 "Di-lepton Pt for 2mu Events","di-lepton Pt (GeV/c)",
+                 "Number of Events", 20, 0.0, 200.0);
+
+    histObjName = nameBase + "_2eMass";
+    diLeptonMass2e =  result->AddHist1D(histObjName.c_str(),
+                 "Di-lepton Mass for 2e Events","di-lepton Mass (GeV/c^2)",
+                 "Number of Events", 20, 0.0, 200.0);
+ 
+    histObjName = nameBase + "_2ePt";
+    diLeptonPt2e =  result->AddHist1D(histObjName.c_str(),
+                 "Di-lepton Pt for 2e Events","di-lepton Pt (GeV/c)",
+                 "Number of Events", 20, 0.0, 200.0);
+
+
+   
+
+
+
     histObjName = nameBase + "_jetPt";// + std::to_string(i) + "Pt";
     jet_pt = result->AddHist1D(histObjName.c_str(), "Jet P_{T}",
                                       "Jet P_{T} (GeV/c)", "Number of Jets",
@@ -79,17 +143,53 @@ WZPlots::WZPlots(ExRootResult* result, std::string nameBase,
                                  20, 0.0, 2000.0);
     }
 }
-void WZPlots::addElectron(float pt, float eta, float scale)
+void WZPlots::addLeptons(const std::vector<ParticleVector>& leptons, float scale)
 {
-    electron_pt->Fill(pt, scale);
-    electron_eta->Fill(eta, scale);
+    for(int i = 0; i < 3; i++)
+    {
+        lepton_pt[i]->Fill(leptons[i].Pt(), scale);
+        lepton_eta[i]->Fill(leptons[i].Eta(), scale);
+    }
 }
 
-void WZPlots::addMuon(float pt, float eta, float scale)
+void WZPlots::add2eDiLepton(const TLorentzVector& diLepton, float scale)
 {
-    muon_pt->Fill(pt, scale);
-    muon_eta->Fill(eta, scale);
+   diLeptonMass2e->Fill(diLepton.M(), scale);
+   diLeptonPt2e->Fill(diLepton.Pt(), scale); 
 }
+
+void WZPlots::add2muDiLepton(const TLorentzVector& diLepton, float scale)
+{
+   diLeptonMass2mu->Fill(diLepton.M(), scale);
+   diLeptonPt2mu->Fill(diLepton.Pt(), scale); 
+}
+
+void WZPlots::add1typeDiLeptons(const std::vector<TLorentzVector>& diLeptons, 
+                                              std::string eventType, float scale)
+{
+    if(eventType == "3e")
+    {
+        diLeptonMass3eNearZ->Fill(diLeptons[0].M(), scale);
+        diLeptonMass3eOffZ->Fill(diLeptons[1].M(), scale);
+
+        diLeptonPt3eNearZ->Fill(diLeptons[0].Pt(), scale);
+        diLeptonPt3eOffZ->Fill(diLeptons[1].Pt(), scale);
+    }
+    else if(eventType == "3mu")
+    {
+        diLeptonMass3muNearZ->Fill(diLeptons[0].M(), scale);
+        diLeptonMass3muOffZ->Fill(diLeptons[1].M(), scale);
+
+        diLeptonPt3muNearZ->Fill(diLeptons[0].Pt(), scale);
+        diLeptonPt3muOffZ->Fill(diLeptons[1].Pt(), scale);
+    }
+    else
+    {
+        std::cout << "\nAn error occured in the add1typeDiLeptons() function.\n";
+        exit(0);
+    }
+}
+
 void WZPlots::addJet(float pt, float eta, float scale)
 {
     jet_pt->Fill(pt, scale);

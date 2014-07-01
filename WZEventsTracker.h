@@ -30,9 +30,10 @@ struct WZKinematicCuts
 class WZEventsTracker
 {
 private:
-    const float ON_SHELL_ZMASS = 91.1876;
+    static constexpr float ON_SHELL_ZMASS = 91.1876f;
     WZEvent* wzEvent;
     WZPlots* plots;
+    std::string eventType;
     std::string nameBase;
     bool useWeights;
     std::vector<float> crossSections;
@@ -43,6 +44,9 @@ private:
     EventCounters eventCounts;
     void processByLeptonType();
     bool passedKinematicCuts();
+    void fillLeptonPlots(float scale);
+    static bool compareVectorPt(const ParticleVector&, const ParticleVector&);
+    static bool sortByZMassRange(const TLorentzVector&, const TLorentzVector&);
 public:
     WZEventsTracker(ExRootResult* result, WZEvent* event, std::string name);
     ~WZEventsTracker();

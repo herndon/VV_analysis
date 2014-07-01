@@ -23,21 +23,20 @@
 #include <string>
 #include "LHEWeights.h"
 
-
-/**
- * @struct GeneratorParticle
- * @brief Holds the pt and eta of a simple particle
- *
- *
- * @param pt P_{T} of the particle
- * @param eta pseudo-rapidity of the particle
- *
- */
-struct GeneratorParticle
+class ParticleVector : public TLorentzVector
 {
-    float pt;
-    float eta; 
+private:
+    int type;
+public:
+    ParticleVector(int type)
+    {
+        this->type = type;
+        TLorentzVector();
+    };
+    ParticleVector() {ParticleVector(0);};
+    int getType() const {return type;};
 };
+
 
 /**
  * @struct WZlVectors
@@ -55,12 +54,8 @@ struct GeneratorParticle
  */ 
 struct WZlVectors
 {
-    TLorentzVector lepton1;
-    TLorentzVector lepton2;
-    TLorentzVector lepton3;
-    TLorentzVector leptonFromW;
-    TLorentzVector jet1;
-    TLorentzVector jet2;
+    std::vector<ParticleVector> allLeptons;
+    std::vector<TLorentzVector> allJets; 
     TLorentzVector MET;
     TLorentzVector W;
     TLorentzVector Z;
@@ -94,14 +89,6 @@ struct EventCounter
     int jetsPostCut;
 };
 
-/**
- * @stuct Cuts
- * 
- * @param leptonPt minimum \f$p_{T}\f$ for a VBF-type lepton
- * @param jetPt \f$p_{T}\f$ for a VBF-type jet
- * @param leptonEta minimum \f$p\eta\f$ for a VBF-type lepton
- * @param jetEta minimum \f$eta\f$ for a VBF-type jet
- */ 
 struct Cuts
 {
     float leptonPt;
@@ -123,15 +110,10 @@ private:
     TRootLHEFParticle* particleMother;
     LHEWeights* weights;
     bool useWeights;
-    float WMass;
-    float ZMass;
-    float MET;
     EventCounter counter;
     Cuts cuts;
     WZlVectors wzlVectors;
-    std::vector<GeneratorParticle> allElectrons;
-    std::vector<GeneratorParticle> allMuons;
-    std::vector<GeneratorParticle> allJets; 
+    
     void processWZLepton(std::string type);
     void foundLepton();
     void foundJet();
@@ -156,9 +138,8 @@ public:
     float getWZTransMass();
     float getWZInvMass();
 
-    std::vector<GeneratorParticle> getAllElectrons();
-    std::vector<GeneratorParticle> getAllMuons();
-    std::vector<GeneratorParticle> getAllJets();
+    std::vector<ParticleVector>& getAllLeptons();
+    std::vector<TLorentzVector>& getAllJets();
     const std::vector<float>& getWeights();
     void resetEvent();
     float getWMass();

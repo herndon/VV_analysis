@@ -1,4 +1,4 @@
-#include "WZEventsTracker.h"
+#include "WZEventsTracker.h" 
 #include <iostream>
 
 using namespace std;
@@ -73,8 +73,6 @@ void WZEventsTracker::processEvent(WZEvent* event)
 {
     wzEvent = event;
 
-    if(!passedKinematicCuts())
-        return;
     if(wzEvent->getNumPostCutLeptons() == tieredCuts.numHighPtLeptons)
     {
         eventCounts.passedLeptonCut++;
@@ -85,6 +83,9 @@ void WZEventsTracker::processEvent(WZEvent* event)
     if(wzEvent->getNumPostCutJets() == tieredCuts.numHighPtJets)
         eventCounts.passedJetCut++;
     else
+        return;
+    
+    if(!passedKinematicCuts())
         return;
     if(wzEvent->getMET() > tieredCuts.met)
         eventCounts.passedMETCut++;
@@ -128,14 +129,26 @@ void WZEventsTracker::processByLeptonType()
     int numHighPtMu = wzEvent->getNumPostCutMuons();
 
     if(numHighPtE == 3 && numHighPtMu == 0)
+    {
         eventCounts.events3e++;
+        eventType = "3e";
+    }
     else if(numHighPtE == 2  && numHighPtMu == 1)
+    {
         eventCounts.events2e1mu++;
+        eventType = "2e1mu";
+    }
     else if(numHighPtE == 1 && numHighPtMu == 2)
+    {
         eventCounts.events2mu1e++;
+        eventType = "2mu1e";
+    }
     else if(numHighPtE == 0 && numHighPtMu == 3)
+    {
         eventCounts.events3mu++;
-    else
+        eventType = "3mu";
+    }
+   else
     {
         std::cout << "A Critical Error occurred in the processByType() function of "
                   << "WZEventsTracker Class.\n";
@@ -168,6 +181,18 @@ void WZEventsTracker::printEventInfo()
     cout << "\n__________________________________________________________________\n";
 }
 
+bool WZEventsTracker::compareVectorPt(const ParticleVector& particle1,
+                                                const ParticleVector& particle2)
+{
+    return particle1.Pt() > particle2.Pt();
+}
+bool WZEventsTracker::sortByZMassRange(const TLorentzVector& diLepton1,
+                                                const TLorentzVector& diLepton2)
+{
+    return std::abs(diLepton1.M() - ON_SHELL_ZMASS) < 
+                                    std::abs(diLepton2.M() - ON_SHELL_ZMASS);
+}
+
 void WZEventsTracker::fillPlots()
 {
     float scale = 1.0;
@@ -175,17 +200,11 @@ void WZEventsTracker::fillPlots()
     if(luminosity != 0.0 && useWeights)
         scale = wzEvent->getSMWeight()*luminosity;
 
-    for(auto electron : wzEvent->getAllElectrons())
-    {
-        plots->addElectron(electron.pt, electron.eta, scale);
-    }
-    for(auto muon : wzEvent->getAllMuons())
-    {
-        plots->addMuon(muon.pt, muon.eta, scale);
-    }
+    fillLeptonPlots(scale);
+
     for(auto jet : wzEvent->getAllJets())
     {
-        plots->addJet(jet.pt, jet.eta, scale);
+        plots->addJet(jet.Pt(), jet.Eta(), scale);
     }
     plots->fillMET(wzEvent->getMET(), scale);
     plots->fillDeltaEta_jj(wzEvent->getJetDeltaEta(),scale);
@@ -200,10 +219,65 @@ void WZEventsTracker::fillPlots()
                                             wzEvent->getWeights(), 1.);
         else
         {
-        //    std::cout << "HI";
             plots->fillWZTMassWeights(wzEvent->getWZTransMass(), 
                                             wzEvent->getWeights(), luminosity);
         }
     }
 }
 
+void WZEventsTracker::fillLeptonPlots(float scale)
+{
+    std::vector<ParticleVector> allLeptons = wzEvent->getAllLeptons();
+    std::sort(allLeptons.begin(), allLeptons.end(), compareVectorPt);
+    
+    plots->addLeptons(allLeptons, scale);
+
+
+    if(eventType == "2e1mu")
+    {
+        TLorentzVector ZdiLepton;
+        for(const auto& lepton : allLeptons)
+        {
+            if(std::abs(lepton.getType()) == 11)
+            {
+                ZdiLepton += (TLorentzVector&) lepton;
+            }
+        } 
+        plots->add2eDiLepton(ZdiLepton, scale);
+    }
+    else if(eventType == "2mu1e")
+    {
+        TLorentzVector ZdiLepton;
+        for(const auto& lepton : allLeptons)
+        {
+            if(std::abs(lepton.getType()) == 13)
+            {
+                ZdiLepton += (TLorentzVector&) lepton;
+            }
+        }
+        plots->add2muDiLepton(ZdiLepton, scale);
+    }
+    else if (eventType == "3e" || eventType == "3mu")
+    {
+        std::vector<TLorentzVector> diLeptons;
+        for(unsigned int i = 0; i < allLeptons.size(); i++)
+        {
+            for(unsigned int j = 0; j < allLeptons.size() - 1; j++)
+            { 
+                if(i == j)
+                    continue;
+                if(allLeptons[i].getType() + allLeptons[j].getType() == 0)
+                    diLeptons.push_back(allLeptons[i] + allLeptons[j]);
+
+            }
+        }
+
+        std::sort(diLeptons.begin(), diLeptons.end(), sortByZMassRange);
+        plots->add1typeDiLeptons(diLeptons, eventType, scale);
+    }
+    else
+    {
+        std::cout << "\nAn error occured in the fillLeptonPlots() function.\n";
+        exit(0);
+    }
+}

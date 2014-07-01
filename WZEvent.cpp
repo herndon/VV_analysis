@@ -74,16 +74,36 @@ float WZEvent::getWZInvMass()
 }
 float WZEvent::getWZTransMass()
 {
-    return  (wzlVectors.lepton1 + wzlVectors.lepton2  + wzlVectors.lepton3
-                                     + wzlVectors.MET).M();
+    if(wzlVectors.allLeptons.size() == 3) 
+    {
+        TLorentzVector leptonSum;
+        for(const auto& lepton : wzlVectors.allLeptons)
+            leptonSum += lepton;
+        return  (leptonSum + wzlVectors.MET).M();
+    }
+    else
+    {
+        std::cout << "\nError in WZ transverse mass calculation.\n";
+        return 0.;
+    }
 }
 float WZEvent::getDiJetInvMass()
 {
-    return (wzlVectors.jet1 + wzlVectors.jet2).M();
+    if(wzlVectors.allJets.size() == 2) 
+        return (wzlVectors.allJets[0] + wzlVectors.allJets[1]).M();
+    else
+        std::cout << "\nError in di-Jet mass calculation.\n";
+    return 0.;
 }
 float WZEvent::getJetDeltaEta()
 {
-    return std::abs(wzlVectors.jet1.Eta() - wzlVectors.jet2.Eta());
+    if(wzlVectors.allJets.size() == 2) 
+        return std::abs(wzlVectors.allJets[0].Eta() - wzlVectors.allJets[1].Eta());
+    else
+    {
+        std::cout << "\nError in Jet deltaEta calculation.\n";
+        return 0.;
+    }
 }
 float WZEvent::getZpt()
 {
@@ -132,47 +152,38 @@ int WZEvent::getNumPostCutLeptons()
 }
 float WZEvent::getWMass()
 {
-    return WMass;
+    return wzlVectors.W.M();
 }
 float WZEvent::getZMass()
 {
-    return ZMass;
+    return wzlVectors.Z.M();
 }
 float WZEvent::getMET()
 {
-    return MET;
+    return wzlVectors.MET.Pt();
 }
-std::vector<GeneratorParticle> WZEvent::getAllElectrons()
+std::vector<ParticleVector>& WZEvent::getAllLeptons()
 {
-    return allElectrons;
+    return wzlVectors.allLeptons;
 }
-std::vector<GeneratorParticle> WZEvent::getAllMuons()
+std::vector<TLorentzVector>& WZEvent::getAllJets()
 {
-    return allMuons;
-}
-std::vector<GeneratorParticle> WZEvent::getAllJets()
-{
-    return allJets;
+    return wzlVectors.allJets;
 }
 
 void WZEvent::foundLepton()
 {
     counter.leptons++;
-    GeneratorParticle lepton;
-    lepton.pt = particle->PT;
-    lepton.eta = particle->Eta;
 
     switch(abs(particle->PID))
     {
         case 11:
             processWZLepton("electron");
             counter.electrons++;
-            allElectrons.push_back(lepton);
             break;
         case 13:
             processWZLepton("muon");
             counter.muons++;
-            allMuons.push_back(lepton);
             break;
         default:
             std::cout << "A problem occured processing leptons in WZEvent class.";
@@ -181,75 +192,44 @@ void WZEvent::foundLepton()
 }
 void WZEvent::processWZLepton(std::string type)
 {
-    if(particleMother->PID == 24)
-    {    
-        wzlVectors.leptonFromW.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle->M);
-        WMass = particleMother->M;
-    }
-    if(fabs(particle->Eta) < cuts.leptonEta && particle->PT > cuts.leptonPt) 
+    if(std::abs(particle->Eta) < cuts.leptonEta && particle->PT > cuts.leptonPt) 
     {
         this->counter.leptonsPostCut++;
         
+        ParticleVector lepton(particle->PID);
+        lepton.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+        wzlVectors.allLeptons.push_back(lepton);
+        
         if(type == "muon")
+        {
             this->counter.muonsPostCut++;
+        }
         else if(type == "electron")
+        {
             this->counter.electronsPostCut++;
+        }
         else
         {
             std::cout << "A critical error occured in processLepton() function.";
             exit(0);
         }
-        switch(counter.leptonsPostCut)
-        {
-            case 1:
-                wzlVectors.lepton1.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle->M);
-                break;
-            case 2: 
-                wzlVectors.lepton2.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle->M);
-                break;
-            case 3:
-                wzlVectors.lepton3.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle->M);
-                break;
-            default:
-                std::cout << "A critical error occured in processLepton() function.";
-                exit(0);
-         }
     }
 }
 void WZEvent::foundJet()
 {
     counter.jets++;
-    GeneratorParticle jet;
-    jet.pt = particle->PT;
-    jet.eta = particle->Eta;
 
-    allJets.push_back(jet);
-
-    if(std::abs(jet.eta) < cuts.jetEta && jet.pt > cuts.jetPt)
+    if(std::abs(particle->Eta) < cuts.jetEta && particle->PT > cuts.jetPt)
     {
         counter.jetsPostCut++;
-        if(counter.jetsPostCut == 1)
-            wzlVectors.jet1.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle->M);
-        else if(counter.jetsPostCut == 2)
-            wzlVectors.jet2.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle->M);
-        else
-        {
-            std::cout << "A critical error occured in foundJet() function.";
-            exit(0);
-        }
-    }
+        TLorentzVector jet;
+        jet.SetPtEtaPhiM(particle->PT,particle->Eta,particle->Phi,particle->M);
+        wzlVectors.allJets.push_back(jet);
+   }
 }
 void WZEvent::foundMET()
 {
-    MET = particle->PT;
-    wzlVectors.MET.SetPtEtaPhiM(particle->PT, 0.0,
-                        particle->Phi,particle->M);
+    wzlVectors.MET.SetPtEtaPhiM(particle->PT, 0.0,particle->Phi,particle->M);
 }
 int WZEvent::getNumPostCutJets()
 {
@@ -257,7 +237,6 @@ int WZEvent::getNumPostCutJets()
 }
 void WZEvent::foundZ()
 {
-    ZMass = particle->M;
     wzlVectors.Z.SetPtEtaPhiM(particle->PT,
                         particle->Eta,particle->Phi,particle->M);
 }
@@ -274,9 +253,8 @@ void WZEvent::resetEvent()
 {
     particle = NULL;
     particleMother = NULL;
-    allElectrons.clear();
-    allMuons.clear();
-    allJets.clear();
+    wzlVectors.allLeptons.clear();
+    wzlVectors.allJets.clear();
     counter = {0};
 }
     
