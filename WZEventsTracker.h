@@ -1,23 +1,13 @@
+#ifndef __WZEVENTSTRACKER_H_
+#define __WZEVENTSTRACKER_H__
+
 #include "WZEvent.h"
 #include "WZPlots.h"
 
-struct EventCounters
-{
-    int passedLeptonCut;
-    int events3mu;
-    int events2mu1e;
-    int events2e1mu;
-    int events3e;
-    int passedJetCut;
-    int passedMETCut;
-    int passedZMassCut;
-    //int passedM_jjSelection;
-    //int passedEta_jjSelection;
-};
 struct WZTieredCuts
 {
-    int numHighPtLeptons;
-    int numHighPtJets;
+    unsigned int numHighPtLeptons;
+    unsigned int numHighPtJets;
     float met;
     float ZMassRange;
 };
@@ -33,23 +23,43 @@ private:
     static constexpr float ON_SHELL_ZMASS = 91.1876f;
     WZEvent* wzEvent;
     WZPlots* plots;
+    std::map<std::string, std::string> plotCuts;
+    std::map<std::pair<std::string, std::string>, float> plotKeys;
     std::string eventType;
-    std::string nameBase;
+    std::map<std::string, int> eventCounters;
     bool useWeights;
     std::vector<float> crossSections;
-    bool scalePlots;
     float luminosity;
+    //float eventWeight;
     WZTieredCuts tieredCuts;
     WZKinematicCuts kinCuts;
-    EventCounters eventCounts;
+    void assignValueToPlotKey(const std::string& keyPair1, 
+                              const std::string& keyPair2, float value);
+    void addPlot(const std::string& plotGroup, const std::string& plot,
+                 const std::string& title, const std::string& xtitle, 
+                 const std::string& ytitle, int numBins, float xMin, float xMax);
     void processByLeptonType();
-    bool passedKinematicCuts();
-    void fillLeptonPlots(float scale);
-    static bool compareVectorPt(const ParticleVector&, const ParticleVector&);
-    static bool sortByZMassRange(const TLorentzVector&, const TLorentzVector&);
+    bool passedKinematicCuts(std::string& cuts);
+    void getLeptonPlotData(const std::string& cuts);
+    void getJetPlotData(const std::string& cuts);
+    void getWZPlotData(const std::string& cuts);
+    void getDijetPlotData(const std::string& cuts);
+    void getZPlotData(const std::string& cuts);
+    void getMETPlotData(const std::string& cuts);
+    void getDileptonPlotData(const std::string& cuts); 
+    static bool sortParticlesByPt(const ParticleVector&, const ParticleVector&);
+    static bool sortDileptonsByZMass(const TLorentzVector&, const TLorentzVector&);
 public:
-    WZEventsTracker(ExRootResult* result, WZEvent* event, std::string name);
+    WZEventsTracker(WZEvent* event, const std::string rootFileName,
+                    const float luminosity);
     ~WZEventsTracker();
+    void initializeDijetPlots();
+    void initializeLeptonPlots();
+    void initializeJetPlots();
+    void initializeDileptonPlots();
+    void initializeWZPlots();
+    void initializeZPlots();
+    void initializeMETPlots();
     void setLuminosity(float luminosity);
     void setLeptonSelection(int numLeptons);
     void setJetSelection(int numJets);
@@ -58,7 +68,10 @@ public:
     void setWZTMassCut(float WZTMass);
     void setZMassCut(float ZMass);
     void setEtajjCut(float eta_jj);
-    void processEvent(WZEvent* wzEvent);
+    void processEvent();
     void printEventInfo();
     void fillPlots();
+    void writePlotsToFile(); 
 };
+
+#endif
