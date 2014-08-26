@@ -10,20 +10,21 @@ class LHEWeights
 private:
     std::fstream lheFile;
     std::vector<float> weights;
-    int SMWeightPos;
+    unsigned int SMWeightPos;
     char line[256];
     std::string lheFileLine;
     std::vector<std::string> weightNames;
+    void formatNames();
     const char* substrFromLine(const std::string&, const std::string&);
-    int searchNextLine(const std::string& searchSequence);
+    const size_t searchNextLine(const std::string& searchSequence);
 public:
     LHEWeights(const char* lheFileName);
     void readWeights();
-    const std::vector<float>& getVector();
-    const std::vector<std::string>& getNames();
-    const float getSMWeight();
-    const int getNumWeights();
-    const int getSMWeightPos();
+    const std::vector<float>& getVector() const;
+    const std::vector<std::string>& getNames() const; 
+    const float getSMWeight() const;
+    const int getNumWeights() const;
+    const int getSMWeightPos() const;
 };
 
 #endif

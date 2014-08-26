@@ -13,7 +13,7 @@
 #include "WZEventsTracker.h"
 #include <iostream>
 
-void AnalyseEvents(ExRootTreeReader *treeReader);
+void AnalyseEvents(ExRootTreeReader *treeReader, float eventWeight);
 bool WZMassCalculation(const TLorentzVector& lVectorlW,
                      const TLorentzVector& lVectorMET, Float_t WMass, Float_t pz);
 
@@ -21,7 +21,7 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-int main()
+int main( int argc, char *argv[])
 {
     const char* inputFile = "unweighted_events.root";
     TChain *chain = new TChain("LHEF");
@@ -30,8 +30,13 @@ int main()
     chain->Add(inputFile);
 
     ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
+    
+    float eventWeight = 1.;
+    
+    if(argc == 2)
+        eventWeight = atof(argv[1]);
 
-    AnalyseEvents(treeReader);
+    AnalyseEvents(treeReader, eventWeight);
     
     delete treeReader;
     delete chain;
@@ -39,7 +44,7 @@ int main()
     return 0;   
 }
 //------------------------------------------------------------------------------
-void AnalyseEvents(ExRootTreeReader *treeReader)
+void AnalyseEvents(ExRootTreeReader *treeReader, float eventWeight)
 {
     // Get pointers to branches used in analysis
     TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
@@ -48,22 +53,21 @@ void AnalyseEvents(ExRootTreeReader *treeReader)
     cout << "** Chain contains " << allEntries << " events" << endl;
     cout.flush();
 
-    WZEvent wzEvent = WZEvent();//"unweighted_events.lhe");
+    WZEvent wzEvent = WZEvent("unweighted_events.lhe");
     wzEvent.setLeptonCuts(20, 2.4);
     wzEvent.setJetCuts(30, 4.7);
-    
-    ExRootResult* selectionResult = new ExRootResult;
-    ExRootResult* generatorResult = new ExRootResult;
-
-    WZEventsTracker generatorEvents(generatorResult, &wzEvent, "generator");
+   
+    WZEventsTracker generatorEvents(&wzEvent, "generatorWeights.root", 100000.);
     generatorEvents.setMetCut(30);
     generatorEvents.setZMassCut(20);
+    //in inverse picobarns
+    generatorEvents.setLuminosity(100000.);
     
-    WZEventsTracker selectionEvents(selectionResult, &wzEvent, "selection");
-    //selectionEvents.setLuminosity(100.);
+    WZEventsTracker selectionEvents(&wzEvent, "selectionWeights.root", 100000.);
+    selectionEvents.setLuminosity(100000.);
     selectionEvents.setMetCut(30);
-    selectionEvents.setZMassCut(20);
-    //selectionEvents.setWZTMassCut(1000);
+    //selectionEvents.setZMassCut(20);
+    //selectionEvents.setWZTMassCut(1200);
     selectionEvents.setJetMassCut(600);
     selectionEvents.setEtajjCut(4.);
 
@@ -73,22 +77,24 @@ void AnalyseEvents(ExRootTreeReader *treeReader)
     {
         // Load selected branches with data from specified event
         //Updates entry pointed to by branchGenParticle and branchEvent 
+        
         treeReader->ReadEntry(entry);
 	    
         wzEvent.resetEvent();
         wzEvent.loadEvent(branchGenParticle);
        
-        generatorEvents.processEvent(&wzEvent);
-        selectionEvents.processEvent(&wzEvent);
+        generatorEvents.processEvent();
+        selectionEvents.processEvent();
     }
  
     generatorEvents.printEventInfo();
     selectionEvents.printEventInfo();
     
-    generatorResult->Write("generatorResultNW.root");
-    selectionResult->Write("selectionResultNW.root");
-    delete generatorResult;
-    delete selectionResult;
+    generatorEvents.writePlotsToFile();
+    selectionEvents.writePlotsToFile();
+    //delete generatorResult;
+    //delete selectionResult;
+    //delete generatorEvents;
 }
 //------------------------------------------------------------------------------
 bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVectorMET,

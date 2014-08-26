@@ -7,7 +7,7 @@ LHEWeights::LHEWeights(const char* lheFileName)
 {
     lheFile.open(lheFileName, std::ios::in | std::ios::binary);
 
-    int position;  
+    size_t position;  
     SMWeightPos = 0;
 
     do {
@@ -20,11 +20,29 @@ LHEWeights::LHEWeights(const char* lheFileName)
     {
         while(searchNextLine("</weightgroup>") == string::npos)
         {
-            weightNames.push_back(substrFromLine("param_card", "#"));
             if(lheFileLine.find(" 0.0 ") != string::npos)
+            {
                 SMWeightPos = weightNames.size() - 1;
-
+                weightNames.push_back("Standard Model");
+            }
+            else
+                weightNames.push_back(substrFromLine("param_card", "#"));
             lheFile.ignore(256, '\n');
+        }
+    }
+    formatNames();
+}
+void LHEWeights::formatNames()
+{
+    std::vector<std::pair<std::string, std::string>> paramNames;
+    paramNames.push_back(std::make_pair("anoinputs 12", "f_T1 ="));
+    
+    for(auto& weightName : weightNames)
+    {    
+        for(auto& paramName : paramNames)
+        {
+            if(weightName.find(paramName.first) != string::npos)
+                weightName.replace(0, paramName.first.size() + 1, paramName.second);
         }
     }
 }
@@ -38,37 +56,37 @@ const char* LHEWeights::substrFromLine(const string& identifier1, const string& 
 }
 
 
-int LHEWeights::searchNextLine(const string& searchSequence)
+const size_t LHEWeights::searchNextLine(const string& searchSequence)
 {
         lheFile.getline(line, 256);
         lheFileLine = line;
         return lheFileLine.find(searchSequence);
 }
 
-const std::vector<float>& LHEWeights::getVector()
+const std::vector<float>& LHEWeights::getVector() const
 {
     return weights;
 }
 
-const float LHEWeights::getSMWeight()
+const float LHEWeights::getSMWeight() const
 {
     return weights[SMWeightPos];
 }
-const int LHEWeights::getSMWeightPos()
+const int LHEWeights::getSMWeightPos() const
 {
     return SMWeightPos;
 }
-const int LHEWeights::getNumWeights()
+const int LHEWeights::getNumWeights() const
 {
     return weightNames.size();
 }
-const std::vector<std::string>& LHEWeights::getNames()
+const std::vector<std::string>& LHEWeights::getNames() const
 {
     return weightNames;
 }
 void LHEWeights::readWeights()
 {
-    int position;   
+    size_t position;   
     weights.clear();
 
     do {

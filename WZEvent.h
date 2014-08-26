@@ -21,22 +21,9 @@
 #include "external/ExRootAnalysis/ExRootClasses.h"
 #include <vector>
 #include <string>
+#include <map>
 #include "LHEWeights.h"
-
-class ParticleVector : public TLorentzVector
-{
-private:
-    int type;
-public:
-    ParticleVector(int type)
-    {
-        this->type = type;
-        TLorentzVector();
-    };
-    ParticleVector() {ParticleVector(0);};
-    int getType() const {return type;};
-};
-
+#include "ParticleVector.h"
 
 /**
  * @struct WZlVectors
@@ -55,38 +42,10 @@ public:
 struct WZlVectors
 {
     std::vector<ParticleVector> allLeptons;
-    std::vector<TLorentzVector> allJets; 
+    std::vector<ParticleVector> allJets; 
     TLorentzVector MET;
     TLorentzVector W;
     TLorentzVector Z;
-};
-
-/**
- * @struct EventCounter
- * @brief Holds all counters indentifing the number of events passing each
- *        selection.
- *
- * @param leptons Number of leptons in event.
- * @param jets Number of jets in event.
- * @param electrons Number of electrons in event.
- * @param muons Number of muons in event.
- * @param leptonsPostCut number of leptons with \f$p_{T} > \f$
- *        WZEvent::cuts.leptonPt and \f$\eta > \f$ WZvent::cuts.leptonEta
- * @param electronsPostCut number of electrons with \f$p_{T} >\f$
- *        Cuts::leptonPt and \f$\eta > \f$ WZEvent::cuts.leptonEta.
- * @param leptonsPostCut number of leptons with \f$p_{T} > \f$
- *        Cuts::leptonPt and \f$\eta > \f$ Cuts::leptonEta.
- */
-struct EventCounter
-{
-    int leptons;
-    int jets;
-    int electrons;
-    int muons;
-    int leptonsPostCut;
-    int electronsPostCut;
-    int muonsPostCut;
-    int jetsPostCut;
 };
 
 struct Cuts
@@ -110,7 +69,7 @@ private:
     TRootLHEFParticle* particleMother;
     LHEWeights* weights;
     bool useWeights;
-    EventCounter counter;
+    std::map<std::string,int> particleCounts;
     Cuts cuts;
     WZlVectors wzlVectors;
     
@@ -138,22 +97,25 @@ public:
     float getWZTransMass();
     float getWZInvMass();
 
+    const std::vector<std::string>& getWeightNames();
     std::vector<ParticleVector>& getAllLeptons();
-    std::vector<TLorentzVector>& getAllJets();
-    const std::vector<float>& getWeights();
+    std::vector<ParticleVector>& getAllJets();
+    const std::vector<float>& getWeightsVector();
+    const LHEWeights* getLHEWeights(); 
     void resetEvent();
     float getWMass();
     float getZMass();
     float getMET();
-    int getNumLeptons();
-    int getNumElectrons();
-    int getNumMuons();
-    int getNumPostCutMuons();
-    int getNumPostCutElectrons();
-    int getNumPostCutLeptons();
-    int getNumPostCutJets();
-    int getNumWeights();
-    const int getSMWeightPos();
+    unsigned int getNumLeptons();
+    unsigned int getNumElectrons();
+    unsigned int getNumMuons();
+    unsigned int getNumPostCutMuons();
+    unsigned int getNumPostCutElectrons();
+    unsigned int getNumPostCutLeptons();
+    unsigned int getNumPostCutJets();
+    unsigned int getNumPostCutTaus();
+    unsigned int getNumWeights();
+    const unsigned int getSMWeightPos();
     float getSMWeight();
 };
 
