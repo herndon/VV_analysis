@@ -64,7 +64,7 @@ void WZEventsTracker::initializeDijetPlots()
     addPlot("dijet", "deltaEta","Dijet #Delta #eta", "#Delta#eta",
             "Events", 40, 0.0, 8.);
     addPlot("dijet", "mass", "Dijet Mass", "Mass (GeV/c^2)", 
-            "Events", 40, -4.0, 4.0);
+            "Events", 100, 0, 2000.);
 }
 void WZEventsTracker::initializeLeptonPlots()
 {
@@ -189,7 +189,7 @@ void WZEventsTracker::getDijetPlotData(const std::string& cuts)
 {
     plotCuts["diJets"] = cuts;
     assignValueToPlotKey("dijet","deltaEta", wzEvent->getJetDeltaEta());
-    assignValueToPlotKey("dijet","deltaEta", wzEvent->getDiJetInvMass());
+    assignValueToPlotKey("dijet","mass", wzEvent->getDiJetInvMass());
 }
 void WZEventsTracker::assignValueToPlotKey(const std::string& keyPair1, 
                                            const std::string& keyPair2,

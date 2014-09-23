@@ -1,13 +1,14 @@
+#include "TROOT.h"
 #include "TSystem.h"
 #include "THStack.h"
 #include "TLegend.h"
 #include "TPaveText.h"
 
-#include "external/ExRootAnalysis/ExRootTreeReader.h"
-#include "external/ExRootAnalysis/ExRootTreeWriter.h"
-#include "external/ExRootAnalysis/ExRootTreeBranch.h"
-#include "external/ExRootAnalysis/ExRootResult.h"
-#include "external/ExRootAnalysis/ExRootUtilities.h"
+#include "ExRootAnalysis/ExRootTreeReader.h"
+#include "ExRootAnalysis/ExRootTreeWriter.h"
+#include "ExRootAnalysis/ExRootTreeBranch.h"
+#include "ExRootAnalysis/ExRootResult.h"
+#include "ExRootAnalysis/ExRootUtilities.h"
 
 #include "WZEvent.h"
 #include "WZEventsTracker.h"
@@ -23,10 +24,10 @@ using namespace std;
 
 int main( int argc, char *argv[])
 {
-    const char* inputFile = "unweighted_events.root";
+    const char* inputFile = "unweighted_events.root";//"tag_1_pythia_lhe_events.root";
     TChain *chain = new TChain("LHEF");
-
-    cout << "Processing file " << inputFile << endl;
+    
+    //cout << "Processing file " << inputFile << endl;
     chain->Add(inputFile);
 
     ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
@@ -53,7 +54,7 @@ void AnalyseEvents(ExRootTreeReader *treeReader, float eventWeight)
     cout << "** Chain contains " << allEntries << " events" << endl;
     cout.flush();
 
-    WZEvent wzEvent = WZEvent("unweighted_events.lhe");
+    WZEvent wzEvent = WZEvent("unweighted_events.lhe");//"tag_1_pythia_events.lhe");
     wzEvent.setLeptonCuts(20, 2.4);
     wzEvent.setJetCuts(30, 4.7);
    
@@ -61,12 +62,10 @@ void AnalyseEvents(ExRootTreeReader *treeReader, float eventWeight)
     generatorEvents.setMetCut(30);
     generatorEvents.setZMassCut(20);
     //in inverse picobarns
-    generatorEvents.setLuminosity(100000.);
     
     WZEventsTracker selectionEvents(&wzEvent, "selectionWeights.root", 100000.);
-    selectionEvents.setLuminosity(100000.);
     selectionEvents.setMetCut(30);
-    //selectionEvents.setZMassCut(20);
+    selectionEvents.setZMassCut(20);
     //selectionEvents.setWZTMassCut(1200);
     selectionEvents.setJetMassCut(600);
     selectionEvents.setEtajjCut(4.);
@@ -92,9 +91,6 @@ void AnalyseEvents(ExRootTreeReader *treeReader, float eventWeight)
     
     generatorEvents.writePlotsToFile();
     selectionEvents.writePlotsToFile();
-    //delete generatorResult;
-    //delete selectionResult;
-    //delete generatorEvents;
 }
 //------------------------------------------------------------------------------
 bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVectorMET,

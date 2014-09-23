@@ -9,13 +9,27 @@ LHEWeights::LHEWeights(const char* lheFileName)
 
     size_t position;  
     SMWeightPos = 0;
+    _unit_wgt = 1.118/34124.;
+
+     do {
+        position = searchNextLine("Unit wgt");
+    } while(position == string::npos && !lheFile.eof());
+    
+    if(position == string::npos)
+        cout << "Error in LHE file format. No unit weight found.\n";
+    else
+        _unit_wgt = atof(substrFromLine(": ", "\n"));
 
     do {
         position = searchNextLine("<weightgroup");
     } while(position == string::npos && !lheFile.eof());
     
     if(position == string::npos)
-        cout << "No weight info in .lhe file\n";
+    {
+        cout << "No weight info in LHE file. Using unit weight " 
+             << _unit_wgt << " for all events. ";
+        weightNames.push_back("unit wgt = " + std::to_string(_unit_wgt));
+    }
     else
     {
         while(searchNextLine("</weightgroup>") == string::npos)
@@ -35,7 +49,7 @@ LHEWeights::LHEWeights(const char* lheFileName)
 void LHEWeights::formatNames()
 {
     std::vector<std::pair<std::string, std::string>> paramNames;
-    paramNames.push_back(std::make_pair("anoinputs 12", "f_T1 ="));
+    paramNames.push_back(std::make_pair("anoinputs 12", "f_{T1} ="));
     
     for(auto& weightName : weightNames)
     {    
@@ -101,5 +115,10 @@ void LHEWeights::readWeights()
         }
     }
     else
-        std::cout << "Error in reading .lhe file\n";
+        weights.push_back(_unit_wgt);
+}
+LHEWeights::~LHEWeights()
+{
+    weights.clear();
+    weightNames.clear();
 }

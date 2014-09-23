@@ -10,7 +10,7 @@ ROOTLDLIBS = `$(ROOTSYS)/bin/root-config --cflags --glibs` -lEG
 
 INCLUDES = -I. $(ROOTINCLUDES)
 LDLIBS = -L. $(ROOTLDLIBS)
-EXROOTLIB = -L./lib -lExRootAnalysis
+EXROOTLIB = -L./ExRootAnalysis/lib -lExRootAnalysis
 
 all : WpZ_ana
 	@echo Built $@
@@ -25,6 +25,6 @@ WpZ_ana: $(SRCS:.cpp=.o)
 	@echo Built $@
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -fPIC $^
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -fPIC $^ 
 	@echo Compiled $@
 

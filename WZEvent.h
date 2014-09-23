@@ -18,7 +18,7 @@
 
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
-#include "external/ExRootAnalysis/ExRootClasses.h"
+#include "ExRootAnalysis/ExRootClasses.h"
 #include <vector>
 #include <string>
 #include <map>

@@ -16,7 +16,7 @@ WZEvent::WZEvent()
 }
 WZEvent::~WZEvent()
 {
-    delete weights;
+    //delete weights;
 }
 const std::vector<float>& WZEvent::getWeightsVector()
 {
@@ -42,7 +42,11 @@ void WZEvent::loadEvent(TClonesArray* branchGenParticle)
             if((particle->Mother1 < i+2) && (abs(particle->PID) == 11 
                         || abs(particle->PID) == 13|| abs(particle->PID) == 15))
             {
-                particleMother = (TRootLHEFParticle*) branchGenParticle->At(particle->Mother1-1);
+                if (particle->Mother1 != 0)
+                {    
+                    particleMother = (TRootLHEFParticle*) 
+                                        branchGenParticle->At(particle->Mother1-1);
+                }
                 foundLepton();
             }
             // for W+Z event initial particles end after 4. Status is not 2 which
@@ -97,7 +101,7 @@ float WZEvent::getWZTransMass()
 }
 float WZEvent::getDiJetInvMass()
 {
-    if(wzlVectors.allJets.size() == 2) 
+    if(wzlVectors.allJets.size() >= 2)
         return (wzlVectors.allJets[0] + wzlVectors.allJets[1]).M();
     else
         std::cout << "\nError in di-Jet mass calculation.\n";
