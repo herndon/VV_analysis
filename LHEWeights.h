@@ -8,16 +8,18 @@
 class LHEWeights
 {
 private:
-    std::fstream lheFile;
-    float _unit_wgt;
+    std::fstream lheFile_;
+    float unit_wgt_;
     std::vector<float> weights;
+    bool has_weights_;
     unsigned int SMWeightPos;
-    char line[256];
-    std::string lheFileLine;
+    std::string lheFileLine_;
     std::vector<std::string> weightNames;
     void formatNames();
     const char* substrFromLine(const std::string&, const std::string&);
-    const size_t searchNextLine(const std::string& searchSequence);
+    bool searchNextLine(const std::string& searchSequence);
+    bool findWeights();
+    void readWeightNames();
 public:
     LHEWeights(const char* lheFileName);
     ~LHEWeights();

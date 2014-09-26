@@ -11,18 +11,11 @@ WZEventsTracker::WZEventsTracker(WZEvent* event, std::string rootFileName,
     this->luminosity = luminosity;
     const LHEWeights* weights = wzEvent->getLHEWeights();
     std::vector<std::string> weightNames;
-    if (weights == NULL)
-    {
-        useWeights = false;    
-        weightNames.push_back("Unweighted");
-    }
-    else
-    {
-        weightNames = weights->getNames();
-        useWeights = true;
-        crossSections.resize(weights->getNumWeights());
-        crossSections = {0.};
-    }
+    weightNames = weights->getNames();
+    useWeights = true;
+    crossSections.resize(weights->getNumWeights());
+    crossSections = {0.};
+    
     plots = new WZPlots(rootFileName, "", weightNames); 
 
     eventCounters["3e"] = 0;

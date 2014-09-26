@@ -14,7 +14,7 @@
 #include "WZEventsTracker.h"
 #include <iostream>
 
-void AnalyseEvents(ExRootTreeReader *treeReader, float eventWeight);
+void AnalyseEvents(ExRootTreeReader *treeReader, const char* lheFile);
 bool WZMassCalculation(const TLorentzVector& lVectorlW,
                      const TLorentzVector& lVectorMET, Float_t WMass, Float_t pz);
 
@@ -24,28 +24,32 @@ using namespace std;
 
 int main( int argc, char *argv[])
 {
-    const char* inputFile = "unweighted_events.root";//"tag_1_pythia_lhe_events.root";
+    const char* kDefaultInputFile = "unweighted_events.root";
+    const char* kDefaultLHEFile = "unweighted_events.lhe";
+    char* inputFile;
+    char* lheFile;
+    if(argc > 1)
+        inputFile = argv[1];
+    else 
+        inputFile = const_cast<char*>(kDefaultInputFile);
+    if(argc > 2)
+        lheFile = argv[2];
+    else 
+      lheFile = const_cast<char*>(kDefaultLHEFile);
+ 
     TChain *chain = new TChain("LHEF");
     
-    //cout << "Processing file " << inputFile << endl;
     chain->Add(inputFile);
-
     ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
     
-    float eventWeight = 1.;
-    
-    if(argc == 2)
-        eventWeight = atof(argv[1]);
-
-    AnalyseEvents(treeReader, eventWeight);
+    AnalyseEvents(treeReader, lheFile);
     
     delete treeReader;
     delete chain;
-    
     return 0;   
 }
 //------------------------------------------------------------------------------
-void AnalyseEvents(ExRootTreeReader *treeReader, float eventWeight)
+void AnalyseEvents(ExRootTreeReader *treeReader, const char* lheFile)
 {
     // Get pointers to branches used in analysis
     TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
@@ -54,16 +58,16 @@ void AnalyseEvents(ExRootTreeReader *treeReader, float eventWeight)
     cout << "** Chain contains " << allEntries << " events" << endl;
     cout.flush();
 
-    WZEvent wzEvent = WZEvent("unweighted_events.lhe");//"tag_1_pythia_events.lhe");
-    wzEvent.setLeptonCuts(20, 2.4);
-    wzEvent.setJetCuts(30, 4.7);
+    WZEvent* wzEvent = new WZEvent(lheFile);
+    wzEvent->setLeptonCuts(20, 2.4);
+    wzEvent->setJetCuts(30, 4.7);
    
-    WZEventsTracker generatorEvents(&wzEvent, "generatorWeights.root", 100000.);
+    WZEventsTracker generatorEvents(wzEvent, "generatorWeights.root", 100000.);
     generatorEvents.setMetCut(30);
     generatorEvents.setZMassCut(20);
     //in inverse picobarns
     
-    WZEventsTracker selectionEvents(&wzEvent, "selectionWeights.root", 100000.);
+    WZEventsTracker selectionEvents(wzEvent, "selectionWeights.root", 100000.);
     selectionEvents.setMetCut(30);
     selectionEvents.setZMassCut(20);
     //selectionEvents.setWZTMassCut(1200);
@@ -76,11 +80,10 @@ void AnalyseEvents(ExRootTreeReader *treeReader, float eventWeight)
     {
         // Load selected branches with data from specified event
         //Updates entry pointed to by branchGenParticle and branchEvent 
-        
         treeReader->ReadEntry(entry);
 	    
-        wzEvent.resetEvent();
-        wzEvent.loadEvent(branchGenParticle);
+        wzEvent->resetEvent();
+        wzEvent->loadEvent(branchGenParticle);
        
         generatorEvents.processEvent();
         selectionEvents.processEvent();

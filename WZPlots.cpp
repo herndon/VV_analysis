@@ -13,9 +13,10 @@ WZPlots::WZPlots(const std::string& rootFileName, const std::string& baseFolder,
         
     for(const auto& weightName : weightNames_)
     {
-        rootFile_->mkdir(weightName.c_str());
+        if(rootFile_->mkdir(weightName.c_str()) == NULL)
+            std::cerr << "Error making weight directory!";
     }
-    plotSets_.resize(weightNames.size());
+    plotSets_.resize(weightNames_.size());
 
 
 }
@@ -46,8 +47,11 @@ void WZPlots::fillHist(const std::string& plotGroup, const std::string plot,
                        const float luminosity)               
 {
     if (weights.size() != plotSets_.size())
+    {
         std::cout << "Error, too many weights in histogram fill function";
-   
+        std::cout << "\nweights.size() = " << weights.size();
+        std::cout << "\nplotSets_.size() = " << plotSets_.size();
+    }   
     //std::cout << "Filling plot " << plotGroup << " " << plot << std::endl; 
     for (unsigned int i = 0; i < weights.size(); i++)
     {

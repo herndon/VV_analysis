@@ -11,7 +11,7 @@ WZEvent::WZEvent(const char* lheFileName)
 WZEvent::WZEvent()
 {
     useWeights = false;
-    weights = NULL;
+    weights = new LHEWeights("");
     resetEvent();
 }
 WZEvent::~WZEvent()
@@ -69,16 +69,13 @@ void WZEvent::loadEvent(TClonesArray* branchGenParticle)
 float WZEvent::getSMWeight()
 {
     if(weights == NULL)
-        return 0.;
+        return 1.;
     else
         return weights->getSMWeight();
 }
 const unsigned int WZEvent::getSMWeightPos()
 {
-    if(weights == NULL)
-        return 0;
-    else
-        return weights->getSMWeightPos();
+    return weights->getSMWeightPos();
 }
 float WZEvent::getWZInvMass()
 {
