@@ -8,17 +8,17 @@ LHEWeights::LHEWeights(const char* lheFileName)
 {
     lheFile_.open(lheFileName, std::ios::in | std::ios::binary);
     
-    if (!lheFile_.is_open())
-    {
+    if (!lheFile_.is_open()) {
         std::cout << "No LHE file found. No weights will be applied.\n";
         has_weights_ = false;
         unit_wgt_ = 1;
         weightNames = {"Unweighted"};
-        return;
     }
-    
-    has_weights_ = findWeights();
-    readWeightNames();
+    else { 
+        has_weights_ = findWeights();
+        if (has_weights_)
+            readWeightNames();
+    }
 }
 bool LHEWeights::findWeights()
 {
@@ -33,7 +33,7 @@ bool LHEWeights::findWeights()
         }
     }
     unit_wgt_ = atof(substrFromLine(": ", "\n"));
-
+    
     while (!searchNextLine("<initrwgt"))
     {
         if (lheFileLine_.find("<init>") != std::string::npos)

@@ -64,13 +64,13 @@ void AnalyseEvents(ExRootTreeReader *treeReader, const char* lheFile)
    
     WZEventsTracker generatorEvents(wzEvent, "generatorWeights.root", 100000.);
     generatorEvents.setMetCut(30);
-    generatorEvents.setZMassCut(20);
+    //generatorEvents.setZMassCut(20);
     //in inverse picobarns
     
     WZEventsTracker selectionEvents(wzEvent, "selectionWeights.root", 100000.);
-    selectionEvents.setMetCut(30);
+    //selectionEvents.setMetCut(30);
     selectionEvents.setZMassCut(20);
-    //selectionEvents.setWZTMassCut(1200);
+    //selectionEvents.setWZMassCut(1000);
     selectionEvents.setJetMassCut(600);
     selectionEvents.setEtajjCut(4.);
 

@@ -44,6 +44,7 @@ struct WZlVectors
     std::vector<ParticleVector> allLeptons;
     std::vector<ParticleVector> allJets; 
     TLorentzVector MET;
+    TLorentzVector neutrino;
     TLorentzVector W;
     TLorentzVector Z;
 };
@@ -69,6 +70,7 @@ private:
     TRootLHEFParticle* particleMother;
     LHEWeights* weights;
     bool useWeights;
+    bool hasLepZ;
     std::map<std::string,int> particleCounts;
     Cuts cuts;
     WZlVectors wzlVectors;
@@ -76,8 +78,8 @@ private:
     void processWZLepton(std::string type);
     void foundLepton();
     void foundJet();
-    void foundW();
-    void foundZ();
+    void foundLeptonicW();
+    void foundLeptonicZ();
     void foundMET();
     void readWeights();   
 public:
@@ -96,6 +98,7 @@ public:
     float getZpt();
     float getWZTransMass();
     float getWZInvMass();
+    float get4lMass();
 
     const std::vector<std::string>& getWeightNames();
     std::vector<ParticleVector>& getAllLeptons();
@@ -106,6 +109,7 @@ public:
     float getWMass();
     float getZMass();
     float getMET();
+    bool hasLeptonicZ();
     unsigned int getNumLeptons();
     unsigned int getNumElectrons();
     unsigned int getNumMuons();

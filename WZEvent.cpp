@@ -45,7 +45,13 @@ void WZEvent::loadEvent(TClonesArray* branchGenParticle)
                 if (particle->Mother1 != 0)
                 {    
                     particleMother = (TRootLHEFParticle*) 
-                                        branchGenParticle->At(particle->Mother1-1);
+                                        branchGenParticle->At(particle->Mother1);
+                    
+                    if (particleMother->PID == 23 && !hasLepZ)
+                    {
+                        hasLepZ = true;
+                        foundLeptonicZ();
+                    }
                 }
                 foundLepton();
             }
@@ -54,13 +60,18 @@ void WZEvent::loadEvent(TClonesArray* branchGenParticle)
             // with extra substantially increasing the events that pass
             else if (i>5 && (abs(particle->PID) < 6||abs(particle->PID) == 21))
                 foundJet();
-            else if (abs(particle->PID) == 12 || abs(particle->PID) == 14) 
+            else if (abs(particle->PID) == 12 || abs(particle->PID) == 14 ||
+                     abs(particle->PID) == 16) {
                 foundMET();
+                particleMother = (TRootLHEFParticle*) 
+                                        branchGenParticle->At(particle->Mother1);
+                    
+                if (particleMother->PID == 24)
+                {
+                    foundLeptonicW();            
+                }
+            }
         }
-        if (particle->PID==23)
-            foundZ();
-        else if (particle->PID==24)  
-            foundW();
     }
     if(useWeights)
         weights->readWeights();
@@ -79,10 +90,30 @@ const unsigned int WZEvent::getSMWeightPos()
 }
 float WZEvent::getWZInvMass()
 {
-    return (wzlVectors.W + wzlVectors.Z).M();
+    if (hasLepZ)
+        return (wzlVectors.W + wzlVectors.Z).M();
+    else
+        return - 1;
+}
+float WZEvent::get4lMass()
+{
+    if(wzlVectors.allLeptons.size() == 3) 
+    {
+        TLorentzVector leptonSum;
+        for(const auto& lepton : wzlVectors.allLeptons)
+            leptonSum += lepton;
+        return  (leptonSum + wzlVectors.neutrino).M();
+    }
+    else
+    {
+        std::cout << "\nError in WZ transverse mass calculation.\n";
+        return 0.;
+    } 
 }
 float WZEvent::getWZTransMass()
 {
+    if (!hasLepZ)
+        return -1;
     if(wzlVectors.allLeptons.size() == 3) 
     {
         TLorentzVector leptonSum;
@@ -116,7 +147,10 @@ float WZEvent::getJetDeltaEta()
 }
 float WZEvent::getZpt()
 {
-    return wzlVectors.Z.Pt();
+    if (hasLepZ)
+        return wzlVectors.Z.Pt();
+    else
+        return -1;
 }
 unsigned int WZEvent::getNumWeights()
 {
@@ -187,7 +221,6 @@ std::vector<ParticleVector>& WZEvent::getAllJets()
 void WZEvent::foundLepton()
 {
     particleCounts["leptons"]++;
-
     switch(abs(particle->PID))
     {
         case 11:
@@ -250,22 +283,29 @@ void WZEvent::foundJet()
 }
 void WZEvent::foundMET()
 {
-    if(particle->PT > 0)
+    if(particle->PT > 0) {
         wzlVectors.MET.SetPtEtaPhiM(particle->PT, 0.0,particle->Phi,particle->M);
+        wzlVectors.neutrino.SetPtEtaPhiM(particle->PT, particle->Eta,particle->Phi,
+                                   particle->M);   
+        }
 }
 unsigned int WZEvent::getNumPostCutJets()
 {
     return particleCounts["jetsPostCut"];
 }
-void WZEvent::foundZ()
+void WZEvent::foundLeptonicZ()
 {
-    wzlVectors.Z.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle->M);
+    wzlVectors.Z.SetPtEtaPhiM(particleMother->PT,particleMother->Eta,
+                              particleMother->Phi,particleMother->M);
 }
-void WZEvent::foundW()
+void WZEvent::foundLeptonicW()
 {
-    wzlVectors.W.SetPtEtaPhiM(particle->PT,
-                        particle->Eta,particle->Phi,particle->M);
+    wzlVectors.W.SetPtEtaPhiM(particleMother->PT,particleMother->Eta,
+                              particleMother->Phi,particleMother->M);
+}
+bool WZEvent::hasLeptonicZ()
+{
+    return hasLepZ;
 }
 void WZEvent::removeCuts()
 {
@@ -275,6 +315,7 @@ void WZEvent::resetEvent()
 {
     particle = NULL;
     particleMother = NULL;
+    hasLepZ = false;
     wzlVectors.allLeptons.clear();
     wzlVectors.allJets.clear();
     particleCounts["jets"] = 0;

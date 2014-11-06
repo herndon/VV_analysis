@@ -7,6 +7,7 @@
 #include <vector>
 #include "TObject.h"
 #include "TFile.h"
+#include "TH2.h"
 
 class WZPlots
 {
@@ -23,8 +24,13 @@ public:
                  const std::string& title, const std::string& xAxisTitle, 
                  const std::string& yAxisTitle, const int numBins, 
                  const float xMin, const float xMax);
+    void add2DHist(const std::string& directory, const std::string& subdirectory,
+                 const std::string& title, const std::string& xAxisTitle, 
+                 const std::string& yAxisTitle, const int numBinsX, 
+                 const float xMin, const float xMax, const int numBinsY,
+                 const float yMin, const float yMax);
     void fillHist(const std::string& plotGroup, const std::string plot,
-                  const float value, const std::vector<float>& weights,
+                  std::vector<float>& value, const std::vector<float>& weights,
                   const float luminosity);               
     void writeToFile();
 };
