@@ -97,6 +97,7 @@ public:
     float getJetDeltaEta();
     float getZpt();
     float getWZTransMass();
+    float get4lTransMass();
     float getWZInvMass();
     float get4lMass();
 

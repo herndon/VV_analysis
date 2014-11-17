@@ -1,20 +1,18 @@
 #include "WZEventsTracker.h" 
+#include "LHEWeights.h"
 #include <iostream>
 #include <cmath>
+#include <vector>
 
 using namespace std;
 
-WZEventsTracker::WZEventsTracker(WZEvent* event, std::string rootFileName,
-                                 const float luminosity)
-{
-    wzEvent = event;
-    const LHEWeights* weights = wzEvent->getLHEWeights();
-    std::vector<std::string> weightNames;
-    weightNames = weights->getNames();
+WZEventsTracker::WZEventsTracker(const std::vector<std::string>& weightNames, 
+                                 std::string rootFileName, const float luminosity) {
     if (weightNames.size() == 1 && weightNames[0] == "Unweighted")
     {
         this->luminosity = 1.;
-        std::cout << "No weights found so luminosity set to 1.\n";
+        std::cout << "No weights found in LHE file, so luminosity set to 1 "
+                  << "for all events in " << rootFileName << ".\n";
         useWeights = false;
     }
     else
@@ -22,7 +20,7 @@ WZEventsTracker::WZEventsTracker(WZEvent* event, std::string rootFileName,
         this->luminosity = luminosity;
         useWeights = true;
     }
-    crossSections.resize(weights->getNumWeights());
+    crossSections.resize(weightNames.size());
     crossSections = {0.};
     
     plots = new WZPlots(rootFileName, "", weightNames); 
@@ -56,17 +54,19 @@ WZEventsTracker::WZEventsTracker(WZEvent* event, std::string rootFileName,
     initializeWZPlots();
     initializeZPlots();
     initializeMETPlots();
-    initializeWZTMassMjjPlot();
+    initialize2DPlots();
 }
 
 WZEventsTracker::~WZEventsTracker()
 {
     delete plots;
 }
-void WZEventsTracker::initializeWZTMassMjjPlot()
+void WZEventsTracker::initialize2DPlots()
 {
     add2DHist("2DHists", "mjj_WZTM", "m_{jj} vs. WZ Transverse Mass",
-              "WZ Transverse Mass","m_{jj}", 30,0, 3000, 20, 0, 1000); 
+              "WZ Transverse Mass","m_{jj}", 40,0, 4000, 40, 0, 2000); 
+    add2DHist("2DHists", "mjj_4lM", "m_{jj} vs. 4 Lepton Mass",
+              "WZ Transverse Mass","m_{jj}", 40,0, 4000, 40, 0, 2000); 
 }
 void WZEventsTracker::initializeDijetPlots()
 {
@@ -122,14 +122,17 @@ void WZEventsTracker::initializeDileptonPlots()
 void WZEventsTracker::initializeWZPlots()
 {
     addHist("WZ", "transMass", "WZ Transverse Mass ", 
-            "WZ Transverse Mass (GeV/c^2)", "Events", 200, 0.0, 2000.0);
+            "WZ Transverse Mass (GeV/c^2)", "Events", 300, 0.0, 3000.0);
     addHist("WZ", "mass", "WZ Mass ", "WZ Mass (GeV/c^2)", "Events", 
-            200, 0.0, 2000.0);
+            400, 0.0, 4000.0);
 }
 void WZEventsTracker::initialize4lPlots()
 {
     addHist("4l", "mass", "4l Mass", 
             "4 Lepton Mass (GeV)", "Events", 200, 0.0, 2000.0);
+    addHist("4l", "transMass", "4l Transverse Mass ", 
+            "4l Transverse Mass (GeV)", "Events", 300, 0.0, 3000.0);
+
 }
 void WZEventsTracker::initializeZPlots()
 {
@@ -188,6 +191,10 @@ void WZEventsTracker::getLeptonPlotData(const std::string& cuts)
 }
 void WZEventsTracker::getWZTMassMjjPlotData(const std::string& cuts)
 {
+    std::vector<float> values = {wzEvent->getWZTransMass(),
+                                 wzEvent->get4lMass()}; 
+    assignValuesToPlotKey("2DHists", "mjj_4lM", values);
+    
     if (wzEvent->hasLeptonicZ()) {
         plotCuts["WZTMassMjj"] = cuts;
         std::vector<float> values = {wzEvent->getWZTransMass(),
@@ -374,7 +381,7 @@ void WZEventsTracker::fillPlots()
     {
         plotGroup = keyMap.first.first;
         plot = keyMap.first.second;
-        //Value of -1 indicates plot value is not defined for this event, i.e.
+        //Empty vector indicates plot value is not defined for this event, i.e.
         //for Z related plots in events with no Z
         if (!keyMap.second.empty())
             plots->fillHist(plotGroup, plot, keyMap.second, 
@@ -425,9 +432,9 @@ void WZEventsTracker::setEtajjCut(float eta_jj)
 }
 
 //THESE ARE TIERED CUTS!
-void WZEventsTracker::processEvent()
+void WZEventsTracker::processEvent(WZEvent* event)
 {
-    //wzEvent = event;
+    wzEvent = event;
     std::string cuts = "";
 
     if(wzEvent->getNumPostCutLeptons() == tieredCuts.numHighPtLeptons)
@@ -578,6 +585,7 @@ void WZEventsTracker::processByLeptonType()
 }
 void WZEventsTracker::printEventInfo()
 {
+    cout << "\n__________________________________________________________________\n";
     cout << "Kinematic cuts applied to all events: " << endl;
     cout << "di-Jet invariant mass > " << kinCuts.diJetMass << " GeV" << endl;
     cout << "Jet eta separation > " << kinCuts.jetDeltaEta << endl;

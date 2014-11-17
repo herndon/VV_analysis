@@ -67,10 +67,10 @@ private:
     static bool sortParticlesByPt(const ParticleVector&, const ParticleVector&);
     static bool sortDileptonsByZMass(const TLorentzVector&, const TLorentzVector&);
 public:
-    WZEventsTracker(WZEvent* event, const std::string rootFileName,
-                    const float luminosity);
+    WZEventsTracker(const std::vector<std::string>& weightNames, 
+                    const std::string rootFileName, const float luminosity);
     ~WZEventsTracker();
-    void initializeWZTMassMjjPlot();
+    void initialize2DPlots();
     void initializeDijetPlots();
     void initializeLeptonPlots();
     void initializeJetPlots();
@@ -89,7 +89,7 @@ public:
     void set4lMassCut(float leptonMass);
     void setZMassCut(float ZMass);
     void setEtajjCut(float eta_jj);
-    void processEvent();
+    void processEvent(WZEvent* wzEvent);
     void printEventInfo();
     void fillPlots();
     void writePlotsToFile(); 

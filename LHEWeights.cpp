@@ -38,8 +38,8 @@ bool LHEWeights::findWeights()
     {
         if (lheFileLine_.find("<init>") != std::string::npos)
         {
-            cout << "No weight info in LHE file. Using unit weight " 
-                 << unit_wgt_ << " for all events. ";
+            cout << "No weight info in LHE file. Using unit weight "
+                 << unit_wgt_ << " for all events.\n";
             weightNames.push_back("unit wgt = " + std::to_string(unit_wgt_));
             return false;
         }

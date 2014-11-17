@@ -12,81 +12,107 @@
 
 #include "WZEvent.h"
 #include "WZEventsTracker.h"
+#include "WZEventList.h"
 #include <iostream>
+#include <vector>
 
-void AnalyseEvents(ExRootTreeReader *treeReader, const char* lheFile);
 bool WZMassCalculation(const TLorentzVector& lVectorlW,
                      const TLorentzVector& lVectorMET, Float_t WMass, Float_t pz);
-
-using namespace std;
+void AnalyseEvents(std::vector<WZEventList>& eventLists);
 
 //------------------------------------------------------------------------------
 
 int main( int argc, char *argv[])
 {
-    const char* kDefaultInputFile = "unweighted_events.root";
+    const char* kDefaultRootFile = "unweighted_events.root";
     const char* kDefaultLHEFile = "unweighted_events.lhe";
-    char* inputFile;
-    char* lheFile;
-    if(argc > 1)
-        inputFile = argv[1];
-    else 
-        inputFile = const_cast<char*>(kDefaultInputFile);
-    if(argc > 2)
-        lheFile = argv[2];
-    else 
-      lheFile = const_cast<char*>(kDefaultLHEFile);
- 
-    TChain *chain = new TChain("LHEF");
+    std::vector<const char*> root_files;
+    std::vector<const char*> lhe_files;
     
-    chain->Add(inputFile);
-    ExRootTreeReader *treeReader = new ExRootTreeReader(chain);
+     if (argc == 1) {
+        root_files.push_back(kDefaultRootFile);
+        lhe_files.push_back(kDefaultLHEFile);
+    }
+    else if (argc == 2) {
+        std::string root_file = const_cast<const char*>(argv[1]);
+        if (root_file.find(".root") != std::string::npos) {
+            root_files.push_back(root_file.c_str());
+            lhe_files.push_back("NONE");
+        }
+        else 
+            std::cout << "First CL argument must be .root file";
+    }
+    else if ((argc - 1) % 2 == 0) {
+        for (int i = 1; i < argc - 1; i += 2) {
+            std::string root_file = argv[i];
+            std::string lhe_file = argv[i+1];
+            if (root_file.find(".root") != std::string::npos &&
+                lhe_file.find(".lhe") != std::string::npos) {
+                lhe_files.push_back(argv[i+1]);
+                root_files.push_back(argv[i]);
+            }
+            else {
+                std::cout << "Must have command line arguments in pairs: "
+                          << "./WpZ_ana rootfile1.root lhefile1.lhe ...";
+                exit(0);
+            }
+        }
+        if (argc > 3) {
+            std::cout << "\nWARNING! Combining multiple LHE files. It is your "
+                      << "responsiblity to check that these files are " 
+                      << "compatible!!!\n\n";
+        }
+    }
+    else {
+        std::cout << "Must have command line arguments in pairs: "
+                  << "./WpZ_ana rootfile1.root lhefile1.lhe ...";
+        exit(0);
+    }
+    std::vector<WZEventList> event_lists;
+    for (unsigned int i = 0; i < root_files.size(); i++) {
+        if (root_files.size() != lhe_files.size()) {
+            std::cout << "\nERROR! Must have same number of root files "
+                      << "as LHE files.\n";
+            exit(0);
+        }
+        WZEventList event_list(root_files[i], lhe_files[i]);
+        event_lists.push_back(event_list);
+    }
+    AnalyseEvents(event_lists);
     
-    AnalyseEvents(treeReader, lheFile);
-    
-    delete treeReader;
-    delete chain;
     return 0;   
 }
 //------------------------------------------------------------------------------
-void AnalyseEvents(ExRootTreeReader *treeReader, const char* lheFile)
+void AnalyseEvents(std::vector<WZEventList>& eventLists)
 {
     // Get pointers to branches used in analysis
-    TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
-    
-    Long64_t allEntries = treeReader->GetEntries();
-    cout << "** Chain contains " << allEntries << " events" << endl;
-    cout.flush();
-
-    WZEvent* wzEvent = new WZEvent(lheFile);
-    wzEvent->setLeptonCuts(20, 2.4);
-    wzEvent->setJetCuts(30, 4.7);
    
-    WZEventsTracker generatorEvents(wzEvent, "generatorWeights.root", 100000.);
+    WZEventsTracker generatorEvents(eventLists[0].getWeightNames(), 
+                                    "generatorWeights.root", 100000.);
+    WZEventsTracker selectionEvents(eventLists[0].getWeightNames(),
+                                    "selectionWeights.root", 100000.);
     generatorEvents.setMetCut(30);
     //generatorEvents.setZMassCut(20);
     //in inverse picobarns
     
-    WZEventsTracker selectionEvents(wzEvent, "selectionWeights.root", 100000.);
     //selectionEvents.setMetCut(30);
     selectionEvents.setZMassCut(20);
     //selectionEvents.setWZMassCut(1000);
     selectionEvents.setJetMassCut(600);
     selectionEvents.setEtajjCut(4.);
 
-    
-    // Loop over all events
-    for(unsigned int entry = 0; entry < allEntries; ++entry) 
-    {
-        // Load selected branches with data from specified event
-        //Updates entry pointed to by branchGenParticle and branchEvent 
-        treeReader->ReadEntry(entry);
-	    
-        wzEvent->resetEvent();
-        wzEvent->loadEvent(branchGenParticle);
+    for (auto& eventList : eventLists) {
+        std::cout << "Event list contains " << eventList.getNumEntries() << " events" 
+             << std::endl;
+        std::cout.flush();
+        eventList.setLeptonCuts(20, 2.4);
+        eventList.setJetCuts(30, 4.7);
        
-        generatorEvents.processEvent();
-        selectionEvents.processEvent();
+        for(unsigned int entry = 0; entry < eventList.getNumEntries(); ++entry) 
+        {
+            generatorEvents.processEvent(eventList.getEvent(entry));
+            selectionEvents.processEvent(eventList.getEvent(entry));
+        }
     }
  
     generatorEvents.printEventInfo();
@@ -119,11 +145,11 @@ bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVe
     {
         pzp = t1;
         pzm = t1;      
-        //cout << "Root was imaginary" << endl;
+        //std::cout << "Root was imaginary" << endl;
     }
 
-    //cout << "pzp " << pzp << " pzm " << pzm << endl;
-    //cout << "pz " << pz << endl;
+    //std::cout << "pzp " << pzp << " pzm " << pzm << endl;
+    //std::cout << "pz " << pz << endl;
     WMass = 80.387;
 
     // Try again with my own solution
@@ -140,13 +166,13 @@ bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVe
     {
         pzp = (-b + sqrt(t2-t3))/(2.0*a);
         pzm = (-b - sqrt(t2-t3))/(2.0*a);      
-        //cout << "New Root was real" << endl;
+        //std::cout << "New Root was real" << endl;
     }
     else
     {
         pzp = -b/(2.0*a);
         pzm = -b/(2.0*a);      
-        //cout << "New Root was imaginary" << endl;
+        //std::cout << "New Root was imaginary" << endl;
     }
     Float_t pzsmall;
     Float_t pzlarge;

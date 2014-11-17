@@ -114,6 +114,11 @@ float WZEvent::getWZTransMass()
 {
     if (!hasLepZ)
         return -1;
+    else
+        return get4lTransMass();
+}
+float WZEvent::get4lTransMass()
+{
     if(wzlVectors.allLeptons.size() == 3) 
     {
         TLorentzVector leptonSum;
