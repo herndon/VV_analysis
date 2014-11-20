@@ -43,7 +43,9 @@ def makePlot (hist, hist_opts, plot_info):
     hist.Draw(hist_opts)
     hist.GetXaxis().SetTitle(plot_info["xlabel"])
     hist.GetYaxis().SetTitle(plot_info["ylabel"])
-    setTDRStyle(canvas, 100, 13, True) 
+    hist.SetTitleOffset(1.3, "y")
+    hist.SetTitleOffset(1.1, "x")
+    setTDRStyle(canvas, 100, 13, plot_info["printCMS"]) 
     canvas.cd()
     canvas.Update()
     canvas.RedrawAxis()
@@ -56,10 +58,13 @@ def makePlot (hist, hist_opts, plot_info):
     canvas.Print(plot_info["output_file"]) 
 def setTDRStyle(canvas, luminosity, energy, printCMS):
     tdrstyle.setTDRStyle() 
-    if printCMS:
+    if printCMS == "right" or printCMS == "left":
         if energy == 13:
             CMS_lumi.lumi_13TeV = "%s fb^{-1} MC" % luminosity
-            iPos = 11
+            if printCMS == "left":
+                iPos = 11
+            else:
+                iPos = 13
             CMS_lumi.writeExtraText = 1
             CMS_lumi.extraText = "Preliminary"
             CMS_lumi.CMS_lumi(canvas, 4, iPos)
@@ -110,8 +115,11 @@ def getBasicParser():
                         help="maximum y value")
     parser.add_argument('--rebin', type=int, required=False, default=0, 
                         help="Number of bins to group together (1D only)")
-    parser.add_argument('--logy', action='store_true', default=0, 
+    parser.add_argument('--logy', action='store_true',
                         help="Set y axis to logarithmic scale")
-    parser.add_argument('--logx', action='store_true', default=0, 
+    parser.add_argument('--logx', action='store_true', 
                         help="Set x axis to logarithmic scale")
+    parser.add_argument('--printCMS', type=str, default="left",required=False,
+                        choices=["left","right"], help="""print 'CMS preliminary' 
+                        in left (or right) upper corner""")
     return parser
