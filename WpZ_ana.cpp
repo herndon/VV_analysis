@@ -101,17 +101,19 @@ void AnalyseEvents(std::vector<WZEventList>& eventLists)
     selectionEvents.setJetMassCut(600);
     selectionEvents.setEtajjCut(4.);
 
+    WZEvent* event;
     for (auto& eventList : eventLists) {
         std::cout << "Event list contains " << eventList.getNumEntries() << " events" 
              << std::endl;
         std::cout.flush();
         eventList.setLeptonCuts(20, 2.4);
         eventList.setJetCuts(30, 4.7);
-       
+        
         for(unsigned int entry = 0; entry < eventList.getNumEntries(); ++entry) 
         {
-            generatorEvents.processEvent(eventList.getEvent(entry));
-            selectionEvents.processEvent(eventList.getEvent(entry));
+            event = eventList.getEvent(entry);
+            generatorEvents.processEvent(event);
+            selectionEvents.processEvent(event);
         }
     }
  

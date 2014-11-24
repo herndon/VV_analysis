@@ -132,8 +132,15 @@ bool LHEWeights::searchNextLine(const string& searchSequence)
         getline(lheFile_, lheFileLine_);
         return lheFileLine_.find(searchSequence) != std::string::npos;
     }
-    else
-        std::cerr << "Problem reading weights from file.";
+    else if (!lheFile_.good()) {
+        std::cerr << "Problem reading weights from file ";
+        std::cerr << "at line " << lheFileLine_;
+        exit(0);
+    }
+    else {
+        std::cerr << "Reached end of file unexpectedly while parsing weights.";
+        exit(0);
+    }
     return false;
 }
 
@@ -166,6 +173,10 @@ void LHEWeights::readWeights()
     {
         while (!searchNextLine("</rwgt>"))
         {
+            if (lheFile_.eof()) {
+                for (const auto & weight : weights)
+                    std::cout << "Weight is : " << weight;
+            }
             if (lheFileLine_.find("wgt id") != std::string::npos)
             {
                 weights.push_back(atof(substrFromLine(">", "</wgt>")));
