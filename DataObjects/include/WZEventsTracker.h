@@ -1,8 +1,8 @@
 #ifndef __WZEVENTSTRACKER_H_
 #define __WZEVENTSTRACKER_H__
 
-#include "WZEvent.h"
-#include "WZPlots.h"
+#include "DataObjects/include/WZEvent.h"
+#include "DataObjects/include/WZPlots.h"
 
 struct WZTieredCuts
 {

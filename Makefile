@@ -1,30 +1,39 @@
-CXX           = g++
-CXXFLAGS      = $(OPT2) $(ROOTCFLAGS) -Wall -g -O2 -std=c++11
-LD            = g++
-LDFLAGS       = $(OPT2)
+vpath %.cpp = $(wildcard */src)
+LIB_PATH = lib/
+MLIB_PATH = mlib/
+TEST_PATH = test/
+OBJSRCS =  $(wildcard */src/*.cpp)
+OBJS = $(addprefix  $(LIB_PATH),$(notdir $(OBJSRCS:.cpp=.o)))
+MAINEXES = $(basename $(notdir  $(wildcard */test/*.cpp)))
+TESTTARGETS = $(addsuffix  .test,$(MAINEXES))
 
-SRCS = LHEWeights.cpp WZEvent.cpp WZEventsTracker.cpp WZPlots.cpp WpZ_ana.cpp ParticleVector.cpp WZEventList.cpp
+INCDIRS = -I.
+CC = g++
+#DEBUG = -g -O0
+DEBUG = -g -O3 -fno-omit-frame-pointer -DNDEBUG
+CFLAGS = -std=c++11 -Wall $(DEBUG) `root-config --cflags`
+LFLAGS = -std=c++11 -Wall $(DEBUG) `root-config --glibs` 
 
-ROOTINCLUDES = -I$(ROOTSYS)/include
-ROOTLDLIBS = `$(ROOTSYS)/bin/root-config --cflags --glibs` -lEG
+.PRECIOUS:$(LIB_PATH)%.o
 
-INCLUDES = -I. $(ROOTINCLUDES)
-LDLIBS = -L. $(ROOTLDLIBS)
-EXROOTLIB = -L./ExRootAnalysis/lib -lExRootAnalysis
+all: $(MAINEXES)
 
-all : WpZ_ana
-	@echo Built $@
+%: $(MLIB_PATH)%.o $(OBJS)
+	$(CC) $(LFLAGS) $(OBJS) lib/libExRootAnalysis.so $< -o $@
 
-.PHONY: clean
+-include  $(LIB_PATH)*.d
 
-clean :
-	rm -rf *.o
+$(LIB_PATH)%.o: %.cpp
+	$(CC) $(CFLAGS) -MMD -c $(INCDIRS) $< -o $@
 
-WpZ_ana: $(SRCS:.cpp=.o)
-	$(LD) $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) $^ $(LDLIBS) $(EXROOTLIB) -o $@
-	@echo Built $@
+$(MLIB_PATH)%.o: */test/%.cpp
+	$(CC) $(CFLAGS) -MMD -c $(INCDIRS) $< -o $@
 
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -fPIC $^ 
-	@echo Compiled $@
+test: $(TESTTARGETS)
 
+%.test: 
+	./$* 
+	diff -qs $(TEST_PATH)log_$* testlog_$*
+
+clean:
+	\rm *~ */*~ */*/*~ $(LIB_PATH)/*.o $(LIB_PATH)/*.d $(MLIB_PATH)/*.o $(MLIB_PATH)/*.d dataGen dataRead hitReco trackReco testlog*

@@ -18,12 +18,12 @@
 
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
-#include "ExRootAnalysis/ExRootClasses.h"
+#include "ExRootAnalysis/include/ExRootClasses.h"
 #include <vector>
 #include <string>
 #include <map>
-#include "LHEWeights.h"
-#include "ParticleVector.h"
+#include "DataObjects/include/LHEWeights.h"
+#include "DataObjects/include/ParticleVector.h"
 
 /**
  * @struct WZlVectors

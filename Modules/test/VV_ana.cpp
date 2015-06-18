@@ -4,15 +4,15 @@
 #include "TLegend.h"
 #include "TPaveText.h"
 
-#include "ExRootAnalysis/ExRootTreeReader.h"
-#include "ExRootAnalysis/ExRootTreeWriter.h"
-#include "ExRootAnalysis/ExRootTreeBranch.h"
-#include "ExRootAnalysis/ExRootResult.h"
-#include "ExRootAnalysis/ExRootUtilities.h"
+#include "ExRootAnalysis/include/ExRootTreeReader.h"
+#include "ExRootAnalysis/include/ExRootTreeWriter.h"
+#include "ExRootAnalysis/include/ExRootTreeBranch.h"
+#include "ExRootAnalysis/include/ExRootResult.h"
+#include "ExRootAnalysis/include/ExRootUtilities.h"
 
-#include "WZEvent.h"
-#include "WZEventsTracker.h"
-#include "WZEventList.h"
+#include "DataObjects/include/WZEvent.h"
+#include "DataObjects/include/WZEventsTracker.h"
+#include "DataObjects/include/WZEventList.h"
 #include <iostream>
 #include <vector>
 

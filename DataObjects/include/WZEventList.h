@@ -1,11 +1,11 @@
 #ifndef __WZEventList_h__
 #define __WZEventList_h__
 
-#include "ExRootAnalysis/ExRootTreeReader.h"
-#include "ExRootAnalysis/ExRootUtilities.h"
+#include "ExRootAnalysis/include/ExRootTreeReader.h"
+#include "ExRootAnalysis/include/ExRootUtilities.h"
 #include "TClonesArray.h"
-#include "ExRootAnalysis/ExRootClasses.h"
-#include "WZEvent.h"
+#include "ExRootAnalysis/include/ExRootClasses.h"
+#include "DataObjects/include/WZEvent.h"
 class WZEventList
 {
 private: 

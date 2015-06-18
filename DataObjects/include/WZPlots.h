@@ -3,7 +3,7 @@
 
 #include <string>
 #include "TH1.h"
-#include "ExRootAnalysis/ExRootResult.h"
+#include "ExRootAnalysis/include/ExRootResult.h"
 #include <vector>
 #include "TObject.h"
 #include "TFile.h"

@@ -1,4 +1,4 @@
-#include "WZPlots.h"
+#include "DataObjects/include/WZPlots.h"
 #include <iostream>
 
 WZPlots::WZPlots(const std::string& rootFileName, const std::string& baseFolder,

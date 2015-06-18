@@ -1,4 +1,4 @@
-#include "WZEventList.h"
+#include "DataObjects/include/WZEventList.h"
 
 WZEventList::WZEventList(const char* root_file_name, const char* lhe_file_name) {
     chain = new TChain("LHEF");
