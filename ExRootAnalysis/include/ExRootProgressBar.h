@@ -7,22 +7,21 @@ class ExRootProgressBar
 {
 public:
 
-  ExRootProgressBar(Long64_t entries, Int_t width = 25);
+  ExRootProgressBar(Long64_t entries, Int_t width = 64);
   ~ExRootProgressBar();
 
-  void Update(Long64_t entry);
+  void Update(Long64_t entry, Long64_t eventCounter = 0, Bool_t last = kFALSE);
   void Finish();
 
 private:
 
-  Long64_t fEntries;
+  Long64_t fEntries, fEventCounter;
   Int_t fWidth;
 
   ULong64_t fTime;
   Int_t fHashes;
 
-  char *fBar;
-
+  char *fBar; //!
 };
 
 #endif /* ExRootProgressBar */

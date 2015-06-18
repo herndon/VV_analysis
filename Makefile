@@ -36,4 +36,4 @@ test: $(TESTTARGETS)
 	diff -qs $(TEST_PATH)log_$* testlog_$*
 
 clean:
-	\rm *~ */*~ */*/*~ $(LIB_PATH)/*.o $(LIB_PATH)/*.d $(MLIB_PATH)/*.o $(MLIB_PATH)/*.d dataGen dataRead hitReco trackReco testlog*
+	\rm *~ */*~ */*/*~ $(LIB_PATH)/*.o $(LIB_PATH)/*.d $(MLIB_PATH)/*.o $(MLIB_PATH)/*.d VV_ana testlog*

@@ -48,6 +48,16 @@ public:
 
 //---------------------------------------------------------------------------
 
+class TRootWeight: public TObject
+{
+public:
+  Double_t Weight; // weight for the event
+
+  ClassDef(TRootWeight, 1)
+};
+
+//---------------------------------------------------------------------------
+
 class TRootLHEFEvent: public TObject
 {
 public:

@@ -28,7 +28,6 @@ public:
 
   void Reset();
   void Write(const char *fileName = "results.root");
-  void Write(const char* fileName, std::map<TObject*, std::string>&);
   void Print(const char *format = "eps");
 
   TH1 *AddHist1D(const char *name, const char *title,
