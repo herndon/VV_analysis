@@ -13,7 +13,7 @@
 #include "DataObjects/include/WZEvent.h"
 #include "DataObjects/include/WZEventsTracker.h"
 #include "DataObjects/include/WZEventList.h"
-#include "Modules/include/AnalyseEvents.h"
+#include "Modules/include/AnalyseEventsModule.h"
 #include <iostream>
 
 
