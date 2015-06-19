@@ -13,77 +13,18 @@
 #include "DataObjects/include/WZEvent.h"
 #include "DataObjects/include/WZEventsTracker.h"
 #include "DataObjects/include/WZEventList.h"
+#include "Modules/include/AnalyseEvents.h"
 #include <iostream>
-#include <vector>
 
-bool WZMassCalculation(const TLorentzVector& lVectorlW,
-                     const TLorentzVector& lVectorMET, Float_t WMass, Float_t pz);
-void AnalyseEvents(std::vector<WZEventList>& eventLists);
 
 //------------------------------------------------------------------------------
 
-int main( int argc, char *argv[])
-{
-    const char* kDefaultRootFile = "unweighted_events.root";
-    const char* kDefaultLHEFile = "unweighted_events.lhe";
-    std::vector<const char*> root_files;
-    std::vector<const char*> lhe_files;
-    
-     if (argc == 1) {
-        root_files.push_back(kDefaultRootFile);
-        lhe_files.push_back(kDefaultLHEFile);
-    }
-    else if (argc == 2) {
-        std::string root_file = const_cast<const char*>(argv[1]);
-        if (root_file.find(".root") != std::string::npos) {
-            root_files.push_back(root_file.c_str());
-            lhe_files.push_back("NONE");
-        }
-        else 
-            std::cout << "First CL argument must be .root file";
-    }
-    else if ((argc - 1) % 2 == 0) {
-        for (int i = 1; i < argc - 1; i += 2) {
-            std::string root_file = argv[i];
-            std::string lhe_file = argv[i+1];
-            if (root_file.find(".root") != std::string::npos &&
-                lhe_file.find(".lhe") != std::string::npos) {
-                lhe_files.push_back(argv[i+1]);
-                root_files.push_back(argv[i]);
-            }
-            else {
-                std::cout << "Must have command line arguments in pairs: "
-                          << "./WpZ_ana rootfile1.root lhefile1.lhe ...";
-                exit(0);
-            }
-        }
-        if (argc > 3) {
-            std::cout << "\nWARNING! Combining multiple LHE files. It is your "
-                      << "responsiblity to check that these files are " 
-                      << "compatible!!!\n\n";
-        }
-    }
-    else {
-        std::cout << "Must have command line arguments in pairs: "
-                  << "./WpZ_ana rootfile1.root lhefile1.lhe ...";
-        exit(0);
-    }
-    std::vector<WZEventList> event_lists;
-    for (unsigned int i = 0; i < root_files.size(); i++) {
-        if (root_files.size() != lhe_files.size()) {
-            std::cout << "\nERROR! Must have same number of root files "
-                      << "as LHE files.\n";
-            exit(0);
-        }
-        WZEventList event_list(root_files[i], lhe_files[i]);
-        event_lists.push_back(event_list);
-    }
-    AnalyseEvents(event_lists);
-    
-    return 0;   
+AnalyseEventsModule::AnalyseEventsModule(int debugLevel):
+  _debugLevel(debugLevel){
 }
+
 //------------------------------------------------------------------------------
-void AnalyseEvents(std::vector<WZEventList>& eventLists)
+void AnalyseEventsModule::AnalyseEvents(std::vector<WZEventList>& eventLists)
 {
     // Get pointers to branches used in analysis
    

@@ -33,7 +33,7 @@ test: $(TESTTARGETS)
 
 %.test: 
 	./$* 
-	diff -qs $(TEST_PATH)log_$* testlog_$*
+	diff -qs $(TEST_PATH)log_$* log_$*
 
 clean:
-	\rm *~ */*~ */*/*~ $(LIB_PATH)/*.o $(LIB_PATH)/*.d $(MLIB_PATH)/*.o $(MLIB_PATH)/*.d VV_ana testlog*
+	\rm *~ */*~ */*/*~ $(LIB_PATH)/*.o $(LIB_PATH)/*.d $(MLIB_PATH)/*.o $(MLIB_PATH)/*.d vvAna log*

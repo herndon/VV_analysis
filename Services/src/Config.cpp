@@ -2,7 +2,7 @@
 #include "Services/include/Exception.h"
 #include "Services/include/Config.h"
 
-vvana::Config::Config(std::ifstream & configfile,int genData,int eventNumberForEventDisplay=-1):
+vvana::Config::Config(std::ifstream & configfile):
     _debugLevel(1) {
 
     _initConfig(configfile);
@@ -25,6 +25,8 @@ void vvana::Config::_initConfig(std::ifstream & configfile) {
 
       if (configString == "DebugLevel") {
 	configfile >> _debugLevel;
+      } else if (configString == "DebugFileName") {
+	configfile >> _debugFileName;
       } else if (configString == "RootFileName") {
 	configfile >> _rootFileName;
       } else {
@@ -42,7 +44,8 @@ void vvana::Config::printConfig(std::ostream& out) const {
 
     out << "Program configuration information" << std::endl;
 
-        out << "Debug Level: " << _debugLevel << std::endl;
-        out << "Root file name " << _rootFileName << std::endl;
+        out << "Debug Level:     " << _debugLevel << std::endl;
+        out << "Debug file name: " << _debugFileName << std::endl;
+        out << "Root file name:  " << _rootFileName << std::endl;
 
 }

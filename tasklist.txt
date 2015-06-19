@@ -1,0 +1,25 @@
+1) Downlaod
+2) Build
+3) Evaluate program
+4) Restruction basic program into directories
+5) Update makefile
+6) Generate detailed task list addressing these issues
+ i) Directory structure
+ ii) Module structure
+ iii) Data objects
+ iv) algorithms
+ v) use of mg weights
+ vi) improved plotting
+ vii) coding standards
+
+Task list
+1) Create intialiation from configuration text file class
+2) Command line arguement of configuration text file
+3) Split off AnalyseEvents into module
+   const usage in AnalyseEvents
+4) Create error logger
+5) Consider how to address physics objects
+6) Consider how to address pythia vs madgraph.  Probably not Delphes
+7) Module framework to support multiple final states?  Probably not
+8) Create cut objects class to support multiple states
+

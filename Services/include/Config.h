@@ -28,7 +28,7 @@ class Config {
 
 public:
 
-  Config(std::ifstream&,int genData,int eventNumberForEventDisplay);
+  Config(std::ifstream&);
 
     int debugLevel() const {
         return _debugLevel;   //!< Returns debug level: 0 nothing, 1 progress infrmation; 2 data object printout; 3-5 basic-detailed debug
