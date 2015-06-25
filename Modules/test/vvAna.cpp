@@ -39,7 +39,7 @@ int main( int argc, char *argv[])
     std::vector<const char*> lhe_files;
     
     root_files.push_back(config.rootFileName().c_str());
-    lhe_files.push_back("NONE");
+    lhe_files.push_back("unweighted_events.lhe");
 
     std::vector<WZEventList> event_lists;
     for (unsigned int i = 0; i < root_files.size(); i++) {

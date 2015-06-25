@@ -10,8 +10,9 @@ class WZEventList
 {
 private: 
     TChain* chain;
-    TClonesArray* branch_gen_particle;
     ExRootTreeReader* tree_reader;
+    TClonesArray* branch_gen_particle;
+    TClonesArray* branchWeights;
     WZEvent* wzEvent;
     unsigned int num_entries;    
 public:

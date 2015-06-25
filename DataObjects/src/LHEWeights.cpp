@@ -186,6 +186,14 @@ void LHEWeights::readWeights()
     else
         weights.push_back(unit_wgt_);
 }
+void LHEWeights::setWeights(std::vector<float> newWeights)
+{
+
+  weights.clear();
+  weights = newWeights;
+
+}
+
 LHEWeights::~LHEWeights()
 {
     weights.clear();

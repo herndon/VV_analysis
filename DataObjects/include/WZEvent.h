@@ -88,7 +88,7 @@ public:
     /// Constructor with stuff
     WZEvent(const char* lheFileName);
     ~WZEvent();
-    void loadEvent(TClonesArray* branchGenParticle);
+    void loadEvent(TClonesArray* branchGenParticle,TClonesArray* branchWeights);
     void setLeptonCuts(float, float);
     void setJetCuts(float, float);
     void removeCuts();

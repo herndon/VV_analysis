@@ -2,6 +2,7 @@
 *.o
 *.so
 *.bin
+*.lhe
 *.root
 log_*
 vvAna

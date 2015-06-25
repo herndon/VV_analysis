@@ -24,6 +24,7 @@ public:
     LHEWeights(const char* lheFileName);
     ~LHEWeights();
     void readWeights();
+    void setWeights(std::vector<float> newWeights);
     const std::vector<float>& getVector() const;
     const std::vector<std::string>& getNames() const; 
     const float getSMWeight() const;

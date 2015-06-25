@@ -30,7 +30,7 @@ const std::vector<std::string>& WZEvent::getWeightNames()
 {
     return weights->getNames();
 }
-void WZEvent::loadEvent(TClonesArray* branchGenParticle)
+void WZEvent::loadEvent(TClonesArray* branchGenParticle,TClonesArray* branchWeights)
 {
     for(int i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
     {
@@ -73,8 +73,23 @@ void WZEvent::loadEvent(TClonesArray* branchGenParticle)
             }
         }
     }
-    if(useWeights)
-        weights->readWeights();
+    //if (branchWeights->GetEntriesFast() > 0) useWeights = true;
+    //std::cout << "useWeights " << useWeights << std::endl; 
+   if(useWeights)
+      {
+	std::vector<float> newWeights;
+	//std::cout << "Number of weights " <<  branchWeights->GetEntriesFast() << std::endl;
+	for (int ii = 0; ii<branchWeights->GetEntriesFast();++ii)
+	  {
+	    TRootWeight* weight = (TRootWeight*) branchWeights->At(ii);
+	    //std::cout << "Weight " << ii << ": " << weight->Weight << std::endl;
+            newWeights.push_back(weight->Weight);
+	    weight = NULL;
+	  }
+	weights->setWeights(newWeights);
+      }
+
+    //weights->readWeights();
 
 }
 float WZEvent::getSMWeight()

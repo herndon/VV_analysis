@@ -1,11 +1,13 @@
 #include "DataObjects/include/WZEventList.h"
+#include "ExRootAnalysis/include/ExRootClasses.h"
+#include <iostream>
 
 WZEventList::WZEventList(const char* root_file_name, const char* lhe_file_name) {
     chain = new TChain("LHEF");
     chain->Add(root_file_name);
     tree_reader = new ExRootTreeReader(chain);
-    
     num_entries = tree_reader->GetEntries();
+    branchWeights = tree_reader->UseBranch("Rwgt");
     branch_gen_particle = tree_reader->UseBranch("Particle");
     wzEvent = new WZEvent(lhe_file_name);
 }
@@ -24,6 +26,7 @@ unsigned int WZEventList::getNumEntries() {
 WZEvent* WZEventList::getEvent(unsigned int entry) {
     wzEvent->resetEvent();
     tree_reader->ReadEntry(entry);
-    wzEvent->loadEvent(branch_gen_particle);
+    wzEvent->loadEvent(branch_gen_particle,branchWeights);
+
     return wzEvent;
 }
