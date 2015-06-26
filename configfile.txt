@@ -1,3 +1,4 @@
 DebugLevel 2
 DebugFileName log_vvAna
 RootFileName unweighted_events.root
+LHEFileName unweighted_events.lhe

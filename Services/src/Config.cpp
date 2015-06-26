@@ -29,6 +29,8 @@ void vvana::Config::_initConfig(std::ifstream & configfile) {
 	configfile >> _debugFileName;
       } else if (configString == "RootFileName") {
 	configfile >> _rootFileName;
+      } else if (configString == "LHEFileName") {
+	configfile >> _lheFileName;
       } else {
 	throw Exception("Config::_initConfig: Unrecognized parameter in configfile.txt");
       }
@@ -47,5 +49,6 @@ void vvana::Config::printConfig(std::ostream& out) const {
         out << "Debug Level:     " << _debugLevel << std::endl;
         out << "Debug file name: " << _debugFileName << std::endl;
         out << "Root file name:  " << _rootFileName << std::endl;
+        out << "LHE file name:  " << _lheFileName << std::endl;
 
 }

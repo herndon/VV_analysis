@@ -32,5 +32,5 @@ y 11) read weights from root file
 16) use error logger
 17) include debug output stream and use debug level
 y 18) Setup mac development enviroment
-19) Setup automated testing
+y 19) Setup automated testing
 

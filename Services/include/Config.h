@@ -40,7 +40,11 @@ public:
     }
 
     std::string const& rootFileName() const {
-        return _rootFileName;    //!< Returns the name of the root file to be created.
+        return _rootFileName;    //!< Returns the name of the root file to be read.
+    }
+
+    std::string const& lheFileName() const {
+        return _lheFileName;    //!< Returns the name of the lhe file to be read.
     }
 
 
@@ -54,6 +58,7 @@ private:
   std::string _debugFileName;
 
   std::string _rootFileName;
+  std::string _lheFileName;
 
   void _initConfig(std::ifstream&);
 
