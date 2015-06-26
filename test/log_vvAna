@@ -1,4 +1,49 @@
-Program configuration information
-Debug Level:     2
-Debug file name: log_vvAna
-Root file name:  unweighted_events.root
+Event list contains 10000 events
+
+__________________________________________________________________
+Kinematic cuts applied to all events: 
+di-Jet invariant mass > 0 GeV
+Jet eta separation > 0
+WZ transverse mass > 0 GeV
+WZ mass > 0 GeV
+4l mass > 0 GeV
+
+Number of events passing post cut lepton number = 3: 6474
+Number of 3 muon events: 5332
+Number of 1 electron 2 muon events:  0
+Number of 2 electron 1 muon events:  0
+Number of 3 electon  events:  0
+Number of 3 tau events: 0
+Number of 1 tau 2 muon events:  0
+Number of 2 electron 1 tau events:  0
+Number of 1 electon 2 tau events:  0
+Number of 1 muon 2 tau events:  0
+Number of events passing post cut jet number = 2: 5332
+Number of events with MET > 30 GeV: 4108
+Number of events with Z Mass within 1e+10 GeV of on-shell Z mass: 4108
+
+__________________________________________________________________
+
+__________________________________________________________________
+Kinematic cuts applied to all events: 
+di-Jet invariant mass > 600 GeV
+Jet eta separation > 4
+WZ transverse mass > 0 GeV
+WZ mass > 0 GeV
+4l mass > 0 GeV
+
+Number of events passing post cut lepton number = 3: 6474
+Number of 3 muon events: 1276
+Number of 1 electron 2 muon events:  0
+Number of 2 electron 1 muon events:  0
+Number of 3 electon  events:  0
+Number of 3 tau events: 0
+Number of 1 tau 2 muon events:  0
+Number of 2 electron 1 tau events:  0
+Number of 1 electon 2 tau events:  0
+Number of 1 muon 2 tau events:  0
+Number of events passing post cut jet number = 2: 5332
+Number of events with MET > 0 GeV: 1276
+Number of events with Z Mass within 20 GeV of on-shell Z mass: 1248
+
+__________________________________________________________________

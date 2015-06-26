@@ -13,23 +13,24 @@
  vii) coding standards
 
 Task list
-x 1) Create intialiation from configuration text file class
+y 1) Create intialiation from configuration text file class
 2) Command line arguement of configuration text file
-x 3) Split off AnalyseEvents into module
+y 3) Split off AnalyseEvents into module
    const usage in AnalyseEvents
-x 4) Create error logger
+y 4) Create error logger
 5) Consider how to address physics objects
 6) Consider how to address pythia vs madgraph.  Probably not Delphes
 7) Module framework to support multiple final states?  Probably not
 8) Create cut objects class to support multiple states
 9) const usage throughout program
 10) const usage for root objects
-11) read weights from root file
+y 11) read weights from root file
 12) consider weight names
 13) use single weight when event by event weights are not present
 14) set data set size in fb-1
 15) lhe file from configuration file
 16) use error logger
 17) include debug output stream and use debug level
-
+y 18) Setup mac development enviroment
+19) Setup automated testing
 

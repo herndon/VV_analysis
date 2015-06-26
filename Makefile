@@ -32,7 +32,7 @@ $(MLIB_PATH)%.o: */test/%.cpp
 test: $(TESTTARGETS)
 
 %.test: 
-	./$* 
+	./$* >& log_$*
 	diff -qs $(TEST_PATH)log_$* log_$*
 
 clean:
