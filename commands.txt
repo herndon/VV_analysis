@@ -1,5 +1,19 @@
-Compiling and linking
+installing root and other packages
+Done through Fermilab art package
+https://scisoft.fnal.gov/
+Followed instruction at
+https://scisoft.fnal.gov/scisoft/bundles/art/v1_14_03/art-v1_14_03.html
 
+installing magraph ExRootAnalysis
+Got tarball from
+https://launchpad.net/mg5amcnlo
+run
+./bin/mg5_aMC
+install
+install ExRootAnalysis
+copy .so file to lib area of VV_analysis
+
+Compiling and linking
 
 MAC OSX:
 source $HOME/products/setups
