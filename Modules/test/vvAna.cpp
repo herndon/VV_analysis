@@ -47,7 +47,7 @@ int main( int argc, char *argv[])
         event_lists.push_back(event_list);
     }
  
-   AnalyseEventsModule analyseEventsModule(config.debugLevel());
+    AnalyseEventsModule analyseEventsModule(config.debugLevel(),debugfile);
     analyseEventsModule.AnalyseEvents(event_lists);
     
     return 0;   

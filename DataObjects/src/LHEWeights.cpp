@@ -1,4 +1,5 @@
 #include "DataObjects/include/LHEWeights.h"
+#include "Services/include/Exception.h"
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
@@ -9,10 +10,10 @@ LHEWeights::LHEWeights(const char* lheFileName)
     lheFile_.open(lheFileName, std::ios::in | std::ios::binary);
     
     if (!lheFile_.is_open()) {
-        std::cout << "No LHE file found. No weights will be applied.\n";
-        has_weights_ = false;
-        unit_wgt_ = 1;
-        weightNames = {"Unweighted"};
+        throw vvana::Exception("LHEWeights::LHEWeights: LHE file not found");
+        //has_weights_ = false;
+        //unit_wgt_ = 1;
+        //weightNames = {"Unweighted"};
     }
     else { 
         has_weights_ = findWeights();
@@ -28,8 +29,7 @@ bool LHEWeights::findWeights()
     {    
         if (lheFile_.eof())
         {    
-            std::cerr << "Error in LHE file format. No unit weight found.\n";
-            exit(0);
+       throw vvana::Exception("LHEWeights::findWeights: Error in LHE file format. No unit weight found.");
         }
     }
     unit_wgt_ = atof(substrFromLine(": ", "\n"));
@@ -38,8 +38,8 @@ bool LHEWeights::findWeights()
     {
         if (lheFileLine_.find("<init>") != std::string::npos)
         {
-            cout << "No weight info in LHE file. Using unit weight "
-                 << unit_wgt_ << " for all events.\n";
+	  //out << "No weight info in LHE file. Using unit weight "
+          //       << unit_wgt_ << " for all events.\n";
             weightNames.push_back("unit wgt = " + std::to_string(unit_wgt_));
             return false;
         }
@@ -133,13 +133,11 @@ bool LHEWeights::searchNextLine(const string& searchSequence)
         return lheFileLine_.find(searchSequence) != std::string::npos;
     }
     else if (!lheFile_.good()) {
-        std::cerr << "Problem reading weights from file ";
-        std::cerr << "at line " << lheFileLine_;
-        exit(0);
+      std::string error = "LHEWeights::searchNextLine: Problem reading weights from file" + lheFileLine_;
+      throw vvana::Exception(error);
     }
     else {
-        std::cerr << "Reached end of file unexpectedly while parsing weights.";
-        exit(0);
+      throw vvana::Exception("LHEWeights::searchNextLine: Reached end of file unexpectedly while parsing weights.");
     }
     return false;
 }
@@ -174,8 +172,8 @@ void LHEWeights::readWeights()
         while (!searchNextLine("</rwgt>"))
         {
             if (lheFile_.eof()) {
-                for (const auto & weight : weights)
-                    std::cout << "Weight is : " << weight;
+	      //for (const auto & weight : weights)
+		  //out << "Weight is : " << weight;
             }
             if (lheFileLine_.find("wgt id") != std::string::npos)
             {

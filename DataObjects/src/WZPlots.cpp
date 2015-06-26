@@ -1,9 +1,9 @@
 #include "DataObjects/include/WZPlots.h"
-#include <iostream>
+#include "Services/include/Exception.h"
+#include <string>
 
 WZPlots::WZPlots(const std::string& rootFileName, const std::string& baseFolder,
-                 std::vector<std::string> weightNames)
-                 
+                 std::vector<std::string> weightNames)                 
 {
     rootFile_ = new TFile(rootFileName.c_str(), "RECREATE");
     rootFileName_ = rootFileName;
@@ -13,8 +13,8 @@ WZPlots::WZPlots(const std::string& rootFileName, const std::string& baseFolder,
         
     for(const auto& weightName : weightNames_)
     {
-        if(rootFile_->mkdir(weightName.c_str()) == NULL)
-            std::cerr << "Error making weight directory!";
+      if (rootFile_->mkdir(weightName.c_str()) == NULL)
+      throw vvana::Exception("WZPlots::WZPlots: Error making weight directory, weightName is NULL");
     }
     plotSets_.resize(weightNames_.size());
 
@@ -71,14 +71,12 @@ void WZPlots::fillHist(const std::string& plotGroup, const std::string plot,
 {
     if (weights.size() != plotSets_.size())
     {
-        std::cout << "Error, too many weights in histogram fill function";
-        std::cout << "\nweights.size() = " << weights.size();
-        std::cout << "\nplotSets_.size() = " << plotSets_.size();
-        std::cout << "\nExiting do to error.\n";
-        exit(0);
-    }   
-    //std::cout << "Filling plot " << plotGroup << " " << plot << std::endl; 
-    for (unsigned int i = 0; i < weights.size(); i++)
+      std::string error = "WZPlots::fillHist: Error, too many weights in histogram fill function, weights.size() = "
+      + std::to_string(weights.size()) + " plotSets_.size() = "  + std::to_string(plotSets_.size());
+      throw vvana::Exception(error);
+    }
+
+  for (unsigned int i = 0; i < weights.size(); i++)
     {
         if (values.size() == 1)
         {
@@ -89,11 +87,6 @@ void WZPlots::fillHist(const std::string& plotGroup, const std::string plot,
         {
             TH2F* hist = static_cast<TH2F*>(plotSets_[i][plotGroup][plot]);
             hist->Fill(values[0], values[1], weights[i]*luminosity);
-        }
-        else
-        {
-            std::cout <<  "Not set up to plot > 2D histograms yet.";
-            exit(0);
         }
     }
 }

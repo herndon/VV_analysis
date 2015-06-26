@@ -1,6 +1,9 @@
 #ifndef __WZEVENTSTRACKER_H_
 #define __WZEVENTSTRACKER_H__
 
+#include <fstream>
+#include <iostream>
+
 #include "DataObjects/include/WZEvent.h"
 #include "DataObjects/include/WZPlots.h"
 
@@ -67,8 +70,9 @@ private:
     static bool sortParticlesByPt(const ParticleVector&, const ParticleVector&);
     static bool sortDileptonsByZMass(const TLorentzVector&, const TLorentzVector&);
 public:
-    WZEventsTracker(const std::vector<std::string>& weightNames, 
-                    const std::string rootFileName, const float luminosity);
+    WZEventsTracker(int debugLevel, std::ostream & out,
+		    const std::vector<std::string>& weightNames, 
+                    const std::string rootFileName, const float luminosity );
     ~WZEventsTracker();
     void initialize2DPlots();
     void initializeDijetPlots();
@@ -90,7 +94,7 @@ public:
     void setZMassCut(float ZMass);
     void setEtajjCut(float eta_jj);
     void processEvent(WZEvent* wzEvent);
-    void printEventInfo();
+    void printEventInfo(std::ostream & debugfile);
     void fillPlots();
     void writePlotsToFile(); 
 };

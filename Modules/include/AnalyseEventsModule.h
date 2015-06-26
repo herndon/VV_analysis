@@ -12,6 +12,8 @@
 #define __AnalyseEvent_h__
 
 #include <vector>
+#include <fstream>
+#include <iostream>
 
 class TLorentzVector;
 class WZEventList;
@@ -20,13 +22,14 @@ class AnalyseEventsModule
 {
  public:
 
-  AnalyseEventsModule(int debugLevel);
+  AnalyseEventsModule(int debugLevel, std::ofstream & debugfile);
 
   void AnalyseEvents(std::vector<WZEventList>& eventLists);
 
  private:
 
   int _debugLevel;
+  std::ofstream & _debugfile;
 
 };
 

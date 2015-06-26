@@ -1,18 +1,20 @@
 #include "DataObjects/include/WZEventsTracker.h" 
 #include "DataObjects/include/LHEWeights.h"
+#include "Services/include/Exception.h"
 #include <iostream>
 #include <cmath>
 #include <vector>
 
 using namespace std;
 
-WZEventsTracker::WZEventsTracker(const std::vector<std::string>& weightNames, 
+WZEventsTracker::WZEventsTracker(int debugLevel, std::ostream & out,
+				 const std::vector<std::string>& weightNames, 
                                  std::string rootFileName, const float luminosity) {
     if (weightNames.size() == 1 && weightNames[0] == "Unweighted")
     {
         this->luminosity = 1.;
-        std::cout << "No weights found in LHE file, so luminosity set to 1 "
-                  << "for all events in " << rootFileName << ".\n";
+        out << "No weights found in LHE file, so luminosity set to 1 "
+	    << "for all events in " << rootFileName << std::endl;
         useWeights = false;
     }
     else
@@ -178,8 +180,7 @@ void WZEventsTracker::getLeptonPlotData(const std::string& cuts)
     std::sort(leptonVectors.begin(), leptonVectors.end(), sortParticlesByPt);
     if (leptonVectors.size() != tieredCuts.numHighPtLeptons)
     {
-        cout << "Critical Error! Too many leptons!";
-        exit(0);
+      throw vvana::Exception("WZEventsTracker::getLeptonPlotData: Too many Leptons");
     }
 
     for(unsigned int i = 0; i < tieredCuts.numHighPtLeptons; i++)
@@ -213,8 +214,7 @@ void WZEventsTracker::getJetPlotData(const std::string& cuts)
     
     if (jetVectors.size() != tieredCuts.numHighPtJets)
     {
-        cout << "Critical Error! Too many jets!";
-        exit(0);
+      throw vvana::Exception("WZEventsTracker::getLeptonPlotData: Too many Jets");
     }
 
     for(unsigned int i = 0; i < tieredCuts.numHighPtJets; i++)
@@ -260,7 +260,7 @@ void WZEventsTracker::assignValueToPlotKey(const std::string& keyPair1,
         plotKeys[key] = values;
     }
     else 
-        std::cout << "\nNo " << keyPair1 << " " << keyPair2 << " Plot\n";
+      throw vvana::Exception("WZEventsTracker::assignValueToPlotKeyL KeyPairs don't exist");
 }
 //This function is used to assign an empty vecotr as the plot value. 
 //It should be called in events where a plot should not be filled, e.g.
@@ -274,7 +274,7 @@ void WZEventsTracker::assignValueToPlotKey(const std::string& keyPair1,
         plotKeys[key] = std::vector<float>();
     }
     else 
-        std::cout << "\nNo " << keyPair1 << " " << keyPair2 << " Plot\n";
+      throw vvana::Exception("WZEventsTracker::assignValueToPlotKeyL KeyPairs don't exist");
 }
 void WZEventsTracker::assignValuesToPlotKey(const std::string& keyPair1, 
                                             const std::string& keyPair2,
@@ -286,7 +286,7 @@ void WZEventsTracker::assignValuesToPlotKey(const std::string& keyPair1,
         plotKeys[key] = values;
     }
     else 
-        std::cout << "\nNo " << keyPair1 << " " << keyPair2 << " Plot\n";
+      throw vvana::Exception("WZEventsTracker::assignValueToPlotKeyL KeyPairs don't exist");
 }
 void WZEventsTracker::getZPlotData(const std::string& cuts)
 {
@@ -354,9 +354,7 @@ void WZEventsTracker::getDileptonPlotData(const std::string& cuts)
     }
     else
     {
-        std::cout << "\nAn error occured in the addDileptons() function"
-                  << "of WZPlots class";
-        exit(0);
+      throw vvana::Exception("WZEventsTracker::getDileptonPlotData:  error occured in the addDileptons() function");
     }
 }
 bool WZEventsTracker::sortParticlesByPt(const ParticleVector& particle1, 
@@ -574,50 +572,49 @@ void WZEventsTracker::processByLeptonType()
     }
     else
     {
-        std::cout << "A Critical Error occurred in the processByLeptonType() "
-                  << "function of WZEventsTracker Class.\n";
-        std::cout << "num taus =" << numHighPtTau << std::endl;
-        std::cout << "num es =" << numHighPtE << std::endl;
-        std::cout << "num mus =" << numHighPtMu << std::endl;
-        
-        exit(0);
-    }
+      throw vvana::Exception("WZEventsTracker::passedKinematicCuts:  wrong number of gen leptons");
+        // out << "A Critical Error occurred in the processByLeptonType() "
+        //           << "function of WZEventsTracker Class.\n";
+        // out << "num taus =" << numHighPtTau << std::endl;
+        // out << "num es =" << numHighPtE << std::endl;
+        // out << "num mus =" << numHighPtMu << std::endl;
+            }
 }
-void WZEventsTracker::printEventInfo()
+void WZEventsTracker::printEventInfo(std::ostream & out)
 {
-    cout << "\n__________________________________________________________________\n";
-    cout << "Kinematic cuts applied to all events: " << endl;
-    cout << "di-Jet invariant mass > " << kinCuts.diJetMass << " GeV" << endl;
-    cout << "Jet eta separation > " << kinCuts.jetDeltaEta << endl;
-    cout << "WZ transverse mass > " << kinCuts.WZTMass << " GeV" << endl;
-    cout << "WZ mass > " << kinCuts.WZMass << " GeV" << endl;
-    cout << "4l mass > " << kinCuts.leptonMass << " GeV" << endl << endl;
+    out << "\n__________________________________________________________________\n";
+    out << "Kinematic cuts applied to all events: " << endl;
+    out << "di-Jet invariant mass > " << kinCuts.diJetMass << " GeV" << endl;
+    out << "Jet eta separation > " << kinCuts.jetDeltaEta << endl;
+    out << "WZ transverse mass > " << kinCuts.WZTMass << " GeV" << endl;
+    out << "WZ mass > " << kinCuts.WZMass << " GeV" << endl;
+    out << "4l mass > " << kinCuts.leptonMass << " GeV" << endl << endl;
 
-    cout << "Number of events passing post cut lepton number = "
+    out << "Number of events passing post cut lepton number = "
          << tieredCuts.numHighPtLeptons << ": "  << eventCounters["passedLeptonCut"]
          << endl;
-    cout << "Number of 3 muon events: " << eventCounters["3mu"] << endl;
-    cout << "Number of 1 electron 2 muon events:  " << eventCounters["2mu1e"] 
+    out << "Number of 3 muon events: " << eventCounters["3mu"] << endl;
+    out << "Number of 1 electron 2 muon events:  " << eventCounters["2mu1e"] 
          << endl;
-    cout <<  "Number of 2 electron 1 muon events:  " << eventCounters["2e1mu"]
+    out <<  "Number of 2 electron 1 muon events:  " << eventCounters["2e1mu"]
          << endl;
-    cout <<  "Number of 3 electon  events:  " << eventCounters["3e"] << endl;
-    cout << "Number of 3 tau events: " << eventCounters["3tau"] << endl;
-    cout << "Number of 1 tau 2 muon events:  " << eventCounters["2mu1t"] 
+    out <<  "Number of 3 electon  events:  " << eventCounters["3e"] << endl;
+    out << "Number of 3 tau events: " << eventCounters["3tau"] << endl;
+    out << "Number of 1 tau 2 muon events:  " << eventCounters["2mu1t"] 
          << endl;
-    cout <<  "Number of 2 electron 1 tau events:  " << eventCounters["2e1t"]
+    out <<  "Number of 2 electron 1 tau events:  " << eventCounters["2e1t"]
          << endl;
-    cout <<  "Number of 1 electon 2 tau events:  " << eventCounters["2t1e"] << endl;
-    cout <<  "Number of 1 muon 2 tau events:  " << eventCounters["2t1mu"] << endl;
+    out <<  "Number of 1 electon 2 tau events:  " << eventCounters["2t1e"] << endl;
+    out <<  "Number of 1 muon 2 tau events:  " << eventCounters["2t1mu"] << endl;
     
-    cout << "Number of events passing post cut jet number = "
+    out << "Number of events passing post cut jet number = "
          << tieredCuts.numHighPtJets << ": "  << eventCounters["passedJetCut"] 
          << endl;
-    cout << "Number of events with MET > " << tieredCuts.met << " GeV: "
+    out << "Number of events with MET > " << tieredCuts.met << " GeV: "
          << eventCounters["passedMETCut"] << endl;
-    cout << "Number of events with Z Mass within " << tieredCuts.ZMassRange
+    out << "Number of events with Z Mass within " << tieredCuts.ZMassRange
          << " GeV of on-shell Z mass: " << eventCounters["passedZMassCut"] << endl;
-    cout << "\n__________________________________________________________________\n";
+    out << "\n__________________________________________________________________\n";
 }
 void WZEventsTracker::writePlotsToFile()
 {

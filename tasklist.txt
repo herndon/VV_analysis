@@ -28,9 +28,9 @@ y 11) read weights from root file
 12) consider weight names
 13) use single weight when event by event weights are not present
 14) set data set size in fb-1
-15) lhe file from configuration file
-16) use error logger
-17) include debug output stream and use debug level
+y 15) lhe file from configuration file
+y 16) use error logger
+y 17) include debug output stream and use debug level
 y 18) Setup mac development enviroment
 y 19) Setup automated testing
-
+y 20) Convert all output to debug stream or error logger

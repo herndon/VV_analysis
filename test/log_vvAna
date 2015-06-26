@@ -1,3 +1,8 @@
+Program configuration information
+Debug Level:     2
+Debug file name: log_vvAna
+Root file name:  unweighted_events.root
+LHE file name:  unweighted_events.lhe
 Event list contains 10000 events
 
 __________________________________________________________________

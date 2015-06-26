@@ -1,4 +1,5 @@
 #include "DataObjects/include/WZEvent.h"
+#include "Services/include/Exception.h"
 #include <cmath>
 #include <iostream>
 
@@ -73,17 +74,13 @@ void WZEvent::loadEvent(TClonesArray* branchGenParticle,TClonesArray* branchWeig
             }
         }
     }
-    //if (branchWeights->GetEntriesFast() > 0) useWeights = true;
-    //std::cout << "useWeights " << useWeights << std::endl; 
    if(useWeights)
       {
 	std::vector<float> newWeights;
-	//std::cout << "Number of weights " <<  branchWeights->GetEntriesFast() << std::endl;
 	for (int ii = 0; ii<branchWeights->GetEntriesFast();++ii)
 	  {
 	    TRootWeight* weight = (TRootWeight*) branchWeights->At(ii);
-	    //std::cout << "Weight " << ii << ": " << weight->Weight << std::endl;
-            newWeights.push_back(weight->Weight);
+           newWeights.push_back(weight->Weight);
 	    weight = NULL;
 	  }
 	weights->setWeights(newWeights);
@@ -121,8 +118,7 @@ float WZEvent::get4lMass()
     }
     else
     {
-        std::cout << "\nError in WZ transverse mass calculation.\n";
-        return 0.;
+      throw vvana::Exception("WZEvent::get4lMass: Wrong number of Leptons");
     } 
 }
 float WZEvent::getWZTransMass()
@@ -143,8 +139,7 @@ float WZEvent::get4lTransMass()
     }
     else
     {
-        std::cout << "\nError in WZ transverse mass calculation.\n";
-        return 0.;
+       throw vvana::Exception("WZEvent::get4lTransMass: Wrong number of Leptons");
     }
 }
 float WZEvent::getDiJetInvMass()
@@ -152,8 +147,7 @@ float WZEvent::getDiJetInvMass()
     if(wzlVectors.allJets.size() >= 2)
         return (wzlVectors.allJets[0] + wzlVectors.allJets[1]).M();
     else
-        std::cout << "\nError in di-Jet mass calculation.\n";
-    return 0.;
+       throw vvana::Exception("WZEvent::getDiJetInvMass: Less than two jets");
 }
 float WZEvent::getJetDeltaEta()
 {
@@ -161,8 +155,7 @@ float WZEvent::getJetDeltaEta()
         return std::abs(wzlVectors.allJets[0].Eta() - wzlVectors.allJets[1].Eta());
     else
     {
-        std::cout << "\nError in Jet deltaEta calculation.\n";
-        return 0.;
+        throw vvana::Exception("WZEvent::getJetDeltaEta: Less than two jets");
     }
 }
 float WZEvent::getZpt()
@@ -256,8 +249,7 @@ void WZEvent::foundLepton()
             particleCounts["taus"]++;
             break;
         default:
-            std::cout << "A problem occured processing leptons in WZEvent class.";
-            exit(0);
+       throw vvana::Exception("WZEvent::getFoundLepton: Not a known charged lepton");
     }
 }
 void WZEvent::processWZLepton(std::string type)
@@ -284,8 +276,7 @@ void WZEvent::processWZLepton(std::string type)
         }
         else
         {
-            std::cout << "A critical error occured in processLepton() function.";
-            exit(0);
+	  throw vvana::Exception("WZEvent::processWZLepton: Not a known charged lepton");
         }
     }
 }

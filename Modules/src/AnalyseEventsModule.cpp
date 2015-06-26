@@ -19,8 +19,10 @@
 
 //------------------------------------------------------------------------------
 
-AnalyseEventsModule::AnalyseEventsModule(int debugLevel):
-  _debugLevel(debugLevel){
+AnalyseEventsModule::AnalyseEventsModule(int debugLevel,std::ofstream & debugfile):
+  _debugLevel(debugLevel),
+  _debugfile(debugfile)
+{
 }
 
 //------------------------------------------------------------------------------
@@ -28,9 +30,11 @@ void AnalyseEventsModule::AnalyseEvents(std::vector<WZEventList>& eventLists)
 {
     // Get pointers to branches used in analysis
    
-    WZEventsTracker generatorEvents(eventLists[0].getWeightNames(), 
+  WZEventsTracker generatorEvents(_debugLevel,_debugfile,
+				  eventLists[0].getWeightNames(), 
                                     "generatorWeights.root", 100000.);
-    WZEventsTracker selectionEvents(eventLists[0].getWeightNames(),
+  WZEventsTracker selectionEvents(_debugLevel,_debugfile,
+				  eventLists[0].getWeightNames(),
                                     "selectionWeights.root", 100000.);
     generatorEvents.setMetCut(30);
     //generatorEvents.setZMassCut(20);
@@ -44,9 +48,8 @@ void AnalyseEventsModule::AnalyseEvents(std::vector<WZEventList>& eventLists)
 
     WZEvent* event;
     for (auto& eventList : eventLists) {
-        std::cout << "Event list contains " << eventList.getNumEntries() << " events" 
+      if (_debugLevel >=1) _debugfile << "Event list contains " << eventList.getNumEntries() << " events" 
              << std::endl;
-        std::cout.flush();
         eventList.setLeptonCuts(20, 2.4);
         eventList.setJetCuts(30, 4.7);
         
@@ -58,8 +61,8 @@ void AnalyseEventsModule::AnalyseEvents(std::vector<WZEventList>& eventLists)
         }
     }
  
-    generatorEvents.printEventInfo();
-    selectionEvents.printEventInfo();
+    if (_debugLevel >= 2) generatorEvents.printEventInfo(_debugfile);
+    if (_debugLevel >= 2) selectionEvents.printEventInfo(_debugfile);
     
     generatorEvents.writePlotsToFile();
     selectionEvents.writePlotsToFile();
@@ -88,11 +91,8 @@ bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVe
     {
         pzp = t1;
         pzm = t1;      
-        //std::cout << "Root was imaginary" << endl;
     }
 
-    //std::cout << "pzp " << pzp << " pzm " << pzm << endl;
-    //std::cout << "pz " << pz << endl;
     WMass = 80.387;
 
     // Try again with my own solution
@@ -109,13 +109,11 @@ bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVe
     {
         pzp = (-b + sqrt(t2-t3))/(2.0*a);
         pzm = (-b - sqrt(t2-t3))/(2.0*a);      
-        //std::cout << "New Root was real" << endl;
     }
     else
     {
         pzp = -b/(2.0*a);
         pzm = -b/(2.0*a);      
-        //std::cout << "New Root was imaginary" << endl;
     }
     Float_t pzsmall;
     Float_t pzlarge;
