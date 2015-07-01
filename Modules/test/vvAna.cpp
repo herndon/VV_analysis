@@ -17,14 +17,24 @@
 #include "Modules/include/AnalyseEventsModule.h"
 #include <iostream>
 #include <vector>
+#include <string>
 
 //------------------------------------------------------------------------------
 
 int main( int argc, char *argv[])
 {
 
-// Configure VV_ana using general Config class
-    std::ifstream configfile("configfile.txt");
+  // arguements.  vvAna can take a configuration file as an input
+  
+  // Configure VV_ana using general Config class
+
+  std::string configfilename;
+  if (argc==2)
+    configfilename = argv[1];
+  else
+    configfilename = "configfile.txt";
+    
+  std::ifstream configfile(configfilename);
     vvana::Config config(configfile);
 
     // iostream file for debug output

@@ -14,7 +14,7 @@
 
 Task list
 y 1) Create intialiation from configuration text file class
-2) Command line arguement of configuration text file
+y 2) Command line arguement of configuration text file
 y 3) Split off AnalyseEvents into module
    const usage in AnalyseEvents
 y 4) Create error logger
