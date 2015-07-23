@@ -19,14 +19,14 @@
 
 //------------------------------------------------------------------------------
 
-AnalyseEventsModule::AnalyseEventsModule(int debugLevel,std::ofstream & debugfile):
+vvana::AnalyseEventsModule::AnalyseEventsModule(int debugLevel,std::ofstream & debugfile):
   _debugLevel(debugLevel),
   _debugfile(debugfile)
 {
 }
 
 //------------------------------------------------------------------------------
-void AnalyseEventsModule::AnalyseEvents(std::vector<WZEventList>& eventLists)
+void vvana::AnalyseEventsModule::AnalyseEvents(std::vector<WZEventList>& eventLists)
 {
     // Get pointers to branches used in analysis
    
@@ -68,7 +68,7 @@ void AnalyseEventsModule::AnalyseEvents(std::vector<WZEventList>& eventLists)
     selectionEvents.writePlotsToFile();
 }
 //------------------------------------------------------------------------------
-bool WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVectorMET,
+bool vvana::WZMassCalculation(const TLorentzVector& lVectorlW,const TLorentzVector& lVectorMET,
                             Float_t WMass, Float_t pz)
 {
     Float_t pzp;

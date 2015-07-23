@@ -1,3 +1,5 @@
+#ifndef __WZEvent_h__
+#define __WZEvent_h__
 /**
  * @file WZEvent.h
  *
@@ -13,8 +15,6 @@
  * leptons and jets). This information is accessed for each event by 
  * instances of the WZEventsTacker class.
  */  
-#ifndef __WZEvent_h__
-#define __WZEvent_h__
 
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
@@ -38,7 +38,10 @@
  * @param MET Lorentz vector of a VBF neutrino.
  * @param W Lorentz vector of W.
  * @param Z Lorentz vector of Z.
- */ 
+ */
+
+namespace vvana {
+  
 struct WZlVectors
 {
     std::vector<ParticleVector> allLeptons;
@@ -123,5 +126,6 @@ public:
     const unsigned int getSMWeightPos();
     float getSMWeight();
 };
-
-#endif
+} // end namespace vvana 
+ 
+#endif // __WZEvent_h__

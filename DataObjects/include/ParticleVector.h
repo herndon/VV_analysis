@@ -3,6 +3,8 @@
 
 #include "TLorentzVector.h"
 
+namespace vvana {
+
 class ParticleVector : public TLorentzVector
 {
 private:
@@ -14,8 +16,8 @@ public:
     const int getType() const;
 };
 
+} // end namespace vvana
 
-
-#endif
+#endif // __PARTICLE_VECTOR_H__
 
 

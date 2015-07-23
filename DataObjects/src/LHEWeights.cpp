@@ -5,7 +5,7 @@
 
 using namespace std;
 
-LHEWeights::LHEWeights(const char* lheFileName)
+vvana::LHEWeights::LHEWeights(const char* lheFileName)
 {
     lheFile_.open(lheFileName, std::ios::in | std::ios::binary);
     
@@ -21,7 +21,7 @@ LHEWeights::LHEWeights(const char* lheFileName)
             readWeightNames();
     }
 }
-bool LHEWeights::findWeights()
+bool vvana::LHEWeights::findWeights()
 {
     unit_wgt_ = 1.;
 
@@ -46,7 +46,7 @@ bool LHEWeights::findWeights()
     }
     return true;
 }
-void LHEWeights::readWeightNames()
+void vvana::LHEWeights::readWeightNames()
 {
     SMWeightPos = 0;
     while(!searchNextLine("</initrwgt>"))
@@ -76,7 +76,7 @@ void LHEWeights::readWeightNames()
     formatNames();
 }
 
-void LHEWeights::formatNames()
+void vvana::LHEWeights::formatNames()
 {
     std::vector<std::pair<std::string, std::string>> paramNames;
     paramNames.push_back(std::make_pair("anoinputs 10", "f_{M7} ="));
@@ -115,7 +115,7 @@ void LHEWeights::formatNames()
     }
 }
 
-const char* LHEWeights::substrFromLine(const string& identifier1, const string& identifier2)
+const char* vvana::LHEWeights::substrFromLine(const string& identifier1, const string& identifier2)
 {
     int startPos = lheFileLine_.find(identifier1) + identifier1.size();
     int length = lheFileLine_.find(identifier2) - startPos;
@@ -125,7 +125,7 @@ const char* LHEWeights::substrFromLine(const string& identifier1, const string& 
 }
 
 
-bool LHEWeights::searchNextLine(const string& searchSequence)
+bool vvana::LHEWeights::searchNextLine(const string& searchSequence)
 {
     if (lheFile_.good() && !lheFile_.eof()) 
     {
@@ -142,28 +142,28 @@ bool LHEWeights::searchNextLine(const string& searchSequence)
     return false;
 }
 
-const std::vector<float>& LHEWeights::getVector() const
+const std::vector<float>& vvana::LHEWeights::getVector() const
 {
     return weights;
 }
 
-const float LHEWeights::getSMWeight() const
+const float vvana::LHEWeights::getSMWeight() const
 {
     return weights[SMWeightPos];
 }
-const int LHEWeights::getSMWeightPos() const
+const int vvana::LHEWeights::getSMWeightPos() const
 {
     return SMWeightPos;
 }
-const int LHEWeights::getNumWeights() const
+const int vvana::LHEWeights::getNumWeights() const
 {
     return weightNames.size();
 }
-const std::vector<std::string>& LHEWeights::getNames() const
+const std::vector<std::string>& vvana::LHEWeights::getNames() const
 {
     return weightNames;
 }
-void LHEWeights::readWeights()
+void vvana::LHEWeights::readWeights()
 {
     weights.clear();
 
@@ -184,7 +184,7 @@ void LHEWeights::readWeights()
     else
         weights.push_back(unit_wgt_);
 }
-void LHEWeights::setWeights(std::vector<float> newWeights)
+void vvana::LHEWeights::setWeights(std::vector<float> newWeights)
 {
 
   weights.clear();
@@ -192,7 +192,7 @@ void LHEWeights::setWeights(std::vector<float> newWeights)
 
 }
 
-LHEWeights::~LHEWeights()
+vvana::LHEWeights::~LHEWeights()
 {
     weights.clear();
     weightNames.clear();

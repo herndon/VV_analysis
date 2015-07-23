@@ -3,35 +3,35 @@
 #include <cmath>
 #include <iostream>
 
-WZEvent::WZEvent(const char* lheFileName)
+vvana::WZEvent::WZEvent(const char* lheFileName)
 {
     weights = new LHEWeights(lheFileName);
     useWeights = true;
     resetEvent();
 }
-WZEvent::WZEvent()
+vvana::WZEvent::WZEvent()
 {
     useWeights = false;
     weights = new LHEWeights("");
     resetEvent();
 }
-WZEvent::~WZEvent()
+vvana::WZEvent::~WZEvent()
 {
     //delete weights;
 }
-const std::vector<float>& WZEvent::getWeightsVector()
+const std::vector<float>& vvana::WZEvent::getWeightsVector()
 {
     return weights->getVector();
 }
-const LHEWeights* WZEvent::getLHEWeights()
+const vvana::LHEWeights* vvana::WZEvent::getLHEWeights()
 {
     return weights;
 }
-const std::vector<std::string>& WZEvent::getWeightNames()
+const std::vector<std::string>& vvana::WZEvent::getWeightNames()
 {
     return weights->getNames();
 }
-void WZEvent::loadEvent(TClonesArray* branchGenParticle,TClonesArray* branchWeights)
+void vvana::WZEvent::loadEvent(TClonesArray* branchGenParticle,TClonesArray* branchWeights)
 {
     for(int i = 0; i < branchGenParticle->GetEntriesFast(); ++i) 
     {
@@ -89,25 +89,25 @@ void WZEvent::loadEvent(TClonesArray* branchGenParticle,TClonesArray* branchWeig
     //weights->readWeights();
 
 }
-float WZEvent::getSMWeight()
+float vvana::WZEvent::getSMWeight()
 {
     if(weights == NULL)
         return 1.;
     else
         return weights->getSMWeight();
 }
-const unsigned int WZEvent::getSMWeightPos()
+const unsigned int vvana::WZEvent::getSMWeightPos()
 {
     return weights->getSMWeightPos();
 }
-float WZEvent::getWZInvMass()
+float vvana::WZEvent::getWZInvMass()
 {
     if (hasLepZ)
         return (wzlVectors.W + wzlVectors.Z).M();
     else
         return - 1;
 }
-float WZEvent::get4lMass()
+float vvana::WZEvent::get4lMass()
 {
     if(wzlVectors.allLeptons.size() == 3) 
     {
@@ -121,14 +121,14 @@ float WZEvent::get4lMass()
       throw vvana::Exception("WZEvent::get4lMass: Wrong number of Leptons");
     } 
 }
-float WZEvent::getWZTransMass()
+float vvana::WZEvent::getWZTransMass()
 {
     if (!hasLepZ)
         return -1;
     else
         return get4lTransMass();
 }
-float WZEvent::get4lTransMass()
+float vvana::WZEvent::get4lTransMass()
 {
     if(wzlVectors.allLeptons.size() == 3) 
     {
@@ -142,14 +142,14 @@ float WZEvent::get4lTransMass()
        throw vvana::Exception("WZEvent::get4lTransMass: Wrong number of Leptons");
     }
 }
-float WZEvent::getDiJetInvMass()
+float vvana::WZEvent::getDiJetInvMass()
 {
     if(wzlVectors.allJets.size() >= 2)
         return (wzlVectors.allJets[0] + wzlVectors.allJets[1]).M();
     else
        throw vvana::Exception("WZEvent::getDiJetInvMass: Less than two jets");
 }
-float WZEvent::getJetDeltaEta()
+float vvana::WZEvent::getJetDeltaEta()
 {
     if(wzlVectors.allJets.size() == 2) 
         return std::abs(wzlVectors.allJets[0].Eta() - wzlVectors.allJets[1].Eta());
@@ -158,80 +158,80 @@ float WZEvent::getJetDeltaEta()
         throw vvana::Exception("WZEvent::getJetDeltaEta: Less than two jets");
     }
 }
-float WZEvent::getZpt()
+float vvana::WZEvent::getZpt()
 {
     if (hasLepZ)
         return wzlVectors.Z.Pt();
     else
         return -1;
 }
-unsigned int WZEvent::getNumWeights()
+unsigned int vvana::WZEvent::getNumWeights()
 {
     if(weights == NULL)
         return 0;
     else
         return weights->getNumWeights();
 }
-void WZEvent::setLeptonCuts(float leptonPt, float leptonEta)
+void vvana::WZEvent::setLeptonCuts(float leptonPt, float leptonEta)
 {
     cuts.leptonPt = leptonPt;
     cuts.leptonEta = leptonEta;
 }
-void WZEvent::setJetCuts(float jetPt, float jetEta)
+void vvana::WZEvent::setJetCuts(float jetPt, float jetEta)
 {
     cuts.jetPt = jetPt;
     cuts.jetEta = jetEta;
 }
-unsigned int WZEvent::getNumLeptons()
+unsigned int vvana::WZEvent::getNumLeptons()
 {
     return particleCounts["leptons"];
 }
-unsigned int WZEvent::getNumElectrons()
+unsigned int vvana::WZEvent::getNumElectrons()
 {
     return particleCounts["electrons"];
 }
-unsigned int WZEvent::getNumMuons()
+unsigned int vvana::WZEvent::getNumMuons()
 {
     return particleCounts["muons"];;
 }
-unsigned int WZEvent::getNumPostCutMuons()
+unsigned int vvana::WZEvent::getNumPostCutMuons()
 {
     return particleCounts["muonsPostCut"];;
 }
-unsigned int WZEvent::getNumPostCutElectrons()
+unsigned int vvana::WZEvent::getNumPostCutElectrons()
 {
     return particleCounts["electronsPostCut"];
 }
-unsigned int WZEvent::getNumPostCutTaus()
+unsigned int vvana::WZEvent::getNumPostCutTaus()
 {
     return particleCounts["tausPostCut"];
 }
-unsigned int WZEvent::getNumPostCutLeptons()
+unsigned int vvana::WZEvent::getNumPostCutLeptons()
 {
     return particleCounts["leptonsPostCut"];
 }
-float WZEvent::getWMass()
+float vvana::WZEvent::getWMass()
 {
     return wzlVectors.W.M();
 }
-float WZEvent::getZMass()
+float vvana::WZEvent::getZMass()
 {
     return wzlVectors.Z.M();
 }
-float WZEvent::getMET()
+float vvana::WZEvent::getMET()
 {
     return wzlVectors.MET.Pt();
 }
-std::vector<ParticleVector>& WZEvent::getAllLeptons()
+std::vector<vvana::ParticleVector>& vvana::WZEvent::getAllLeptons()
 {
     return wzlVectors.allLeptons;
 }
-std::vector<ParticleVector>& WZEvent::getAllJets()
+std::vector<vvana::ParticleVector>& vvana::WZEvent::getAllJets()
 {
     return wzlVectors.allJets;
 }
 
-void WZEvent::foundLepton()
+void vvana::WZEvent::foundLepton()
 {
     particleCounts["leptons"]++;
     switch(abs(particle->PID))
@@ -252,7 +252,7 @@ void WZEvent::foundLepton()
        throw vvana::Exception("WZEvent::getFoundLepton: Not a known charged lepton");
     }
 }
-void WZEvent::processWZLepton(std::string type)
+void vvana::WZEvent::processWZLepton(std::string type)
 {
     if(std::abs(particle->Eta) < cuts.leptonEta && particle->PT > cuts.leptonPt) 
     {
@@ -280,7 +280,7 @@ void WZEvent::processWZLepton(std::string type)
         }
     }
 }
-void WZEvent::foundJet()
+void vvana::WZEvent::foundJet()
 {
     particleCounts["jets"]++;
 
@@ -292,7 +292,7 @@ void WZEvent::foundJet()
         wzlVectors.allJets.push_back(jet);
     }
 }
-void WZEvent::foundMET()
+void vvana::WZEvent::foundMET()
 {
     if(particle->PT > 0) {
         wzlVectors.MET.SetPtEtaPhiM(particle->PT, 0.0,particle->Phi,particle->M);
@@ -300,29 +300,29 @@ void WZEvent::foundMET()
                                    particle->M);   
         }
 }
-unsigned int WZEvent::getNumPostCutJets()
+unsigned int vvana::WZEvent::getNumPostCutJets()
 {
     return particleCounts["jetsPostCut"];
 }
-void WZEvent::foundLeptonicZ()
+void vvana::WZEvent::foundLeptonicZ()
 {
     wzlVectors.Z.SetPtEtaPhiM(particleMother->PT,particleMother->Eta,
                               particleMother->Phi,particleMother->M);
 }
-void WZEvent::foundLeptonicW()
+void vvana::WZEvent::foundLeptonicW()
 {
     wzlVectors.W.SetPtEtaPhiM(particleMother->PT,particleMother->Eta,
                               particleMother->Phi,particleMother->M);
 }
-bool WZEvent::hasLeptonicZ()
+bool vvana::WZEvent::hasLeptonicZ()
 {
     return hasLepZ;
 }
-void WZEvent::removeCuts()
+void vvana::WZEvent::removeCuts()
 {
     cuts = {0.};
 }
-void WZEvent::resetEvent()
+void vvana::WZEvent::resetEvent()
 {
     particle = NULL;
     particleMother = NULL;

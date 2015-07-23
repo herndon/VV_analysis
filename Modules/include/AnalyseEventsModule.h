@@ -1,3 +1,5 @@
+#ifndef __AnalyseEvent_h__
+#define __AnalyseEvent_h__
 /**
  * @file AnalyzeEvent.h
  *
@@ -8,14 +10,15 @@
  *
  * Planned upgrade to work with a general VV state
  */  
-#ifndef __AnalyseEvent_h__
-#define __AnalyseEvent_h__
 
 #include <vector>
 #include <fstream>
 #include <iostream>
 
 class TLorentzVector;
+
+namespace vvana {
+
 class WZEventList;
 
 class AnalyseEventsModule
@@ -36,5 +39,6 @@ class AnalyseEventsModule
 bool WZMassCalculation(const TLorentzVector& lVectorlW,
                      const TLorentzVector& lVectorMET, Float_t WMass, Float_t pz);
 
+} // end namespace vvana  
 
 #endif //__Analyse_Event_h__

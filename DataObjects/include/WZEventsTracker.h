@@ -7,6 +7,8 @@
 #include "DataObjects/include/WZEvent.h"
 #include "DataObjects/include/WZPlots.h"
 
+namespace vvana {
+
 struct WZTieredCuts
 {
     unsigned int numHighPtLeptons;
@@ -98,5 +100,6 @@ public:
     void fillPlots();
     void writePlotsToFile(); 
 };
-
-#endif
+} // end namespacei vvana 
+ 
+#endif // __WZEVENTSTRACKER_H__

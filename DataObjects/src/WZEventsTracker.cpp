@@ -7,7 +7,7 @@
 
 using namespace std;
 
-WZEventsTracker::WZEventsTracker(int debugLevel, std::ostream & out,
+vvana::WZEventsTracker::WZEventsTracker(int debugLevel, std::ostream & out,
 				 const std::vector<std::string>& weightNames, 
                                  std::string rootFileName, const float luminosity) {
     if (weightNames.size() == 1 && weightNames[0] == "Unweighted")
@@ -59,25 +59,25 @@ WZEventsTracker::WZEventsTracker(int debugLevel, std::ostream & out,
     initialize2DPlots();
 }
 
-WZEventsTracker::~WZEventsTracker()
+vvana::WZEventsTracker::~WZEventsTracker()
 {
     delete plots;
 }
-void WZEventsTracker::initialize2DPlots()
+void vvana::WZEventsTracker::initialize2DPlots()
 {
     add2DHist("2DHists", "mjj_WZTM", "m_{jj} vs. WZ Transverse Mass",
               "WZ Transverse Mass","m_{jj}", 40,0, 4000, 40, 0, 2000); 
     add2DHist("2DHists", "mjj_4lM", "m_{jj} vs. 4 Lepton Mass",
               "WZ Transverse Mass","m_{jj}", 40,0, 4000, 40, 0, 2000); 
 }
-void WZEventsTracker::initializeDijetPlots()
+void vvana::WZEventsTracker::initializeDijetPlots()
 {
     addHist("dijet", "deltaEta","Dijet #Delta #eta", "#Delta#eta",
             "Events", 40, 0.0, 8.);
     addHist("dijet", "mass", "Dijet Mass", "Mass (GeV/c^2)", 
             "Events", 100, 0, 2000.);
 }
-void WZEventsTracker::initializeLeptonPlots()
+void vvana::WZEventsTracker::initializeLeptonPlots()
 {
     for(unsigned int i = 1; i <= tieredCuts.numHighPtLeptons; i++)
     {
@@ -89,7 +89,7 @@ void WZEventsTracker::initializeLeptonPlots()
                 "Eta", "Events", 40, -4.0, 4.0);
     }
 }
-void WZEventsTracker::initializeJetPlots()
+void vvana::WZEventsTracker::initializeJetPlots()
 {
     for(unsigned int i = 1; i <= tieredCuts.numHighPtJets; i++)
     {
@@ -100,7 +100,7 @@ void WZEventsTracker::initializeJetPlots()
                 "Jet" + std::to_string(i) + " Eta", "Eta",  "Events", 40, -4.0, 4.0);
     }
 }
-void WZEventsTracker::initializeDileptonPlots()
+void vvana::WZEventsTracker::initializeDileptonPlots()
 {
     addHist("DiffFlavDileptons","pt", "Dilepton p_{T} for Mixed Flavor Events ",
             "Dilepton p_{T} (GeV/c)", "Events", 150, 0.0, 100.0);
@@ -121,14 +121,14 @@ void WZEventsTracker::initializeDileptonPlots()
             "Dilepton p_{T} for Same Flavor Events (Off Z Mass)",
             "Dilepton Mass (GeV/c^2)", "Events", 150, 0.0, 100.0);
 }
-void WZEventsTracker::initializeWZPlots()
+void vvana::WZEventsTracker::initializeWZPlots()
 {
     addHist("WZ", "transMass", "WZ Transverse Mass ", 
             "WZ Transverse Mass (GeV/c^2)", "Events", 300, 0.0, 3000.0);
     addHist("WZ", "mass", "WZ Mass ", "WZ Mass (GeV/c^2)", "Events", 
             400, 0.0, 4000.0);
 }
-void WZEventsTracker::initialize4lPlots()
+void vvana::WZEventsTracker::initialize4lPlots()
 {
     addHist("4l", "mass", "4l Mass", 
             "4 Lepton Mass (GeV)", "Events", 200, 0.0, 2000.0);
@@ -136,17 +136,17 @@ void WZEventsTracker::initialize4lPlots()
             "4l Transverse Mass (GeV)", "Events", 300, 0.0, 3000.0);
 
 }
-void WZEventsTracker::initializeZPlots()
+void vvana::WZEventsTracker::initializeZPlots()
 {
     addHist("Z", "pt", "Z p_{T}", "p_{T} (GeV/c)", "Events", 60, 0.0, 1000.0);
     addHist("Z", "mass", "Z Mass", "Mass (GeV/c^2)", "Events", 60, 0.0, 150.0);
 }
-void WZEventsTracker::initializeMETPlots()
+void vvana::WZEventsTracker::initializeMETPlots()
 {
     addHist("MET", "MET", "Missing E_{T} ", "Missing E_{T} (GeV/c^2)", "Events", 
             60, 0.0, 200.0);
 }   
-void WZEventsTracker::addHist(const std::string& plotGroup, const std::string& plot,
+void vvana::WZEventsTracker::addHist(const std::string& plotGroup, const std::string& plot,
                               const std::string& title, const std::string& xTitle, 
                               const std::string& yTitle, const int numBins, 
                               const float xMin, const float xMax)
@@ -158,7 +158,7 @@ void WZEventsTracker::addHist(const std::string& plotGroup, const std::string& p
     plots->addHist(key.first, key.second, title.c_str(), xTitle, yTitle, 
                    numBins, xMin, xMax);
 }
-void WZEventsTracker::add2DHist(const std::string& plotGroup, const std::string& plot,
+void vvana::WZEventsTracker::add2DHist(const std::string& plotGroup, const std::string& plot,
                                 const std::string& title, const std::string& xTitle, 
                                 const std::string& yTitle, const int numBinsX, 
                                 const float xMin, const float xMax, 
@@ -172,7 +172,7 @@ void WZEventsTracker::add2DHist(const std::string& plotGroup, const std::string&
     plots->add2DHist(key.first, key.second, title.c_str(), xTitle, yTitle, 
                    numBinsX, xMin, xMax, numBinsY, yMin, yMax);
 }
-void WZEventsTracker::getLeptonPlotData(const std::string& cuts)
+void vvana::WZEventsTracker::getLeptonPlotData(const std::string& cuts)
 {
     plotCuts["leptons"] = cuts;
     std::vector<ParticleVector> leptonVectors = wzEvent->getAllLeptons();
@@ -190,7 +190,7 @@ void WZEventsTracker::getLeptonPlotData(const std::string& cuts)
         assignValueToPlotKey("leptons", leptonName + "_eta", leptonVectors[i].Eta());
     }
 }
-void WZEventsTracker::getWZTMassMjjPlotData(const std::string& cuts)
+void vvana::WZEventsTracker::getWZTMassMjjPlotData(const std::string& cuts)
 {
     std::vector<float> values = {wzEvent->getWZTransMass(),
                                  wzEvent->get4lMass()}; 
@@ -205,7 +205,7 @@ void WZEventsTracker::getWZTMassMjjPlotData(const std::string& cuts)
     else
         assignValueToPlotKey("2DHists", "mjj_WZTM");
 }
-void WZEventsTracker::getJetPlotData(const std::string& cuts)
+void vvana::WZEventsTracker::getJetPlotData(const std::string& cuts)
 {
     plotCuts["jets"] = cuts;
     std::vector<ParticleVector> jetVectors = wzEvent->getAllJets();
@@ -225,7 +225,7 @@ void WZEventsTracker::getJetPlotData(const std::string& cuts)
                              jetVectors[i].Eta());
     }
 }       
-void WZEventsTracker::getWZPlotData(const std::string& cuts)
+void vvana::WZEventsTracker::getWZPlotData(const std::string& cuts)
 {
     plotCuts["WZ"] = cuts;
     if (wzEvent->hasLeptonicZ()) {
@@ -238,18 +238,18 @@ void WZEventsTracker::getWZPlotData(const std::string& cuts)
         assignValueToPlotKey("WZ","mass");
     }
 }
-void WZEventsTracker::get4lPlotData(const std::string& cuts)
+void vvana::WZEventsTracker::get4lPlotData(const std::string& cuts)
 {
     plotCuts["4l"] = cuts;
     assignValueToPlotKey("4l","mass", wzEvent->get4lMass());
 }
-void WZEventsTracker::getDijetPlotData(const std::string& cuts)
+void vvana::WZEventsTracker::getDijetPlotData(const std::string& cuts)
 {
     plotCuts["diJets"] = cuts;
     assignValueToPlotKey("dijet","deltaEta", wzEvent->getJetDeltaEta());
     assignValueToPlotKey("dijet","mass", wzEvent->getDiJetInvMass());
 }
-void WZEventsTracker::assignValueToPlotKey(const std::string& keyPair1, 
+void vvana::WZEventsTracker::assignValueToPlotKey(const std::string& keyPair1, 
                                            const std::string& keyPair2,
                                            const float value)
 {
@@ -265,7 +265,7 @@ void WZEventsTracker::assignValueToPlotKey(const std::string& keyPair1,
 //This function is used to assign an empty vecotr as the plot value. 
 //It should be called in events where a plot should not be filled, e.g.
 //plots relating to Z when there is no Z.
-void WZEventsTracker::assignValueToPlotKey(const std::string& keyPair1, 
+void vvana::WZEventsTracker::assignValueToPlotKey(const std::string& keyPair1, 
                                            const std::string& keyPair2)
 {
     std::pair<std::string, std::string> key(keyPair1, keyPair2);
@@ -276,7 +276,7 @@ void WZEventsTracker::assignValueToPlotKey(const std::string& keyPair1,
     else 
       throw vvana::Exception("WZEventsTracker::assignValueToPlotKeyL KeyPairs don't exist");
 }
-void WZEventsTracker::assignValuesToPlotKey(const std::string& keyPair1, 
+void vvana::WZEventsTracker::assignValuesToPlotKey(const std::string& keyPair1, 
                                             const std::string& keyPair2,
                                             std::vector<float>& values)
 {
@@ -288,7 +288,7 @@ void WZEventsTracker::assignValuesToPlotKey(const std::string& keyPair1,
     else 
       throw vvana::Exception("WZEventsTracker::assignValueToPlotKeyL KeyPairs don't exist");
 }
-void WZEventsTracker::getZPlotData(const std::string& cuts)
+void vvana::WZEventsTracker::getZPlotData(const std::string& cuts)
 {
     plotCuts["Z"] = cuts;
     if (wzEvent->hasLeptonicZ()) {
@@ -300,12 +300,12 @@ void WZEventsTracker::getZPlotData(const std::string& cuts)
         assignValueToPlotKey("Z","mass");
     }
 }
-void WZEventsTracker::getMETPlotData(const std::string& cuts)
+void vvana::WZEventsTracker::getMETPlotData(const std::string& cuts)
 {
     plotCuts["MET"] = cuts;
     assignValueToPlotKey("MET","MET", wzEvent->getMET());
 }
-void WZEventsTracker::getDileptonPlotData(const std::string& cuts)
+void vvana::WZEventsTracker::getDileptonPlotData(const std::string& cuts)
 {
     std::vector<ParticleVector> leptonVectors = wzEvent->getAllLeptons();
     int dileptonType;
@@ -357,20 +357,20 @@ void WZEventsTracker::getDileptonPlotData(const std::string& cuts)
       throw vvana::Exception("WZEventsTracker::getDileptonPlotData:  error occured in the addDileptons() function");
     }
 }
-bool WZEventsTracker::sortParticlesByPt(const ParticleVector& particle1, 
+bool vvana::WZEventsTracker::sortParticlesByPt(const ParticleVector& particle1, 
                                 const ParticleVector& particle2)
 {
     return particle1.Pt() > particle2.Pt();
 }
 
-bool WZEventsTracker::sortDileptonsByZMass(const TLorentzVector& dilepton1, 
+bool vvana::WZEventsTracker::sortDileptonsByZMass(const TLorentzVector& dilepton1, 
                                    const TLorentzVector& dilepton2)
 {
     return fabs(dilepton1.M() - ON_SHELL_ZMASS) < 
                                     fabs(dilepton2.M() - ON_SHELL_ZMASS);
 }
 
-void WZEventsTracker::fillPlots()
+void vvana::WZEventsTracker::fillPlots()
 {
     std::string plotGroup;
     std::string plot;
@@ -387,50 +387,50 @@ void WZEventsTracker::fillPlots()
 
     }
 }        
-void WZEventsTracker::setLuminosity(float luminosity)
+void vvana::WZEventsTracker::setLuminosity(float luminosity)
 {
     this->luminosity = luminosity;
 }
 
-void WZEventsTracker::setLeptonSelection(int numLeptons)
+void vvana::WZEventsTracker::setLeptonSelection(int numLeptons)
 {
     tieredCuts.numHighPtLeptons = numLeptons;
 }
-void WZEventsTracker::setJetSelection(int numJets)
+void vvana::WZEventsTracker::setJetSelection(int numJets)
 {
     tieredCuts.numHighPtJets = numJets;
 }
-void WZEventsTracker::setMetCut(float metCut)
+void vvana::WZEventsTracker::setMetCut(float metCut)
 {
     tieredCuts.met = metCut;
 }
-void WZEventsTracker::setZMassCut(float ZMassRange)
+void vvana::WZEventsTracker::setZMassCut(float ZMassRange)
 {
     tieredCuts.ZMassRange = ZMassRange;
 }
-void WZEventsTracker::setWZTMassCut(float WZTMass)
+void vvana::WZEventsTracker::setWZTMassCut(float WZTMass)
 {  
     kinCuts.WZTMass = WZTMass;
 }
-void WZEventsTracker::setWZMassCut(float WZMass)
+void vvana::WZEventsTracker::setWZMassCut(float WZMass)
 {  
     kinCuts.WZMass = WZMass;
 }
-void WZEventsTracker::set4lMassCut(float leptonMass)
+void vvana::WZEventsTracker::set4lMassCut(float leptonMass)
 {  
     kinCuts.leptonMass = leptonMass;
 }
-void WZEventsTracker::setJetMassCut(float diJetMass)
+void vvana::WZEventsTracker::setJetMassCut(float diJetMass)
 {
     kinCuts.diJetMass = diJetMass;
 }
-void WZEventsTracker::setEtajjCut(float eta_jj)
+void vvana::WZEventsTracker::setEtajjCut(float eta_jj)
 {
     kinCuts.jetDeltaEta = eta_jj;
 }
 
 //THESE ARE TIERED CUTS!
-void WZEventsTracker::processEvent(WZEvent* event)
+void vvana::WZEventsTracker::processEvent(WZEvent* event)
 {
     wzEvent = event;
     std::string cuts = "";
@@ -491,7 +491,7 @@ void WZEventsTracker::processEvent(WZEvent* event)
     fillPlots();
 }
 
-bool WZEventsTracker::passedKinematicCuts(std::string& cuts)
+bool vvana::WZEventsTracker::passedKinematicCuts(std::string& cuts)
 {
     if(wzEvent->getWZTransMass() < kinCuts.WZTMass)
         return false;
@@ -519,7 +519,7 @@ bool WZEventsTracker::passedKinematicCuts(std::string& cuts)
     return true;
 }
 
-void WZEventsTracker::processByLeptonType()
+void vvana::WZEventsTracker::processByLeptonType()
 {
     int numHighPtE = wzEvent->getNumPostCutElectrons();
     int numHighPtMu = wzEvent->getNumPostCutMuons();
@@ -580,7 +580,7 @@ void WZEventsTracker::processByLeptonType()
         // out << "num mus =" << numHighPtMu << std::endl;
             }
 }
-void WZEventsTracker::printEventInfo(std::ostream & out)
+void vvana::WZEventsTracker::printEventInfo(std::ostream & out)
 {
     out << "\n__________________________________________________________________\n";
     out << "Kinematic cuts applied to all events: " << endl;
@@ -616,7 +616,7 @@ void WZEventsTracker::printEventInfo(std::ostream & out)
          << " GeV of on-shell Z mass: " << eventCounters["passedZMassCut"] << endl;
     out << "\n__________________________________________________________________\n";
 }
-void WZEventsTracker::writePlotsToFile()
+void vvana::WZEventsTracker::writePlotsToFile()
 {
     plots->writeToFile();
 }

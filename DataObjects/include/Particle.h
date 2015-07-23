@@ -13,9 +13,10 @@
  * and mother/daughter information.
  */  
 
-
 #include "TLorentzVector.h"
 #include <vector>
+
+namespace vvana {
 
 class Particle
 {
@@ -34,8 +35,8 @@ private:
     
 };
 
+} // end namespacei vvana 
 
-
-#endif
+#endif // __PARTICLE_H__
 
 

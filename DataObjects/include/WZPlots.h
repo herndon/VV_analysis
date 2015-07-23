@@ -9,6 +9,8 @@
 #include "TFile.h"
 #include "TH2.h"
 
+namespace vvana {
+
 class WZPlots
 {
 private:
@@ -34,5 +36,6 @@ public:
                   const float luminosity);               
     void writeToFile();
 };
+} // end namespace vvana 
 
-#endif    
+#endif // __WZPLOTS_H__ 

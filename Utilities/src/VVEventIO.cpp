@@ -5,7 +5,7 @@
 
 #include <vector>
 
-const VVEvent VVEventIO::readVVEvent(TClonesArray* branchGenParticle,TClonesArray* branchWeights){
+const vvana::VVEvent vvana::VVEventIO::readVVEvent(TClonesArray* branchGenParticle,TClonesArray* branchWeights){
 
   VVType vvType = WZ;
   std::vector<Particle> particles;

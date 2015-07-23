@@ -51,13 +51,13 @@ int main( int argc, char *argv[])
     root_files.push_back(config.rootFileName().c_str());
     lhe_files.push_back(config.lheFileName().c_str());
 
-    std::vector<WZEventList> event_lists;
+    std::vector<vvana::WZEventList> event_lists;
     for (unsigned int i = 0; i < root_files.size(); i++) {
-        WZEventList event_list(root_files[i], lhe_files[i]);
+      vvana::WZEventList event_list(root_files[i], lhe_files[i]);
         event_lists.push_back(event_list);
     }
  
-    AnalyseEventsModule analyseEventsModule(config.debugLevel(),debugfile);
+    vvana::AnalyseEventsModule analyseEventsModule(config.debugLevel(),debugfile);
     analyseEventsModule.AnalyseEvents(event_lists);
     
     return 0;   

@@ -1,3 +1,5 @@
+#ifndef __WZEvent_h__
+#define __WZEvent_h__
 /**
  * @file VVEvent.h
  *
@@ -11,8 +13,6 @@
  * V decay leptons and V particles (identified by pt and eta cuts on
  * leptons and jets).
  */  
-#ifndef __WZEvent_h__
-#define __WZEvent_h__
 
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
@@ -23,6 +23,7 @@
 #include "DataObjects/include/LHEWeights.h"
 #include "DataObjects/include/Particle.h"
 
+namespace vvana {
 
 enum VVType {Wg, Zg, WW, WZ, ZZ};
 
@@ -73,5 +74,6 @@ public:
     const std::vector<float>& weights() const {return _weights;};
     float smWeight() const;
 };
-
-#endif
+} // end namespace vvana 
+ 
+#endif // __WZEvent_h__

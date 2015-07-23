@@ -2,7 +2,7 @@
 #include "Services/include/Exception.h"
 #include <string>
 
-WZPlots::WZPlots(const std::string& rootFileName, const std::string& baseFolder,
+vvana::WZPlots::WZPlots(const std::string& rootFileName, const std::string& baseFolder,
                  std::vector<std::string> weightNames)                 
 {
     rootFile_ = new TFile(rootFileName.c_str(), "RECREATE");
@@ -20,7 +20,7 @@ WZPlots::WZPlots(const std::string& rootFileName, const std::string& baseFolder,
 
 
 }
-void WZPlots::addHist(const std::string& directory, const std::string& subdirectory,
+void vvana::WZPlots::addHist(const std::string& directory, const std::string& subdirectory,
                       const std::string& title, const std::string& xAxisTitle, 
                       const std::string& yAxisTitle, const int numBins, 
                       const float xMin, const float xMax)
@@ -42,7 +42,7 @@ void WZPlots::addHist(const std::string& directory, const std::string& subdirect
         i++;
     } 
 }
-void WZPlots::add2DHist(const std::string& directory, const std::string& subdirectory,
+void vvana::WZPlots::add2DHist(const std::string& directory, const std::string& subdirectory,
                         const std::string& title, const std::string& xAxisTitle, 
                         const std::string& yAxisTitle, const int numBinsX, 
                         const float xMin, const float xMax, const int numBinsY,
@@ -65,7 +65,7 @@ void WZPlots::add2DHist(const std::string& directory, const std::string& subdire
         i++;
     } 
 }
-void WZPlots::fillHist(const std::string& plotGroup, const std::string plot,
+void vvana::WZPlots::fillHist(const std::string& plotGroup, const std::string plot,
                        std::vector<float>& values, const std::vector<float>& weights,
                        const float luminosity)               
 {
@@ -90,7 +90,7 @@ void WZPlots::fillHist(const std::string& plotGroup, const std::string plot,
         }
     }
 }
-void WZPlots::writeToFile()
+void vvana::WZPlots::writeToFile()
 {
     int i = 0;
     for (auto& plotSet : plotSets_)
@@ -107,7 +107,7 @@ void WZPlots::writeToFile()
         }
     }
 }
-WZPlots::~WZPlots()
+vvana::WZPlots::~WZPlots()
 {
     for (auto& plotSet : plotSets_)
     {

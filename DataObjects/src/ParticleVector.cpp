@@ -1,20 +1,20 @@
 #include "DataObjects/include/ParticleVector.h"
 
-ParticleVector::ParticleVector(int type)
+vvana::ParticleVector::ParticleVector(int type)
 {
     this->type = type;
     TLorentzVector();
 }
 
-ParticleVector::ParticleVector()
+vvana::ParticleVector::ParticleVector()
 {
     ParticleVector(0);
 }
-const int ParticleVector::getType() const
+const int vvana::ParticleVector::getType() const
 {
     return type;
 }
-void ParticleVector::setType(int type)
+void vvana::ParticleVector::setType(int type)
 {
     this->type = type;
 }

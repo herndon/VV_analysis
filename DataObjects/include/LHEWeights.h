@@ -5,6 +5,8 @@
 #include <vector>
 #include <fstream>
 
+namespace vvana {
+
 class LHEWeights
 {
 private:
@@ -32,4 +34,6 @@ public:
     const int getSMWeightPos() const;
 };
 
-#endif
+} // end namespacei vvana 
+ 
+#endif // __LHEWEIGHTS_H__

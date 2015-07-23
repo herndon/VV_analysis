@@ -34,3 +34,6 @@ y 17) include debug output stream and use debug level
 y 18) Setup mac development enviroment
 y 19) Setup automated testing
 y 20) Convert all output to debug stream or error logger
+21) Program VVEVentIO
+22) Introduce an event reading module
+23) Namespace

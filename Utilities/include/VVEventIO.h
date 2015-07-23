@@ -13,6 +13,8 @@
 
 #include "TClonesArray.h"
 
+namespace vvana {
+
 class VVEvent;
 
 /**
@@ -35,4 +37,6 @@ class VVEventIO
 
 };
 
+} // end namespace vvana
+ 
 #endif // __VVEvent_h__

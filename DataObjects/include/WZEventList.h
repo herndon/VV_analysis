@@ -6,6 +6,9 @@
 #include "TClonesArray.h"
 #include "ExRootAnalysis/include/ExRootClasses.h"
 #include "DataObjects/include/WZEvent.h"
+
+namespace vvana {
+
 class WZEventList
 {
 private: 
@@ -23,4 +26,5 @@ public:
     const std::vector<std::string>& getWeightNames();
     WZEvent* getEvent(unsigned int entry);
 };
-#endif
+} // end namespacei vvana
+#endif //__WZEventList_h__
