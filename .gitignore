@@ -2,6 +2,8 @@
 *.o
 *.so
 *.bin
+*.*_temp
+*~
 *.lhe
 *.root
 log_*
