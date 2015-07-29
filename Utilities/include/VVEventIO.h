@@ -8,16 +8,21 @@
  * This class reads and stores all particle information from a single 
  * VV generated event as a VVEvent object. 
  */  
-#ifndef __VVEvent_h__
-#define __VVEvent_h__
+#ifndef __VVEventIO_h__
+#define __VVEventIO_h__
 
 #include "TClonesArray.h"
+#include "DataObjects/include/VVEvent.h"
 
 namespace vvana {
 
-class VVEvent;
+  //class VVEvent;
+  class Particle;
+  
 
-/**
+  enum particleType{electron,muon,tau,neutrino,W,Z,photon,jet};
+
+ /**
  *
  * @class VVEventIO
  *
@@ -28,10 +33,12 @@ class VVEventIO
  public:
 
     /// Constructor and destructor
-  VVEventIO();
-  ~VVEventIO();
+  VVEventIO() {};
+  ~VVEventIO() {};
 
   const VVEvent readVVEvent(TClonesArray* branchGenParticle,TClonesArray* branchWeights);
+
+  void getParticles( particleType type, TClonesArray* branchGenParticle, std::vector<Particle> & particles);
   
  private: 
 
@@ -39,4 +46,4 @@ class VVEventIO
 
 } // end namespace vvana
  
-#endif // __VVEvent_h__
+#endif // __VVEventIO_h__

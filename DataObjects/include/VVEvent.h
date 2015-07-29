@@ -1,5 +1,5 @@
-#ifndef __WZEvent_h__
-#define __WZEvent_h__
+#ifndef __VVEvent_h__
+#define __VVEvent_h__
 /**
  * @file VVEvent.h
  *
@@ -35,9 +35,6 @@ enum VVType {Wg, Zg, WW, WZ, ZZ};
  */
 class VVEvent
 {
- public:
-
-
   
  private: 
 
@@ -48,8 +45,8 @@ class VVEvent
   
 public:
     /// Constructor
-  VVEvent(const VVType vvType, const std::vector<Particle> & particles, const std::vector<float> & _weights);
-    ~VVEvent();
+  VVEvent(const VVType vvType, const std::vector<Particle> particles, const std::vector<float> & _weights);
+  // ~VVEvent();
 
     const VVType vvType() const {return _vvType;}
     
@@ -73,7 +70,9 @@ public:
 
     const std::vector<float>& weights() const {return _weights;};
     float smWeight() const;
+
+    void printEvent() const;
 };
 } // end namespace vvana 
  
-#endif // __WZEvent_h__
+#endif // __VVEvent_h__

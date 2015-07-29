@@ -13,6 +13,8 @@
 #include "DataObjects/include/WZEvent.h"
 #include "DataObjects/include/WZEventsTracker.h"
 #include "DataObjects/include/WZEventList.h"
+#include "DataObjects/include/VVEvent.h"
+#include "Utilities/include/VVEventIO.h"
 #include "Modules/include/AnalyseEventsModule.h"
 #include <iostream>
 
@@ -48,16 +50,22 @@ void vvana::AnalyseEventsModule::AnalyseEvents(std::vector<WZEventList>& eventLi
 
     WZEvent* event;
     for (auto& eventList : eventLists) {
+
       if (_debugLevel >=1) _debugfile << "Event list contains " << eventList.getNumEntries() << " events" 
-             << std::endl;
-        eventList.setLeptonCuts(20, 2.4);
-        eventList.setJetCuts(30, 4.7);
+				      << std::endl;
+      eventList.setLeptonCuts(20, 2.4);
+      eventList.setJetCuts(30, 4.7);
         
-        for(unsigned int entry = 0; entry < eventList.getNumEntries(); ++entry) 
+      for(unsigned int entry = 0; entry < eventList.getNumEntries(); ++entry) 
         {
-            event = eventList.getEvent(entry);
-            generatorEvents.processEvent(event);
-            selectionEvents.processEvent(event);
+      // new infrastructure
+	  event = eventList.getEvent(entry);
+	  //VVEventIO vvEventIO;
+	  //VVEvent vvEvent(vvEventIO.readVVEvent(eventList.branch_gen_particle,eventList.branchWeights));
+          //vvEvent.printEvent();
+	  
+	  generatorEvents.processEvent(event);
+	  selectionEvents.processEvent(event);
         }
     }
  

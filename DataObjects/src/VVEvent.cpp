@@ -1,7 +1,8 @@
 #include "DataObjects/include/VVEvent.h"
 #include <cmath>
+#include <iostream>
 
-vvana::VVEvent::VVEvent(const VVType vvType, const std::vector<Particle> & particles, const std::vector<float> & weights):
+vvana::VVEvent::VVEvent(const VVType vvType, const std::vector<Particle> particles, const std::vector<float> & weights):
   _vvType(vvType),
   _particles(particles),
   _weights(weights)
@@ -61,5 +62,13 @@ float vvana::VVEvent::smWeight() const {
 
 }
 
+void vvana::VVEvent::printEvent() const {
+
+  // Implement event type check
+  std::cout << "Event type: WZ" << std::endl;
+  // Implement particle print
+  // Implement particles loop
+  if (_particles.begin() != _particles.end()) std::cout << "First particle type: " << _particles.begin()->type() << std::endl;
+}
 
 
