@@ -15,6 +15,7 @@
 #include "DataObjects/include/WZEventList.h"
 #include "DataObjects/include/VVEvent.h"
 #include "Utilities/include/VVEventIO.h"
+#include "Analysis/include/WZAnalysis.h"
 #include "Modules/include/AnalyseEventsModule.h"
 #include <iostream>
 
@@ -60,9 +61,11 @@ void vvana::AnalyseEventsModule::AnalyseEvents(std::vector<WZEventList>& eventLi
         {
       // new infrastructure
 	  event = eventList.getEvent(entry);
-	  //VVEventIO vvEventIO;
-	  //VVEvent vvEvent(vvEventIO.readVVEvent(eventList.branch_gen_particle,eventList.branchWeights));
-          //vvEvent.printEvent();
+	  // VVEventIO vvEventIO;
+	  // VVEvent vvEvent(vvEventIO.readVVEvent(eventList.branch_gen_particle,eventList.branchWeights));
+	  // WZAnalysis wzAnalysis(vvEvent);
+	  // std::cout << "wzEvent: " << wzAnalysis.wzEvent() << std::endl;
+          // vvEvent.printEvent();
 	  
 	  generatorEvents.processEvent(event);
 	  selectionEvents.processEvent(event);

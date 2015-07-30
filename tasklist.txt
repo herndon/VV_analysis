@@ -37,3 +37,6 @@ y 20) Convert all output to debug stream or error logger
 21) Program VVEVentIO
 22) Introduce an event reading module
 y 23) Namespace
+24) Program WZAnalysis class
+25) public then private
+
