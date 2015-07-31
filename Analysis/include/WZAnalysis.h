@@ -5,11 +5,12 @@
  *
  * @brief IO class ffor VVEvent
  *
- * This class reads and stores all particle information from a single 
- * VV generated event as a VVEvent object. 
+ * This class analyses a VVEvent as a WZ->lnull final state
  */  
 #ifndef __WZAnalysis_h__
 #define __WZAnalysis_h__
+
+#include "DataObjects/include/Particle.h"
 
 #include <vector>
 
@@ -17,6 +18,7 @@
 namespace vvana {
 
   class VVEvent;
+  //  class Particle;
   
  /**
  *
@@ -39,14 +41,16 @@ class WZAnalysis
 
   bool _wzEvent;
   const VVEvent & _vvEvent;
-  /* const Particle & _w; */
-  /* const Particle & _z; */
-  /* // Vectors are pT ordered */
-  /* const std::vector<const Particle &> _wLeptons; */
-  /* const Partcile & _wNeutrino; */
-  /* const Particle & _wLepton; */
-  /* const std::vector<const Particle &> _zLetpons; */
-  /* const std::vector<const Particle &> _jets; */
+
+  // All particles in VVEvent referenced by index
+  int _w;
+  int _z;
+  // Vectors are pT ordered
+  std::vector<int> _wLeptons;
+  int _wNeutrino;
+  int _wLepton;
+  int _zLetpons;
+  std::vector<int> _jets;
   
 };
 
