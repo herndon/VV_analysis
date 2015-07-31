@@ -12,7 +12,8 @@
 
 #include "DataObjects/include/Particle.h"
 
-vvana::Particle::Particle(int type, const TLorentzVector& lorentzVector, const std::vector<int>& mothers, const std::vector<int>& daughters):
+vvana::Particle::Particle(int index, int type, const TLorentzVector& lorentzVector, const std::vector<int>& mothers, const std::vector<int>& daughters):
+  _index(index),
   _type(type),
   _lorentzVector(lorentzVector),
   _mothers(mothers),

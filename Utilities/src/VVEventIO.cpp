@@ -19,14 +19,18 @@ const vvana::VVEvent vvana::VVEventIO::readVVEvent(TClonesArray* branchGenPartic
    getParticles(particleType::electron,branchGenParticle,particles);
    getParticles(particleType::muon,branchGenParticle,particles);
    getParticles(particleType::tau,branchGenParticle,particles);  
+   getParticles(particleType::neutrino,branchGenParticle,particles);  
    getParticles(particleType::photon,branchGenParticle,particles);  
    getParticles(particleType::W,branchGenParticle,particles);  
    getParticles(particleType::Z,branchGenParticle,particles);  
    getParticles(particleType::jet,branchGenParticle,particles);  
 
    if (particles.begin() != particles.end()) std::cout << "IO First particle type: " << particles.begin()->type() << std::endl;
-   
-  VVEvent vvEvent(vvType,particles,weights);
+
+  std::vector<Particle> indexedParticles;
+
+  setParentage(particles,indexedParticles); 
+  VVEvent vvEvent(vvType,indexedParticles,weights);
   
   return vvEvent;
 
@@ -111,11 +115,52 @@ void vvana::VVEventIO::getParticles(particleType type, TClonesArray* branchGenPa
 
       TLorentzVector lorentzVector(particle->Px,particle->Py,particle->Pz,particle->E);
 
-      Particle lepton(particle->PID,lorentzVector,mothers,daughters);
-      particles.push_back(lepton);
+      Particle newParticle(ii+1,particle->PID,lorentzVector,mothers,daughters);
+      particles.push_back(std::move(newParticle));
 
     }
   }
 
 }
 
+void vvana::VVEventIO::setParentage(const std::vector<Particle> & particles, std::vector<Particle> & indexedParticles){
+
+  std::vector<std::vector<int>> mothersVector;
+  std::vector<std::vector<int>> daughtersVector;
+
+  for (auto const & particle : particles){
+    std::vector<int> mothers;
+    std::vector<int> daughters;
+    
+    for (auto const & mother : particle.mothers()){
+      int index = 0;
+      for (auto const & motherParticle : particles){
+	if (mother==motherParticle.index()) mothers.push_back(index);
+	index++;
+      }
+    }
+    for (auto const & daughter : particle.daughters()){
+      int index = 0;
+      for (auto const & daughterParticle : particles){
+	if (daughter==daughterParticle.index()) daughters.push_back(index);
+	index++;
+      }
+    }
+      
+    mothersVector.push_back(mothers);
+    daughtersVector.push_back(daughters);
+            
+    
+  }
+
+
+    int index = 0;
+    for (auto const & particle : particles){
+
+      Particle newParticle(particle.index(),particle.type(),particle.lorentzVector(),mothersVector[index],daughtersVector[index]);
+      indexedParticles.push_back(std::move(newParticle));
+      index++;
+
+  }      
+
+}

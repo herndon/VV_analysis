@@ -38,10 +38,13 @@ class VVEventIO
 
   const VVEvent readVVEvent(TClonesArray* branchGenParticle,TClonesArray* branchWeights);
 
-  void getParticles( particleType type, TClonesArray* branchGenParticle, std::vector<Particle> & particles);
   
  private: 
 
+  void getParticles( particleType type, TClonesArray* branchGenParticle, std::vector<Particle> & particles);
+  void setParentage(const std::vector<Particle> & particles, std::vector<Particle> & indexedParticles); 
+  
+  
 };
 
 } // end namespace vvana
