@@ -37,8 +37,15 @@ y 20) Convert all output to debug stream or error logger
 21) Program VVEVentIO
 22) Introduce an event reading module
 y 23) Namespace
-24) Introduce WZAnalysis class
-25) Program WZAnalysis class
+y 24) Introduce WZAnalysis class
+y 25) Program WZAnalysis class
 26) Check const correctness in VVEvent
 27) public then private
-
+y 28) Introduce WZ and VV AnalysisFunctions
+y 29) Reduced index of mothers and daughters
+30) Complete print function for VVEvent
+31) Test reduced mother daughter indexi
+y 32) Complete VVAnalysisFunctions
+y 33) Complete WZAnalysisFunctions
+34) Test WZAnalysis
+35) Create selection code

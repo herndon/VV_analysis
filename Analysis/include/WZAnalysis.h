@@ -32,6 +32,7 @@ class WZAnalysis
 
     /// Constructor and destructor
   WZAnalysis(const VVEvent & vvEvent);
+  WZAnalysis(bool wzEvent,const VVEvent & vvEvent, int w, int z, const std::vector<int> & zLeptons, const std::vector<int> & wLeptons, int wNeutrino, int wLepton, const std::vector<int> & jets);
   ~WZAnalysis() {};
 
   bool wzEvent() const {return _wzEvent;}
@@ -46,10 +47,10 @@ class WZAnalysis
   int _w;
   int _z;
   // Vectors are pT ordered
+  std::vector<int> _zLeptons;
   std::vector<int> _wLeptons;
   int _wNeutrino;
   int _wLepton;
-  int _zLetpons;
   std::vector<int> _jets;
   
 };
