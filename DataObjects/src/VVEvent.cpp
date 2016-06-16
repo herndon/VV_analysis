@@ -18,6 +18,12 @@ const std::vector<vvana::Particle> vvana::VVEvent::muons() const {
 const std::vector<vvana::Particle> vvana::VVEvent::taus() const {
   return _particles;
 }
+const std::vector<vvana::Particle> vvana::VVEvent::chargedLeptons() const {
+  return _particles;
+}
+const std::vector<vvana::Particle> vvana::VVEvent::neutrinos() const {
+  return _particles;
+}
 const std::vector<vvana::Particle> vvana::VVEvent::leptons() const {
   return _particles;
 }
@@ -62,13 +68,13 @@ float vvana::VVEvent::smWeight() const {
 
 }
 
-void vvana::VVEvent::printEvent() const {
+void vvana::VVEvent::print(std::ostream& out) const {
 
   // Implement event type check
   std::cout << "Event type: WZ" << std::endl;
-  // Implement particle print
-  // Implement particles loop
-  if (_particles.begin() != _particles.end()) std::cout << "First particle type: " << _particles.begin()->type() << std::endl;
+  for (auto const & particle : _particles){
+    particle.print(out);
+  }
 }
 
 

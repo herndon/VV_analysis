@@ -16,13 +16,13 @@ const vvana::VVEvent vvana::VVEventIO::readVVEvent(TClonesArray* branchGenPartic
   std::vector<float> weights;
 
    
+   getParticles(particleType::W,branchGenParticle,particles);  
+   getParticles(particleType::Z,branchGenParticle,particles);  
+   getParticles(particleType::photon,branchGenParticle,particles);  
    getParticles(particleType::electron,branchGenParticle,particles);
    getParticles(particleType::muon,branchGenParticle,particles);
    getParticles(particleType::tau,branchGenParticle,particles);  
    getParticles(particleType::neutrino,branchGenParticle,particles);  
-   getParticles(particleType::photon,branchGenParticle,particles);  
-   getParticles(particleType::W,branchGenParticle,particles);  
-   getParticles(particleType::Z,branchGenParticle,particles);  
    getParticles(particleType::jet,branchGenParticle,particles);  
 
    if (particles.begin() != particles.end()) std::cout << "IO First particle type: " << particles.begin()->type() << std::endl;
@@ -30,7 +30,7 @@ const vvana::VVEvent vvana::VVEventIO::readVVEvent(TClonesArray* branchGenPartic
   std::vector<Particle> indexedParticles;
 
   setParentage(particles,indexedParticles); 
-  VVEvent vvEvent(vvType,indexedParticles,weights);
+  VVEvent vvEvent(vvType,particles,weights);
   
   return vvEvent;
 
@@ -66,7 +66,6 @@ void vvana::VVEventIO::getParticles(particleType type, TClonesArray* branchGenPa
     break;
   case Z:
     types.push_back(23);
-    types.push_back(-24);
     break;
  case photon:
     types.push_back(21);
@@ -98,25 +97,29 @@ void vvana::VVEventIO::getParticles(particleType type, TClonesArray* branchGenPa
     std::cout << "Particle, status: " << particle->PID << ", " << particle->Status << std::endl;
     //int id = particle->PID;
     if (((particle->Status==1)||(particle->Status==2))&&std::any_of(types.begin(),types.end(), [particle](int i){return i==particle->PID;})){
-  std::cout << "Found particle: " << particle->PID << std::endl; 
+      std::cout << "Found particle index, PID: " << ii << " " << particle->PID << std::endl;
 
       std::vector<int> mothers;
       mothers.push_back(particle->Mother1);
       mothers.push_back(particle->Mother2);
-
+      std::cout << "Mothers " << particle->Mother1 << " " << particle->Mother2 << std::endl;
+      std::cout << "Mothers " << mothers[0] << " " << mothers[1] << std::endl;
+      
       std::vector<int> daughters;
 
       for(int jj = 0; jj < branchGenParticle->GetEntriesFast(); ++jj) {
-	TRootLHEFParticle* particle2 = (TRootLHEFParticle*) branchGenParticle->At(ii);
-	if (particle2->Mother1 == ii+1) daughters.push_back(jj+1);
-	if (particle2->Mother2 == ii+1) daughters.push_back(jj+1);
+	TRootLHEFParticle* particle2 = (TRootLHEFParticle*) branchGenParticle->At(jj);
+	std::cout << "On particle: " << ii << " Mothers of index, PID: " << jj << " " << particle2->PID << " are " << particle2->Mother1 << " " << particle2->Mother2 << std::endl;
+	if (particle2->Mother1 == ii) daughters.push_back(jj);
+	if (particle2->Mother2 == ii) daughters.push_back(jj);
       }
 
 
       TLorentzVector lorentzVector(particle->Px,particle->Py,particle->Pz,particle->E);
 
-      Particle newParticle(ii+1,particle->PID,lorentzVector,mothers,daughters);
-      particles.push_back(std::move(newParticle));
+      Particle newParticle(ii,particle->PID,lorentzVector,mothers,daughters);
+      newParticle.print(std::cout);
+      particles.push_back(newParticle);
 
     }
   }

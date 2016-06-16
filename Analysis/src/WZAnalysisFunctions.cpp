@@ -3,15 +3,18 @@
 #include "Analysis/include/WZAnalysis.h"
 #include "Analysis/include/VVAnalysisFunctions.h"
 #include "Analysis/include/WZAnalysisFunctions.h"
-
+#include <iostream>
 
 const vvana::WZAnalysis vvana::BuildWZAnalysis(const VVEvent& vvEvent){
 
   bool wzEvent = false;
+  std::cout << "In BuildWZAnalysis" << std::endl;
 
   // All particles in VVEvent referenced by index
   std::vector<int> ws = wlnus(vvEvent);
+  std::cout << "Found w" << std::endl;
   std::vector<int> zs = zlls(vvEvent);
+  std::cout << "Found z" << std::endl;
   // Vectors are pT ordered
   std::vector<int> wLeptons;
   int wNeutrino = -1;
@@ -19,7 +22,11 @@ const vvana::WZAnalysis vvana::BuildWZAnalysis(const VVEvent& vvEvent){
   std::vector<int> zLeptons;
   //std::vector<int> jets = jets(vvEvent);
 
+  std::cout << "Sizes w,z " << ws.size() << " " << zs.size() << std::endl;
   if (ws.size()==1&&zs.size()==1) {
+    std::cout.flush();
+    std::cout << "Have we found a WZ event?" << std::endl;
+    std::cout.flush();
     wzEvent = true;
     if (vvEvent.particles()[vvEvent.particles()[zs[0]].daughters()[0]].lorentzVector().Pt()>=
 	vvEvent.particles()[vvEvent.particles()[zs[0]].daughters()[1]].lorentzVector().Pt()){
@@ -55,7 +62,11 @@ const vvana::WZAnalysis vvana::BuildWZAnalysis(const VVEvent& vvEvent){
      }
   }
   
-  return WZAnalysis(wzEvent,vvEvent,ws[0],zs[0],zLeptons,wLeptons,wNeutrino,wLepton,jets(vvEvent));
+  if (wzEvent) {
+    return WZAnalysis(wzEvent,vvEvent,ws[0],zs[0],zLeptons,wLeptons,wNeutrino,wLepton,jets(vvEvent));
+  } else {
+    return WZAnalysis(vvEvent);
+  }
   
 }
 

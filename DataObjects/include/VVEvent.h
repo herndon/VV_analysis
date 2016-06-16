@@ -54,6 +54,8 @@ public:
     const std::vector<Particle> electrons() const;
     const std::vector<Particle> muons() const;
     const std::vector<Particle> taus() const;
+    const std::vector<Particle> chargedLeptons() const;
+    const std::vector<Particle> neutrinos() const;
     const std::vector<Particle> leptons() const;
     const std::vector<Particle> jets() const;
     const std::vector<Particle> gammas() const;
@@ -71,7 +73,7 @@ public:
     const std::vector<float>& weights() const {return _weights;};
     float smWeight() const;
 
-    void printEvent() const;
+    void print(std::ostream& out) const;
 };
 } // end namespace vvana 
  

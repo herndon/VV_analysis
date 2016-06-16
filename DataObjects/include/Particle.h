@@ -27,13 +27,15 @@ private:
     std::vector<int> _mothers;
     std::vector<int> _daughters;
  public:
-    Particle(int index, int type, const TLorentzVector& lorentzVector, const std::vector<int>& mothers, const std::vector<int>& daughters);
+    Particle(int index, int type, const TLorentzVector& lorentzVector, const std::vector<int> mothers, const std::vector<int> daughters);
     int index() const {return _index;}
     int type() const {return _type;}
     const TLorentzVector & lorentzVector() const {return _lorentzVector;}
     const std::vector<int> & mothers() const {return _mothers;}
     const std::vector<int> & daughters() const {return _daughters;}
     bool isStable() const {return (_daughters.size() == 0);}
+    void print(std::ostream& out) const;
+
     
 };
 

@@ -7,7 +7,7 @@ OBJS = $(addprefix  $(LIB_PATH),$(notdir $(OBJSRCS:.cpp=.o)))
 MAINEXES = $(basename $(notdir  $(wildcard */test/*.cpp)))
 TESTTARGETS = $(addsuffix  .test,$(MAINEXES))
 
-INCDIRS = -I. -I$(BOOST_INC)
+INCDIRS = -I. -I/opt/local/include
 CC = g++
 #DEBUG = -g -O0
 DEBUG = -g -O3 -fno-omit-frame-pointer -DNDEBUG

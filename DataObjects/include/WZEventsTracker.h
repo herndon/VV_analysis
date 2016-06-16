@@ -1,4 +1,4 @@
-#ifndef __WZEVENTSTRACKER_H_
+#ifndef __WZEVENTSTRACKER_H__
 #define __WZEVENTSTRACKER_H__
 
 #include <fstream>

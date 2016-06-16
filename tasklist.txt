@@ -43,9 +43,12 @@ y 25) Program WZAnalysis class
 27) public then private
 y 28) Introduce WZ and VV AnalysisFunctions
 y 29) Reduced index of mothers and daughters
-30) Complete print function for VVEvent
+y 30) Complete print function for particles and VVEvent
 31) Test reduced mother daughter indexi
 y 32) Complete VVAnalysisFunctions
 y 33) Complete WZAnalysisFunctions
 34) Test WZAnalysis
 35) Create selection code
+36) Complete print function for WZAnalysis
+37) Link retrieval functions in WZAnalysis for particles
+38) Link retrieval functions in VVEvent for particles by index
